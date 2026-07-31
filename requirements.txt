@@ -1,0 +1,13 @@
+# Core numerical and deep-learning runtime
+numpy==2.5.1
+torch==2.6.0
+torchvision==0.21.0
+
+# Dataset preparation and evaluation
+datasets>=3.0
+scikit-learn==1.9.0
+
+# Image handling, plotting, and progress display
+matplotlib==3.11.1
+Pillow==12.3.0
+tqdm==4.70.0

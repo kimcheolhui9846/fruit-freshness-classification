@@ -1,0 +1,6 @@
+# Runtime dependencies
+-r requirements.txt
+
+# Interactive development for the active deep3.ipynb entry point
+jupyterlab
+ipykernel==7.2.0
