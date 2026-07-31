@@ -272,3 +272,19 @@ For all future implementation work:
 - **Implementation push:** `origin/main` advanced from `c8e3ea9` to `b96863e`; local HEAD matched `origin/main` after the push.
 - **Remaining items:** The preserved nested `fruit-freshness-classification/` repository remains untracked and untouched. Local Python `__pycache__` directories remain ignored and uncommitted.
 - **Next recommended unit:** Await explicit authorization for Phase 4.3 - Extract Dataset Preparation and DataLoader Pipeline. Do not begin it automatically.
+
+
+## Completed Unit - Phase 4.3 Dataset Preparation and DataLoader Pipeline (2026-07-31)
+
+- **Scope:** Extract only the active Hugging Face dataset preparation, label filtering/remapping, RGB normalization, stratified fold selection, subset construction, and DataLoader construction from `deep3.ipynb`. Model, loss, optimizer, scheduler, training, validation, evaluation, inference, transforms, and Mixup logic were not changed.
+- **Created files:** `src/datasets/fruit_freshness.py`, `src/datasets/folds.py`, `src/datasets/loaders.py`, `tests/datasets/test_fruit_freshness.py`, `tests/datasets/test_folds.py`, `tests/datasets/test_loaders.py`, and `tests/datasets/test_notebook_data_pipeline.py`.
+- **Modified file:** `deep3.ipynb` only among notebooks. The active `prepare_dataset` function and `FruitHFDataset` class were removed from cells 1-2; cells 0 and 5 now use explicit `src.datasets` imports and calls.
+- **Public APIs:** `load_fruit_freshness_dataset`, `FruitHFDataset`, `iter_stratified_folds`, `select_fold_datasets`, `build_fold_dataloaders`, and `build_holdout_dataloader`.
+- **Behavior preserved:** Dataset `Densu341/Fresh-rotten-fruit`; removed-label list; 80/20 split with seed 42; label-name order and remapping; ClassLabel metadata; RGB conversion; item tuple and long target dtype; K-fold shuffle/seed; subset index order; train/validation/holdout loader batch, shuffle, worker, pin-memory, and default loader behavior. No new random seeds, samplers, caching, or data sources were added.
+- **Verification:** Eight focused tests passed (dataset/remapping/item contract, fold parameters/index order, loader parameters/batches, and notebook data/transform orchestration). Dataset module syntax, notebook JSON, notebook source compilation, and scope comparison passed. SHA-256 checks confirm `deep.ipynb`, `deep1.ipynb`, and `deep2.ipynb` remain unchanged. Source modules are trackable; `.gitignore` and Phase 4.2 transform code have no diff. The protected nested repository remains clean and untracked.
+- **Production integration status:** Not executed. The local Python environment lacks the `datasets` and `scikit-learn` packages, so no production dataset was downloaded and the direct production import smoke test is environment-blocked. Dependency-isolated synthetic tests and structural parity checks passed; this is not an implementation workaround.
+- **Implementation commit:** `9f64a3a` - `refactor: extract dataset and dataloader pipeline`.
+- **Implementation push:** Succeeded to `origin/main` (`470e704..9f64a3a`).
+- **Known Git limitation:** A Codex-managed temporary ref under `.git/refs/codex/turn-diffs/` may make `git fetch origin` fail. Do not modify it; use the documented local/remote/GitHub CLI SHA fallback if needed.
+- **Remaining items:** Ignored Python caches and the protected untracked nested repository remain local only. No dataset, Hugging Face cache, checkpoint, weight, output, or log was staged.
+- **Next recommended unit:** Phase 4.3 documentation commit and synchronization verification only; do not begin Phase 4.4 automatically.
