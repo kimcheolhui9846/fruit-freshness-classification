@@ -37,7 +37,8 @@ class NotebookModelPipelineTest(unittest.TestCase):
             "model = build_cmt_classifier(num_classes).to(device)",
             self.source,
         )
-        self.assertIn("class ModelEma(nn.Module):", self.source)
+        self.assertIn("from src.engine.ema import ModelEma", self.source)
+        self.assertNotIn("class ModelEma(nn.Module):", self.source)
         self.assertIn("ema = ModelEma(model, decay=EMA_DECAY, device=device)", self.source)
 
 
