@@ -29,10 +29,8 @@ class NotebookModelPipelineTest(unittest.TestCase):
             self.assertNotIn(f"class {class_name}", self.source)
 
     def test_model_construction_and_ema_boundary_are_preserved(self):
-        self.assertIn(
-            "m = build_cmt_classifier(num_classes).to(device)",
-            self.source,
-        )
+        inference_loading = Path("src/inference/loading.py").read_text(encoding="utf-8")
+        self.assertIn("model = build_cmt_classifier(num_classes).to(device)", inference_loading)
         self.assertIn(
             "model = build_cmt_classifier(num_classes).to(device)",
             self.source,

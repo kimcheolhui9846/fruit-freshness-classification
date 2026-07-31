@@ -56,13 +56,12 @@ class NotebookEvaluationPipelineTest(unittest.TestCase):
             'print(f"Val (EMA)',
             "if va_acc > best_acc_fold + 1e-6:",
             "scheduler.step()",
-            "for x, y in tqdm(test_loader, ncols=100):",
-            "x = x.to(device)",
-            "logits = ensemble_logits_tta_hflip(models, x)",
-            "pred = logits.argmax(1)",
         ]
         for anchor in anchors:
             self.assertEqual(legacy.count(anchor), current.count(anchor), anchor)
+        self.assertIn("for x, y in tqdm(test_loader, ncols=100):", legacy)
+        self.assertIn("run_ensemble_holdout(models, test_loader, device)", current)
+
         self.assertLess(
             current.index("compute_validation_metrics("),
             current.index("val_acc_list.append(va_acc)"),

@@ -37,8 +37,9 @@ class NotebookEnginePipelineTest(unittest.TestCase):
         self.assertIn("class ModelEma", self.legacy_cells[2])
         self.assertNotIn("class ModelEma", self.current_cells[2])
         self.assertIn("m.load_state_dict(torch.load(path, map_location=device))", self.legacy_cells[3])
-        self.assertIn("load_model_state(m, path, map_location=device)", self.current_cells[3])
-        self.assertNotIn("m.load_state_dict(torch.load(path, map_location=device))", self.current_cells[3])
+        inference_loading = Path("src/inference/loading.py").read_text(encoding="utf-8")
+        self.assertIn("load_model_state(model, path, map_location=device)", inference_loading)
+        self.assertNotIn("m.load_state_dict(torch.load(path, map_location=device))", inference_loading)
         self.assertIn("torch.optim.AdamW", self.legacy_cells[4])
         self.assertNotIn("torch.optim.AdamW", self.current_cells[4])
         self.assertIn("CosineAnnealingLR", self.legacy_cells[4])
@@ -67,9 +68,10 @@ class NotebookEnginePipelineTest(unittest.TestCase):
         self.assertNotIn("ema.update(model)", self.current_cells[4])
         self.assertIn("train_one_epoch(", self.current_cells[4])
         self.assertIn("validate_one_epoch(", self.current_cells[4])
-        self.assertIn("def load_fold_models", self.current_cells[3])
-        self.assertIn("def ensemble_logits", self.current_cells[3])
-        self.assertIn("def ensemble_logits_tta_hflip", self.current_cells[3])
+        self.assertIn("from src.inference.loading import load_fold_models", self.current_cells[0])
+        self.assertIn("from src.inference.ensemble import run_ensemble_holdout", self.current_cells[0])
+        self.assertNotIn("def load_fold_models", self.current_cells[3])
+        self.assertNotIn("def ensemble_logits", self.current_cells[3])
 
 
 if __name__ == "__main__":

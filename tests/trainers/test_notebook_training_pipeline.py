@@ -57,7 +57,6 @@ class NotebookTrainingPipelineTest(unittest.TestCase):
             "save_model_state(ema.module, save_path)",
             "scheduler.step()",
             "models = load_fold_models(K, num_classes, device, ckpt_dir)",
-            "ensemble_logits_tta_hflip(models, x)",
         ]
         for anchor in anchors:
             self.assertEqual(legacy.count(anchor), current.count(anchor), anchor)
@@ -65,6 +64,9 @@ class NotebookTrainingPipelineTest(unittest.TestCase):
             current.index("if va_acc > best_acc_fold + 1e-6:"),
             current.index("scheduler.step()"),
         )
+        self.assertIn("for x, y in tqdm(test_loader, ncols=100):", legacy)
+        self.assertIn("run_ensemble_holdout(models, test_loader, device)", current)
+
         self.assertNotIn("scheduler.step()", self.current_cells[0])
 
 
