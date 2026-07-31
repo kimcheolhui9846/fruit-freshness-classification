@@ -288,3 +288,21 @@ For all future implementation work:
 - **Known Git limitation:** A Codex-managed temporary ref under `.git/refs/codex/turn-diffs/` may make `git fetch origin` fail. Do not modify it; use the documented local/remote/GitHub CLI SHA fallback if needed.
 - **Remaining items:** Ignored Python caches and the protected untracked nested repository remain local only. No dataset, Hugging Face cache, checkpoint, weight, output, or log was staged.
 - **Next recommended unit:** Phase 4.3 documentation commit and synchronization verification only; do not begin Phase 4.4 automatically.
+
+
+## Completed Unit - Phase 4.4 Model Architecture and Construction (2026-07-31)
+
+- **Scope:** Extract only the active custom CMT architecture, its primitive layers, and direct model construction from `deep3.ipynb`. EMA remains in the notebook as training state; loss, optimizer, scheduler, checkpoint implementation, training, validation, evaluation, TTA, ensemble, inference, datasets, transforms, and Mixup were not changed.
+- **Architecture:** `CMTClassifier` is the notebook's custom CNN-plus-transformer classifier with `DropPath`, depthwise LPU, multi-head attention, MLP, and the original classifier head. It does not use timm, pretrained weights, parameter freezing, or a model registry.
+- **Created files:** `src/models/cmt_classifier.py`, `src/models/factory.py`, `tests/models/test_architecture.py`, and `tests/models/test_notebook_model_pipeline.py`. `src/models/__init__.py` remains a package marker so imports stay explicit.
+- **Modified file:** `deep3.ipynb` only among notebooks. Cell 0 imports `build_cmt_classifier`; cell 2 retains `ModelEma` but removes active CMT definitions; cells 3 and 4 retain their checkpoint/inference and training orchestration while delegating only model construction to the factory.
+- **Public APIs:** `CMTClassifier` and `build_cmt_classifier(num_classes)`.
+- **Compatibility verification:** Legacy code is loaded read-only from the Phase 4.3 notebook commit `7eb6e2a`. Constructor signature, child-module names/order, state-dict keys/order/shapes/dtypes/values, named-parameter order, named-buffer order, total and trainable parameter counts, requires-grad flags, CPU initialization RNG consumption, evaluation forward output, seeded training forward output, and bidirectional `strict=True` in-memory state-dict loading all match exactly.
+- **Checkpoint format:** The notebook saves only state dictionaries: per-fold `ema.module.state_dict()` and final `model.state_dict()`. It loads fold state dictionaries with the default strict behavior. No full-model pickle is used, no on-disk checkpoint is locally available, and no checkpoint was generated or committed.
+- **Verification:** Model import smoke test, AST syntax validation, nine focused unittest parity tests, notebook JSON/source comparison, and historical notebook SHA-256 preservation all passed. `.gitignore`, completed datasets, transforms, Mixup, and utilities have no diff; source files are trackable and the nested repository is clean and untouched.
+- **Pretrained and CUDA status:** Pretrained-weight integration was not applicable because the active constructor has no pretrained path. CUDA is available, but constructor initialization does not create CUDA tensors or consume CUDA RNG; CPU construction RNG parity is the applicable check.
+- **Implementation commit:** `40a354b` - `refactor: extract model architecture and construction`.
+- **Implementation push:** Succeeded to `origin/main` (`7eb6e2a..40a354b`); local implementation HEAD matched `origin/main` after push.
+- **Known Git limitation:** A Codex-managed temporary ref under `.git/refs/codex/turn-diffs/` may make `git fetch origin` fail. Do not modify it; use the documented local/remote/GitHub CLI SHA fallback if needed.
+- **Remaining items:** Ignored Python caches and the protected untracked nested repository remain local only. No weight, checkpoint, output, cache, or dataset was staged.
+- **Next recommended unit:** Phase 4.4 documentation commit and synchronization verification only; do not begin Phase 4.5 automatically.
