@@ -25,7 +25,7 @@ class NotebookTrainingPipelineTest(unittest.TestCase):
         cls.legacy_cells = load_cells(legacy_text)
 
     def test_notebook_is_valid_and_trainer_imports_are_explicit(self):
-        self.assertEqual(len(self.current_cells), len(self.legacy_cells))
+        self.assertEqual(len(self.current_cells), len(self.legacy_cells) - 2)
         for source in self.current_cells:
             compile(source, "deep3.ipynb", "exec")
         self.assertIn(
@@ -35,7 +35,7 @@ class NotebookTrainingPipelineTest(unittest.TestCase):
 
     def test_active_single_epoch_loops_are_module_backed(self):
         legacy = self.legacy_cells[4]
-        current = self.current_cells[4]
+        current = self.current_cells[2]
         self.assertIn("for x, y in pbar:", legacy)
         self.assertNotIn("for x, y in pbar:", current)
         self.assertIn("for x, y in tqdm(val_loader", legacy)
@@ -46,7 +46,7 @@ class NotebookTrainingPipelineTest(unittest.TestCase):
 
     def test_outer_orchestration_boundaries_are_preserved(self):
         legacy = self.legacy_cells[4]
-        current = self.current_cells[4]
+        current = self.current_cells[2]
         anchors = [
             "for fold, (train_idx, val_idx) in enumerate(",
             "for epoch in range(1, EPOCHS+1):",

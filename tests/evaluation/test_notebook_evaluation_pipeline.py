@@ -25,7 +25,7 @@ class NotebookEvaluationPipelineTest(unittest.TestCase):
         cls.legacy_cells = load_cells(legacy_text)
 
     def test_notebook_is_valid_and_evaluation_import_is_explicit(self):
-        self.assertEqual(len(self.current_cells), len(self.legacy_cells))
+        self.assertEqual(len(self.current_cells), len(self.legacy_cells) - 2)
         for source in self.current_cells:
             compile(source, "deep3.ipynb", "exec")
         self.assertIn(
@@ -35,7 +35,7 @@ class NotebookEvaluationPipelineTest(unittest.TestCase):
 
     def test_active_notebook_metrics_are_module_backed(self):
         legacy = self.legacy_cells[4]
-        current = self.current_cells[4]
+        current = self.current_cells[2]
         self.assertIn('va_f1   = f1_score(all_labels, all_preds, average="macro")', legacy)
         self.assertIn("va_bal  = balanced_accuracy_score(all_labels, all_preds)", legacy)
         self.assertIn("va_top2 = top_k_accuracy_score(", legacy)
@@ -47,7 +47,7 @@ class NotebookEvaluationPipelineTest(unittest.TestCase):
 
     def test_execution_and_orchestration_boundaries_are_preserved(self):
         legacy = self.legacy_cells[4]
-        current = self.current_cells[4]
+        current = self.current_cells[2]
         anchors = [
             "validate_one_epoch(",
             "all_logits = np.concatenate(all_logits, axis=0)",

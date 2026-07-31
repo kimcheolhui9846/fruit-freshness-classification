@@ -16,7 +16,9 @@ class NotebookLossPipelineTest(unittest.TestCase):
             "from src.losses.focal import FocalLoss, build_class_balanced_alpha",
             self.source,
         )
-        self.assertIn("from src.losses.mixup import mixup_criterion", self.source)
+        self.assertNotIn("from src.losses.mixup import mixup_criterion", self.source)
+        trainer_source = Path("src/trainers/loops.py").read_text(encoding="utf-8")
+        self.assertIn("from src.losses.mixup import mixup_criterion", trainer_source)
         self.assertNotIn("class FocalLoss", self.source)
 
     def test_loss_orchestration_remains_at_the_same_boundary(self):

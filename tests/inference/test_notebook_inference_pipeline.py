@@ -25,7 +25,7 @@ class NotebookInferencePipelineTest(unittest.TestCase):
         cls.legacy_cells = load_cells(legacy_text)
 
     def test_notebook_is_valid_and_inference_imports_are_explicit(self):
-        self.assertEqual(len(self.current_cells), len(self.legacy_cells))
+        self.assertEqual(len(self.current_cells), len(self.legacy_cells) - 2)
         for source in self.current_cells:
             compile(source, "deep3.ipynb", "exec")
         imports = self.current_cells[0]
@@ -34,7 +34,7 @@ class NotebookInferencePipelineTest(unittest.TestCase):
 
     def test_active_final_inference_is_module_backed(self):
         legacy = self.legacy_cells[3] + self.legacy_cells[4]
-        current = self.current_cells[3] + self.current_cells[4]
+        current = self.current_cells[2]
         self.assertIn("def load_fold_models", legacy)
         self.assertIn("def ensemble_logits", legacy)
         self.assertIn("def ensemble_logits_tta_hflip", legacy)
@@ -46,7 +46,7 @@ class NotebookInferencePipelineTest(unittest.TestCase):
 
     def test_orchestration_reporting_and_completed_boundaries_are_preserved(self):
         legacy = self.legacy_cells[4]
-        current = self.current_cells[4]
+        current = self.current_cells[2]
         anchors = [
             "ckpt_dir = save_dir",
             "models = load_fold_models(K, num_classes, device, ckpt_dir)",

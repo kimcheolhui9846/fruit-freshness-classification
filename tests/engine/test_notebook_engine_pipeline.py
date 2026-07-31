@@ -25,11 +25,12 @@ class NotebookEnginePipelineTest(unittest.TestCase):
         cls.legacy_cells = load_cells(legacy_text)
 
     def test_notebook_is_valid_and_engine_imports_are_explicit(self):
-        self.assertEqual(len(self.current_cells), len(self.legacy_cells))
+        self.assertEqual(len(self.current_cells), len(self.legacy_cells) - 2)
         for source in self.current_cells:
             compile(source, "deep3.ipynb", "exec")
         imports = self.current_cells[0]
-        self.assertIn("from src.engine.checkpoint import load_model_state, save_model_state", imports)
+        self.assertIn("from src.engine.checkpoint import save_model_state", imports)
+        self.assertNotIn("load_model_state", imports)
         self.assertIn("from src.engine.ema import ModelEma", imports)
         self.assertIn("from src.engine.optimization import build_optimizer, build_scheduler", imports)
 
@@ -41,13 +42,13 @@ class NotebookEnginePipelineTest(unittest.TestCase):
         self.assertIn("load_model_state(model, path, map_location=device)", inference_loading)
         self.assertNotIn("m.load_state_dict(torch.load(path, map_location=device))", inference_loading)
         self.assertIn("torch.optim.AdamW", self.legacy_cells[4])
-        self.assertNotIn("torch.optim.AdamW", self.current_cells[4])
+        self.assertNotIn("torch.optim.AdamW", self.current_cells[2])
         self.assertIn("CosineAnnealingLR", self.legacy_cells[4])
-        self.assertNotIn("CosineAnnealingLR", self.current_cells[4])
-        self.assertIn("build_optimizer(", self.current_cells[4])
-        self.assertIn("build_scheduler(optimizer, t_max=EPOCHS)", self.current_cells[4])
-        self.assertIn("save_model_state(ema.module, save_path)", self.current_cells[4])
-        self.assertIn('save_model_state(model, "last_model_weights.pt")', self.current_cells[4])
+        self.assertNotIn("CosineAnnealingLR", self.current_cells[2])
+        self.assertIn("build_optimizer(", self.current_cells[2])
+        self.assertIn("build_scheduler(optimizer, t_max=EPOCHS)", self.current_cells[2])
+        self.assertIn("save_model_state(ema.module, save_path)", self.current_cells[2])
+        self.assertIn('save_model_state(model, "last_model_weights.pt")', self.current_cells[2])
 
     def test_loop_and_decision_boundaries_remain_in_the_notebook(self):
         anchors = [
@@ -59,19 +60,19 @@ class NotebookEnginePipelineTest(unittest.TestCase):
         for anchor in anchors:
             self.assertEqual(
                 self.legacy_cells[4].count(anchor),
-                self.current_cells[4].count(anchor),
+                self.current_cells[2].count(anchor),
                 anchor,
             )
         self.assertIn("from src.trainers.loops import train_one_epoch, validate_one_epoch", self.current_cells[0])
-        self.assertNotIn("for x, y in pbar:", self.current_cells[4])
-        self.assertNotIn("for x, y in tqdm(val_loader", self.current_cells[4])
-        self.assertNotIn("ema.update(model)", self.current_cells[4])
-        self.assertIn("train_one_epoch(", self.current_cells[4])
-        self.assertIn("validate_one_epoch(", self.current_cells[4])
+        self.assertNotIn("for x, y in pbar:", self.current_cells[2])
+        self.assertNotIn("for x, y in tqdm(val_loader", self.current_cells[2])
+        self.assertNotIn("ema.update(model)", self.current_cells[2])
+        self.assertIn("train_one_epoch(", self.current_cells[2])
+        self.assertIn("validate_one_epoch(", self.current_cells[2])
         self.assertIn("from src.inference.loading import load_fold_models", self.current_cells[0])
         self.assertIn("from src.inference.ensemble import run_ensemble_holdout", self.current_cells[0])
-        self.assertNotIn("def load_fold_models", self.current_cells[3])
-        self.assertNotIn("def ensemble_logits", self.current_cells[3])
+        self.assertNotIn("def load_fold_models", self.current_cells[2])
+        self.assertNotIn("def ensemble_logits", self.current_cells[2])
 
 
 if __name__ == "__main__":
