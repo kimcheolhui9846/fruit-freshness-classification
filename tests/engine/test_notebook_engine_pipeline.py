@@ -51,10 +51,7 @@ class NotebookEnginePipelineTest(unittest.TestCase):
     def test_loop_and_decision_boundaries_remain_in_the_notebook(self):
         anchors = [
             "for epoch in range(1, EPOCHS+1):",
-            "for x, y in pbar:",
-            "for x, y in tqdm(val_loader",
             "if va_acc > best_acc_fold + 1e-6:",
-            "ema.update(model)",
             "scheduler.step()",
             "scaler = GradScaler()",
         ]
@@ -64,6 +61,12 @@ class NotebookEnginePipelineTest(unittest.TestCase):
                 self.current_cells[4].count(anchor),
                 anchor,
             )
+        self.assertIn("from src.trainers.loops import train_one_epoch, validate_one_epoch", self.current_cells[0])
+        self.assertNotIn("for x, y in pbar:", self.current_cells[4])
+        self.assertNotIn("for x, y in tqdm(val_loader", self.current_cells[4])
+        self.assertNotIn("ema.update(model)", self.current_cells[4])
+        self.assertIn("train_one_epoch(", self.current_cells[4])
+        self.assertIn("validate_one_epoch(", self.current_cells[4])
         self.assertIn("def load_fold_models", self.current_cells[3])
         self.assertIn("def ensemble_logits", self.current_cells[3])
         self.assertIn("def ensemble_logits_tta_hflip", self.current_cells[3])

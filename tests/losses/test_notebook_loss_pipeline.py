@@ -32,11 +32,12 @@ class NotebookLossPipelineTest(unittest.TestCase):
             "criterion = FocalLoss(alpha=alpha.to(device), gamma=2.0).to(device)",
             self.source,
         )
+        trainer_source = Path("src/trainers/loops.py").read_text(encoding="utf-8")
         self.assertIn(
             "loss = mixup_criterion(criterion, out, y_a, y_b, lam)",
-            self.source,
+            trainer_source,
         )
-        self.assertIn("loss = criterion(out, y)", self.source)
+        self.assertIn("loss = criterion(out, y)", trainer_source)
 
 
 if __name__ == "__main__":
