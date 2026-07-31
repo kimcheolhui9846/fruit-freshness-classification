@@ -306,3 +306,15 @@ For all future implementation work:
 - **Known Git limitation:** A Codex-managed temporary ref under `.git/refs/codex/turn-diffs/` may make `git fetch origin` fail. Do not modify it; use the documented local/remote/GitHub CLI SHA fallback if needed.
 - **Remaining items:** Ignored Python caches and the protected untracked nested repository remain local only. No weight, checkpoint, output, cache, or dataset was staged.
 - **Next recommended unit:** Phase 4.4 documentation commit and synchronization verification only; do not begin Phase 4.5 automatically.
+
+## Completed Unit - Phase 4.5 Loss Functions and Loss-Related Helpers (2026-07-31)
+
+- **Scope:** Extract only the active Focal Loss, class-balanced alpha construction, and Mixup loss combination from `deep3.ipynb`. Dataset/DataLoader, transforms and `mixup_data`, model, EMA, optimizer, scheduler, checkpoint implementation, training, validation, evaluation, inference, and hyperparameters were not changed.
+- **Created files:** `src/losses/focal.py` (`FocalLoss`, `build_class_balanced_alpha`), `src/losses/mixup.py` (`mixup_criterion`), and three focused tests under `tests/losses/`.
+- **Notebook migration:** `deep3.ipynb` now imports the extracted helpers, delegates only the class-balanced alpha formula and Mixup loss expression, and removes only the inline Focal Loss class. Cross-entropy construction, Focal Loss constructor arguments, non-Mixup loss path, data counting, and the existing training orchestration remain in the notebook.
+- **Behavior preserved:** The Focal Loss formula and operation order, `alpha` buffer behavior, gamma/reduction/epsilon semantics, class-balanced-alpha formula, CrossEntropy label smoothing path, and `lam * criterion(out, y_a) + (1-lam) * criterion(out, y_b)` behavior are preserved exactly.
+- **Verification:** 11 loss-focused parity tests passed, including values, gradients, reductions, alpha variants, invalid-index/broadcast behavior, CPU/CUDA parity, class-alpha construction, CrossEntropy/Focal Mixup parity, and notebook orchestration. Existing regressions also passed: 9 model tests, 5 transform tests, and 8 dataset tests. Notebook JSON/source validation, historical notebook SHA-256 preservation, source tracking, and staged whitespace checks passed.
+- **Environment note:** Loss tests ran successfully. The existing production dataset integration limitation remains: local `datasets` and `scikit-learn` packages are not installed, so no Hugging Face download was attempted.
+- **Implementation commit:** `531fc19` - `refactor: extract loss functions and helpers`, pushed to `origin/refactor/phase-4.5-losses` and verified against GitHub.
+- **Safety:** No dataset, weight, checkpoint, output, cache, notebook checkpoint, or nested repository content was staged. The protected nested `fruit-freshness-classification/` repository remains clean and untracked. The known Codex-managed temporary-ref `git fetch` limitation remains untouched.
+- **Next recommended unit:** After this phase is fully synchronized, await separate authorization for Phase 4.6 (checkpointing, EMA, and training-engine foundations). Do not begin it automatically.
