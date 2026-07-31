@@ -1,0 +1,35 @@
+# Data and caches
+data/
+/datasets/
+.cache/
+.cache/huggingface/
+huggingface/
+hf_cache/
+
+# Python bytecode and notebook state
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Model artifacts
+weights/*
+checkpoints/
+*.pt
+*.pth
+*.ckpt
+label_names.json
+
+# Generated experiment outputs
+results/*
+outputs/
+runs/
+logs/
+
+# Local environment and editor files
+.env
+.venv/
+venv/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
