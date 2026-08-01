@@ -43,10 +43,9 @@ Existing overwrite behavior is preserved. There is no timestamped run directory,
 
 The notebook has no explicit random-seed initialization, and the script adds none. The script preserves the runtime/device, dataset/fold, model/optimizer/scheduler/scaler/EMA, and fine-tuning construction sequence structurally. Exact production RNG parity remains unverified because the Hugging Face dataset and full CMT training have not been executed in this environment.
 
-## Deferred to Phase 5.4
+## Evaluation boundary
 
-The script intentionally ends after training and required saves. It does not load saved fold checkpoints, create the holdout DataLoader, run the holdout ensemble, apply TTA, compute final holdout accuracy, or render the notebook's interactive Matplotlib figure. Those are evaluation/inference or notebook-presentation responsibilities planned for Phase 5.4.
-
+The training script intentionally ends after training and required saves. Saved-fold loading, holdout DataLoader construction, raw-logit ensemble evaluation, and horizontal-flip TTA are provided separately by `scripts/evaluate.py`; notebook-specific Matplotlib history plotting remains in `deep3.ipynb`. See [evaluation.md](evaluation.md) for the evaluation input and checkpoint contract.
 ## Requirements and verification status
 
 Install the project requirements described in `docs/environment.md`, including Hugging Face `datasets` for production loading. Dataset access may require network access or an existing Hugging Face cache. The entry point uses the existing CUDA-first device helper; CPU execution follows existing PyTorch behavior but has not been validated as a production run.

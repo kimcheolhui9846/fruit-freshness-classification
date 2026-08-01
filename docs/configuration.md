@@ -1,6 +1,6 @@
 # Experiment configuration
 
-`configs/deep3.toml` is the single active experiment configuration for `deep3.ipynb`. It is parsed by `src.utils.config.load_experiment_config()` with Python 3.12's standard-library `tomllib`; no configuration framework or additional dependency is used.
+`configs/deep3.toml` is the single active experiment configuration for `deep3.ipynb`, `scripts/train.py`, and `scripts/evaluate.py`. It is parsed by `src.utils.config.load_experiment_config()` with Python 3.12's standard-library `tomllib`; no configuration framework or additional dependency is used.
 
 ## Structure
 
@@ -31,4 +31,4 @@ The Hugging Face dataset identifier, excluded labels, split construction, image 
 3. Intentionally update `CONFIG_PATH` in `deep3.ipynb` to select that one file.
 4. Run the configuration tests and full unittest discovery before training.
 
-There is currently no override hierarchy, CLI override, environment-variable override, profile, or interpolation syntax. A future Phase 5.3 training entry point should consume this same explicit configuration contract rather than adding a parallel one.
+There is currently no override hierarchy, CLI override, environment-variable override, profile, or interpolation syntax. The active `scripts/train.py` and `scripts/evaluate.py` entry points consume this same explicit configuration contract rather than adding a parallel one.
