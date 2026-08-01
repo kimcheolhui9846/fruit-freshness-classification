@@ -1,0 +1,1 @@
+"""Repository-level safety and CI contract tests."""

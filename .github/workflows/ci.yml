@@ -1,0 +1,136 @@
+name: Repository CI
+
+on:
+  push:
+    branches:
+      - main
+      - "**"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  repository-health:
+    name: ${{ matrix.os }} / Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        python-version: ["3.12"]
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+          submodules: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Install CPU-only dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -r requirements-dev.txt
+
+      - name: Validate dependency consistency
+        shell: pwsh
+        env:
+          HF_HUB_OFFLINE: "1"
+          HF_DATASETS_OFFLINE: "1"
+          MPLBACKEND: Agg
+        run: python -m pip check
+
+      - name: Report runtime versions
+        shell: pwsh
+        env:
+          HF_HUB_OFFLINE: "1"
+          HF_DATASETS_OFFLINE: "1"
+          MPLBACKEND: Agg
+        run: |
+          python -c "import platform; print(f'Python: {platform.python_version()}')"
+          python -c "import torch, torchvision; print(f'torch: {torch.__version__}'); print(f'torchvision: {torchvision.__version__}'); print(f'CUDA available: {torch.cuda.is_available()}'); assert not torch.cuda.is_available()"
+          python -c "from importlib.metadata import version; [print(f'{name}: {version(name)}') for name in ('datasets', 'jupyterlab', 'ipykernel')]"
+
+      - name: Validate runtime imports
+        shell: pwsh
+        env:
+          HF_HUB_OFFLINE: "1"
+          HF_DATASETS_OFFLINE: "1"
+          MPLBACKEND: Agg
+        run: python -c "import datasets, matplotlib, numpy, PIL, sklearn, torch, torchvision, tqdm; print('runtime imports passed')"
+
+      - name: Validate project imports
+        shell: pwsh
+        env:
+          HF_HUB_OFFLINE: "1"
+          HF_DATASETS_OFFLINE: "1"
+          MPLBACKEND: Agg
+        run: python -c "from src.datasets.folds import iter_stratified_folds; from src.engine.checkpoint import load_model_state, save_model_state; from src.evaluation.metrics import compute_validation_metrics; from src.inference import run_ensemble_holdout; from src.losses.focal import FocalLoss; from src.models.factory import build_cmt_classifier; from src.trainers.loops import train_one_epoch, validate_one_epoch; from src.transforms.classification import build_validation_transform; from src.utils.config import load_experiment_config; print('project imports passed')"
+
+      - name: Validate experiment configuration
+        shell: pwsh
+        env:
+          HF_HUB_OFFLINE: "1"
+          HF_DATASETS_OFFLINE: "1"
+          MPLBACKEND: Agg
+        run: python -c "from src.utils.config import load_experiment_config; config = load_experiment_config('configs/deep3.toml'); print(f\"epochs: {config['training']['epochs']}\")"
+
+      - name: Compile source, scripts, and tests
+        shell: pwsh
+        env:
+          HF_HUB_OFFLINE: "1"
+          HF_DATASETS_OFFLINE: "1"
+          MPLBACKEND: Agg
+        run: python -m compileall src scripts tests
+
+      - name: Run unit and contract tests
+        shell: pwsh
+        env:
+          HF_HUB_OFFLINE: "1"
+          HF_DATASETS_OFFLINE: "1"
+          MPLBACKEND: Agg
+        run: python -m unittest discover -s tests -p "test_*.py" -v
+
+      - name: Check command-line interfaces
+        shell: pwsh
+        env:
+          HF_HUB_OFFLINE: "1"
+          HF_DATASETS_OFFLINE: "1"
+          MPLBACKEND: Agg
+        run: |
+          python -m scripts.train --help
+          python -m scripts.evaluate --help
+
+      - name: Verify repository cleanliness
+        shell: pwsh
+        env:
+          HF_HUB_OFFLINE: "1"
+          HF_DATASETS_OFFLINE: "1"
+          MPLBACKEND: Agg
+        run: |
+          git diff --exit-code
+          $status = git status --porcelain --untracked-files=all
+          if ($status) {
+            Write-Output $status
+            exit 1
+          }
