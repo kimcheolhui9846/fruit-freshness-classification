@@ -2,5 +2,5 @@
 -r requirements.txt
 
 # Interactive development for the active deep3.ipynb entry point
-jupyterlab
+jupyterlab==4.6.2
 ipykernel==7.2.0

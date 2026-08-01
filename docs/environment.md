@@ -23,9 +23,10 @@ The verified interpreter is **Python 3.12.10 (64-bit)** on Windows 11. The curre
 | Pillow | 12.3.0 | validated by current tests |
 | tqdm | 4.70.0 | validated by imports and tests |
 | Matplotlib | 3.11.1 | imported by `deep3.ipynb` |
-| ipykernel | 7.2.0 | installed, but notebook-server execution was not run |
+| ipykernel | 7.2.0 | installed; bounded JupyterLab server startup passed, but notebook execution was not run |
 | Hugging Face `datasets` | 5.0.1 | clean-environment loader validation |
-| `huggingface-hub` | 1.26.0 | pinned source-download API |`n| JupyterLab | 4.6.2 | installed; notebook execution was not run |
+| `huggingface-hub` | 1.26.0 | pinned source-download API |
+| JupyterLab | 4.6.2 | installed; bounded server startup and notebook execution remain separate checks |
 
 The active source imports `datasets.ClassLabel`, `datasets.DatasetDict`, `datasets.load_dataset`, and `huggingface_hub.hf_hub_download`. It uses a fixed Hub revision and an explicit local ImageFolder content root because the automatic Hub zip route fails during `ClassLabel` encoding in the verified package. `datasets==5.0.1` and `huggingface-hub==1.26.0` are therefore direct, exact runtime requirements. The pinned path was validated against `Densu341/Fresh-rotten-fruit` in a new virtual environment and empty cache. See [the Hugging Face loading guide](https://huggingface.co/docs/datasets/en/loading) and [dataset.md](dataset.md) for the source contract.
 
@@ -36,13 +37,14 @@ The active source imports `datasets.ClassLabel`, `datasets.DatasetDict`, `datase
 | `numpy` | `==2.5.1` | exact pin | Directly imported by data, transforms, training, and evaluation; this version passed the current suite. |
 | `torch` | `==2.6.0` | exact base pin | Model, engine, loss, trainer, and inference behavior are PyTorch-sensitive. CUDA wheel selection is documented separately. |
 | `torchvision` | `==0.21.0` | exact base pin | Direct transform dependency; paired with the verified PyTorch release. |
-| `datasets` | `==5.0.1` | exact pin | Verified ImageFolder, DatasetDict, map, split, and feature API behavior. |`n| `huggingface-hub` | `==1.26.0` | exact pin | Direct pinned-archive download API used by the dataset loader. |
+| `datasets` | `==5.0.1` | exact pin | Verified ImageFolder, DatasetDict, map, split, and feature API behavior. |
+| `huggingface-hub` | `==1.26.0` | exact pin | Direct pinned-archive download API used by the dataset loader. |
 | `scikit-learn` | `==1.9.0` | exact pin | Direct metric and stratified-fold dependency validated by tests. Its installed metadata accepts NumPy 2.5.1. |
 | `matplotlib` | `==3.11.1` | exact pin | Direct notebook plotting import on the verified host. |
 | `Pillow` | `==12.3.0` | exact pin | Image handling dependency; tests import it through `PIL`, and the production data path consumes PIL images decoded by Hugging Face Datasets. |
 | `tqdm` | `==4.70.0` | exact pin | Direct trainer and inference progress dependency. |
-| `jupyterlab` | unpinned | development-only direct requirement | Needed to open and execute the active notebook, but no JupyterLab distribution was installed on the validation host. |
-| `ipykernel` | `==7.2.0` | exact development pin | Installed kernel package for notebook execution; the notebook server itself was not run in this phase. |
+| `jupyterlab` | `==4.6.2` | exact development pin | Needed to open the active notebook and to reproduce the bounded JupyterLab server verification. |
+| `ipykernel` | `==7.2.0` | exact development pin | Installed kernel package; bounded JupyterLab server startup passed, but notebook execution was not run. |
 
 `requirements.txt` deliberately uses base PyTorch versions, not a machine-specific local version such as `torch==2.6.0+cu124`. This keeps the file valid for CPU and CUDA users while requiring explicit wheel-index selection below.
 
@@ -108,8 +110,8 @@ python -c "from datasets import ClassLabel, DatasetDict, load_dataset; print('da
 
 ## Known limitations and next verification
 
-- The production dataset workflow requires network access for its first download or an existing Hugging Face cache. Its pinned source, preprocessing, and one transform/DataLoader batch were validated in Phase 5.5A; CMT construction, checkpoint loading, evaluation, training, and notebook execution remain outside that validation.
-- The current unit suite validates modular behavior with synthetic data. Phase 5.5A additionally validated the real dataset loader, but no production training run, checkpoint load, evaluation, or full notebook execution was run.
+- The production dataset workflow requires network access for its first download or an existing Hugging Face cache. Phase 5.5A established the cold-cache loader proof; the later Phase 5.5 rerun separately verified bounded CMT execution, temporary checkpoint interoperability, and real-holdout evaluation. See [reproducibility.md](reproducibility.md) for the precise evidence boundary.
+- The unit suite primarily validates modular behavior with synthetic data. Phase 5.5 rerun added real-data bounded CMT, temporary-checkpoint, and holdout-evaluation evidence; it did not run canonical training, trained-checkpoint evaluation, benchmark reproduction, or full notebook execution.
 - Checkpoints, model weights, datasets, caches, and generated results are intentionally not stored in Git.
-- A clean virtual-environment installation and bounded real-data loader validation passed in Phase 5.5A. Full end-to-end training reproducibility remains unverified.
+- A clean virtual-environment installation, production loader, bounded CMT runtime, checkpoint path, and real holdout evaluation passed in Phase 5.5. Full canonical training reproducibility remains unverified.
 - A known Codex-managed temporary Git reference may cause `git fetch origin` to fail. It is local tool metadata, not a project dependency or environment problem, and must not be modified.
