@@ -39,7 +39,7 @@ class RepositoryCIContractTests(unittest.TestCase):
     def test_security_controls_are_explicit(self) -> None:
         self.assertRegex(self.workflow, r"(?ms)^permissions:\s*\n\s+contents:\s+read\s*$")
         self.assertIn("persist-credentials: false", self.workflow)
-        self.assertIn("fetch-depth: 30", self.workflow)
+        self.assertIn("fetch-depth: 32", self.workflow)
         self.assertNotIn("fetch-depth: 0", self.workflow)
         self.assertIn("timeout-minutes: 30", self.workflow)
         self.assertIn("cancel-in-progress: true", self.workflow)
