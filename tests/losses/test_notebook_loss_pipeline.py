@@ -31,7 +31,7 @@ class NotebookLossPipelineTest(unittest.TestCase):
             self.source,
         )
         self.assertIn(
-            "criterion = FocalLoss(alpha=alpha.to(device), gamma=2.0).to(device)",
+            "criterion = FocalLoss(alpha=alpha.to(device), gamma=config[\"loss\"][\"focal_gamma\"]).to(device)",
             self.source,
         )
         trainer_source = Path("src/trainers/loops.py").read_text(encoding="utf-8")

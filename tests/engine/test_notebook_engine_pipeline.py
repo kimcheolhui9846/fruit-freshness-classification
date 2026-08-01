@@ -48,7 +48,7 @@ class NotebookEnginePipelineTest(unittest.TestCase):
         self.assertIn("build_optimizer(", self.current_cells[2])
         self.assertIn("build_scheduler(optimizer, t_max=EPOCHS)", self.current_cells[2])
         self.assertIn("save_model_state(ema.module, save_path)", self.current_cells[2])
-        self.assertIn('save_model_state(model, "last_model_weights.pt")', self.current_cells[2])
+        self.assertIn('save_model_state(model, config["checkpoint"]["final_model_filename"])', self.current_cells[2])
 
     def test_loop_and_decision_boundaries_remain_in_the_notebook(self):
         anchors = [

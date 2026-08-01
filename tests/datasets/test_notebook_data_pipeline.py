@@ -47,7 +47,7 @@ class NotebookDataPipelineTest(unittest.TestCase):
     def test_orchestration_preserves_dataset_and_loader_calls(self):
         self.assertIn("final_dataset = load_fruit_freshness_dataset()", self.source)
         self.assertIn(
-            "iter_stratified_folds(final_dataset[\"train\"], n_splits=K, shuffle=True, random_state=42)",
+            "iter_stratified_folds(final_dataset[\"train\"], n_splits=K, shuffle=config[\"cross_validation\"][\"shuffle\"], random_state=config[\"cross_validation\"][\"random_state\"])",
             self.source,
         )
         self.assertIn(

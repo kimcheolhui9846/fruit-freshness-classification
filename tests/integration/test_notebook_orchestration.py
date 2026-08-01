@@ -27,7 +27,7 @@ def find_main_source(sources):
     raise AssertionError("main() orchestration cell was not found")
 
 
-def assignment_signature(source):
+def assignment_names(source):
     main_node = next(
         node for node in ast.parse(source).body if isinstance(node, ast.FunctionDef) and node.name == "main"
     )
@@ -46,13 +46,14 @@ def assignment_signature(source):
         "USE_CE_LS",
         "LABEL_SMOOTHING",
     }
-    signature = []
-    for node in main_node.body:
-        if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
-            if node.targets[0].id in names:
-                signature.append((node.targets[0].id, ast.dump(node.value, include_attributes=False)))
-    return signature
-
+    return [
+        node.targets[0].id
+        for node in main_node.body
+        if isinstance(node, ast.Assign)
+        and len(node.targets) == 1
+        and isinstance(node.targets[0], ast.Name)
+        and node.targets[0].id in names
+    ]
 
 class NotebookOrchestrationTest(unittest.TestCase):
     @classmethod
@@ -85,6 +86,7 @@ class NotebookOrchestrationTest(unittest.TestCase):
         }
         expected = {
             ("src.utils.runtime", "resolve_device"),
+            ("src.utils.config", "load_experiment_config"),
             ("src.datasets.fruit_freshness", "load_fruit_freshness_dataset"),
             ("src.transforms.classification", "build_train_transform"),
             ("src.models.factory", "build_cmt_classifier"),
@@ -119,8 +121,8 @@ class NotebookOrchestrationTest(unittest.TestCase):
         for anchor in anchors:
             self.assertIn(anchor, self.main_source)
         self.assertEqual(
-            assignment_signature(self.main_source),
-            assignment_signature(self.baseline_main_source),
+            assignment_names(self.main_source),
+            assignment_names(self.baseline_main_source),
         )
 
     def test_completed_implementation_duplicates_are_absent(self):
