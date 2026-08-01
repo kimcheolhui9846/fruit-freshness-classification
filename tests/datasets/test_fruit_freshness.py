@@ -1,4 +1,5 @@
 import importlib
+from pathlib import Path
 import sys
 import types
 import unittest
@@ -34,7 +35,10 @@ class FakeSplit:
         return self.items[key]
 
     def select(self, indices):
-        return FakeSplit([self.items[index].copy() for index in indices], self.features["label"])
+        return FakeSplit(
+            [self.items[index].copy() for index in indices],
+            self.features["label"],
+        )
 
     def train_test_split(self, test_size, seed):
         test_count = int(len(self.items) * test_size)
@@ -44,7 +48,10 @@ class FakeSplit:
         }
 
     def map(self, function, **_):
-        return FakeSplit([function(item.copy()) for item in self.items], self.features["label"])
+        return FakeSplit(
+            [function(item.copy()) for item in self.items],
+            self.features["label"],
+        )
 
     def cast_column(self, name, feature):
         self.features[name] = feature
@@ -59,8 +66,14 @@ def _load_dataset_module():
     fake_datasets = types.ModuleType("datasets")
     fake_datasets.ClassLabel = FakeClassLabel
     fake_datasets.DatasetDict = FakeDatasetDict
-    fake_datasets.load_dataset = lambda *_: None
-    with patch.dict(sys.modules, {"datasets": fake_datasets}):
+    fake_datasets.config = types.SimpleNamespace(HF_DATASETS_CACHE="unused-cache")
+    fake_datasets.load_dataset = lambda *_args, **_kwargs: None
+    fake_hub = types.ModuleType("huggingface_hub")
+    fake_hub.hf_hub_download = lambda *_args, **_kwargs: "unused-archive.zip"
+    with patch.dict(
+        sys.modules,
+        {"datasets": fake_datasets, "huggingface_hub": fake_hub},
+    ):
         sys.modules.pop("src.datasets.fruit_freshness", None)
         return importlib.import_module("src.datasets.fruit_freshness")
 
@@ -75,20 +88,37 @@ def _build_source_dataset():
         for label in range(21)
         for index in range(5)
     ]
-    return FakeDatasetDict({"train": FakeSplit(items, FakeClassLabel(21, label_names))}), label_names
+    return (
+        FakeDatasetDict({"train": FakeSplit(items, FakeClassLabel(21, label_names))}),
+        label_names,
+    )
 
 
 class FruitFreshnessDatasetTest(unittest.TestCase):
     def test_loading_filtering_remapping_and_item_contract(self):
         module = _load_dataset_module()
         source, original_names = _build_source_dataset()
-        with patch.object(module, "load_dataset", return_value=source) as mocked_load_dataset:
-            with patch.object(module.os, "cpu_count", return_value=2):
-                prepared = module.load_fruit_freshness_dataset()
+        with patch.object(
+            module,
+            "_resolve_imagefolder_data_dir",
+            return_value=Path("prepared-data"),
+        ):
+            with patch.object(
+                module,
+                "load_dataset",
+                return_value=source,
+            ) as mocked_load_dataset:
+                with patch.object(module.os, "cpu_count", return_value=2):
+                    prepared = module.load_fruit_freshness_dataset()
 
-        mocked_load_dataset.assert_called_once_with("Densu341/Fresh-rotten-fruit")
+        mocked_load_dataset.assert_called_once_with(
+            "imagefolder",
+            data_dir="prepared-data",
+        )
         expected_names = [
-            name for index, name in enumerate(original_names) if index not in REMOVED_LABELS
+            name
+            for index, name in enumerate(original_names)
+            if index not in REMOVED_LABELS
         ]
         self.assertEqual(prepared.keys(), {"train", "test"})
         self.assertEqual(prepared["train"].features["label"].names, expected_names)

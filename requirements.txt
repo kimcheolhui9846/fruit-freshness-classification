@@ -4,7 +4,8 @@ torch==2.6.0
 torchvision==0.21.0
 
 # Dataset preparation and evaluation
-datasets>=3.0
+datasets==5.0.1
+huggingface-hub==1.26.0
 scikit-learn==1.9.0
 
 # Image handling, plotting, and progress display

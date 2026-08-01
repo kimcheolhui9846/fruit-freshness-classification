@@ -1,15 +1,80 @@
 """Fruit-freshness Hugging Face dataset preparation."""
 
 import os
+from pathlib import Path, PurePosixPath
+from uuid import uuid4
+from zipfile import ZipFile
 
 import numpy as np
-from datasets import ClassLabel, DatasetDict, load_dataset
+from datasets import ClassLabel, DatasetDict, config as datasets_config, load_dataset
+from huggingface_hub import hf_hub_download
 from torch.utils.data import Dataset
+
+
+DATASET_REPOSITORY_ID = "Densu341/Fresh-rotten-fruit"
+DATASET_REVISION = "2077850adc575aa1e8d6029e6cd6cefe9e403a1c"
+DATASET_ARCHIVE_FILENAME = "freshness_fruit.zip"
+DATASET_CONTENT_DIRECTORY = "dataset"
+
+
+def _validate_archive_members(archive: ZipFile) -> None:
+    """Reject archive members that would escape the managed cache directory."""
+    for member in archive.infolist():
+        member_path = PurePosixPath(member.filename)
+        if member_path.is_absolute() or ".." in member_path.parts:
+            raise ValueError(f"Unsafe dataset archive member: {member.filename}")
+
+
+def _resolve_imagefolder_data_dir() -> Path:
+    """Download the pinned archive and expose its image-directory root."""
+    extraction_parent = (
+        Path(datasets_config.HF_DATASETS_CACHE)
+        / "fruit_freshness"
+        / DATASET_REVISION
+    )
+    data_dir = extraction_parent / DATASET_CONTENT_DIRECTORY
+    if data_dir.is_dir():
+        return data_dir
+    if extraction_parent.exists():
+        raise RuntimeError(
+            "Fruit-freshness extraction cache is incomplete: "
+            f"{extraction_parent}"
+        )
+
+    archive_path = Path(
+        hf_hub_download(
+            repo_id=DATASET_REPOSITORY_ID,
+            repo_type="dataset",
+            filename=DATASET_ARCHIVE_FILENAME,
+            revision=DATASET_REVISION,
+        )
+    )
+    staging_parent = extraction_parent.with_name(
+        f".{extraction_parent.name}.tmp-{uuid4().hex}"
+    )
+    staging_parent.mkdir(parents=True)
+    with ZipFile(archive_path) as archive:
+        _validate_archive_members(archive)
+        archive.extractall(staging_parent)
+
+    staging_data_dir = staging_parent / DATASET_CONTENT_DIRECTORY
+    if not staging_data_dir.is_dir():
+        raise ValueError(
+            "Fruit-freshness archive does not contain the expected "
+            f"{DATASET_CONTENT_DIRECTORY!r} directory."
+        )
+    try:
+        staging_parent.rename(extraction_parent)
+    except FileExistsError:
+        if data_dir.is_dir():
+            return data_dir
+        raise
+    return data_dir
 
 
 def load_fruit_freshness_dataset():
     """Load and prepare the notebook's fruit-freshness dataset splits."""
-    dataset = load_dataset("Densu341/Fresh-rotten-fruit")
+    dataset = load_dataset("imagefolder", data_dir=str(_resolve_imagefolder_data_dir()))
 
     remove_labels = [18, 20, 16, 13, 2, 5, 7, 9]
     labels = np.array(dataset["train"]["label"])

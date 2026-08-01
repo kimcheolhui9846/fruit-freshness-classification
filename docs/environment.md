@@ -1,6 +1,6 @@
 # Environment and dependency specification
 
-This document specifies the minimal environment for the modular fruit-freshness classification project. It records the environment used for Phase 5.1 validation and distinguishes it from clean-machine reproduction, which has not yet been performed.
+This document specifies the minimal environment for the modular fruit-freshness classification project. It records the Phase 5.1 baseline and the Phase 5.5A clean-virtual-environment dataset-loader validation.
 
 ## Scope and Python version
 
@@ -24,10 +24,10 @@ The verified interpreter is **Python 3.12.10 (64-bit)** on Windows 11. The curre
 | tqdm | 4.70.0 | validated by imports and tests |
 | Matplotlib | 3.11.1 | imported by `deep3.ipynb` |
 | ipykernel | 7.2.0 | installed, but notebook-server execution was not run |
-| Hugging Face `datasets` | not installed | production dataset execution not validated |
-| JupyterLab | not installed | development-only installation remains unvalidated |
+| Hugging Face `datasets` | 5.0.1 | clean-environment loader validation |
+| `huggingface-hub` | 1.26.0 | pinned source-download API |`n| JupyterLab | 4.6.2 | installed; notebook execution was not run |
 
-The active source imports `datasets.ClassLabel`, `datasets.DatasetDict`, and `datasets.load_dataset`, then uses dataset split, map, select, and feature APIs. `datasets>=3.0` is therefore a direct runtime requirement. Its lower bound preserves these active APIs while avoiding an unsupported exact-version claim: the package was not present on the validation host, so downloading `Densu341/Fresh-rotten-fruit` was not performed in this phase. Hugging Face documents `load_dataset()` as the supported Hub-loading API, and the current package metadata supports Python 3.10 or newer. See the [Hugging Face loading guide](https://huggingface.co/docs/datasets/en/loading) and the [datasets PyPI project](https://pypi.org/project/datasets/).
+The active source imports `datasets.ClassLabel`, `datasets.DatasetDict`, `datasets.load_dataset`, and `huggingface_hub.hf_hub_download`. It uses a fixed Hub revision and an explicit local ImageFolder content root because the automatic Hub zip route fails during `ClassLabel` encoding in the verified package. `datasets==5.0.1` and `huggingface-hub==1.26.0` are therefore direct, exact runtime requirements. The pinned path was validated against `Densu341/Fresh-rotten-fruit` in a new virtual environment and empty cache. See [the Hugging Face loading guide](https://huggingface.co/docs/datasets/en/loading) and [dataset.md](dataset.md) for the source contract.
 
 ## Dependency policy
 
@@ -36,7 +36,7 @@ The active source imports `datasets.ClassLabel`, `datasets.DatasetDict`, and `da
 | `numpy` | `==2.5.1` | exact pin | Directly imported by data, transforms, training, and evaluation; this version passed the current suite. |
 | `torch` | `==2.6.0` | exact base pin | Model, engine, loss, trainer, and inference behavior are PyTorch-sensitive. CUDA wheel selection is documented separately. |
 | `torchvision` | `==0.21.0` | exact base pin | Direct transform dependency; paired with the verified PyTorch release. |
-| `datasets` | `>=3.0` | minimum bound | Direct Hugging Face dataset API dependency; production execution is not locally verified, so no unsubstantiated exact pin is used. |
+| `datasets` | `==5.0.1` | exact pin | Verified ImageFolder, DatasetDict, map, split, and feature API behavior. |`n| `huggingface-hub` | `==1.26.0` | exact pin | Direct pinned-archive download API used by the dataset loader. |
 | `scikit-learn` | `==1.9.0` | exact pin | Direct metric and stratified-fold dependency validated by tests. Its installed metadata accepts NumPy 2.5.1. |
 | `matplotlib` | `==3.11.1` | exact pin | Direct notebook plotting import on the verified host. |
 | `Pillow` | `==12.3.0` | exact pin | Image handling dependency; tests import it through `PIL`, and the production data path consumes PIL images decoded by Hugging Face Datasets. |
@@ -100,7 +100,7 @@ python -c "from src.models.factory import build_cmt_classifier; from src.losses.
 python -m unittest discover -s tests -p "test_*.py" -v
 ```
 
-For the production dataset path, also verify the intentional Hugging Face dependency after installing `datasets`:
+For the production dataset path, confirm the pinned Hugging Face dependencies after installation:
 
 ```powershell
 python -c "from datasets import ClassLabel, DatasetDict, load_dataset; print('datasets imports ok')"
@@ -108,8 +108,8 @@ python -c "from datasets import ClassLabel, DatasetDict, load_dataset; print('da
 
 ## Known limitations and next verification
 
-- The production dataset workflow requires the Hugging Face `datasets` package and may require network access or an existing Hugging Face cache. It was not executed in Phase 5.1 because `datasets` is absent from the verified environment.
-- The current unit suite validates modular behavior with synthetic data; no production training run, dataset download, checkpoint load, or full notebook execution was run during this phase.
+- The production dataset workflow requires network access for its first download or an existing Hugging Face cache. Its pinned source, preprocessing, and one transform/DataLoader batch were validated in Phase 5.5A; CMT construction, checkpoint loading, evaluation, training, and notebook execution remain outside that validation.
+- The current unit suite validates modular behavior with synthetic data. Phase 5.5A additionally validated the real dataset loader, but no production training run, checkpoint load, evaluation, or full notebook execution was run.
 - Checkpoints, model weights, datasets, caches, and generated results are intentionally not stored in Git.
-- A clean-machine or clean-virtual-environment installation has not yet been performed. Phase 5.5 should perform that end-to-end reproducibility check before broader compatibility is claimed.
+- A clean virtual-environment installation and bounded real-data loader validation passed in Phase 5.5A. Full end-to-end training reproducibility remains unverified.
 - A known Codex-managed temporary Git reference may cause `git fetch origin` to fail. It is local tool metadata, not a project dependency or environment problem, and must not be modified.
