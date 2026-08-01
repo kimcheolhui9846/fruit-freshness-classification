@@ -93,7 +93,8 @@ jobs:
           HF_HUB_OFFLINE: "1"
           HF_DATASETS_OFFLINE: "1"
           MPLBACKEND: Agg
-        run: python -c "from src.utils.config import load_experiment_config; config = load_experiment_config('configs/deep3.toml'); print(f\"epochs: {config['training']['epochs']}\")"
+        run: |
+          run: python -c "from src.utils.config import load_experiment_config; config = load_experiment_config('configs/deep3.toml'); print(f\"epochs: {config['training']['epochs']}\")"
 
       - name: Compile source, scripts, and tests
         shell: pwsh
