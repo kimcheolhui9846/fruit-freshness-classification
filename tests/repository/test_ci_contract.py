@@ -39,7 +39,8 @@ class RepositoryCIContractTests(unittest.TestCase):
     def test_security_controls_are_explicit(self) -> None:
         self.assertRegex(self.workflow, r"(?ms)^permissions:\s*\n\s+contents:\s+read\s*$")
         self.assertIn("persist-credentials: false", self.workflow)
-        self.assertIn("fetch-depth: 1", self.workflow)
+        self.assertIn("fetch-depth: 30", self.workflow)
+        self.assertNotIn("fetch-depth: 0", self.workflow)
         self.assertIn("timeout-minutes: 30", self.workflow)
         self.assertIn("cancel-in-progress: true", self.workflow)
         self.assertNotRegex(self.workflow, r"(?i)\bsecrets\b")
@@ -53,7 +54,7 @@ class RepositoryCIContractTests(unittest.TestCase):
             self.assertRegex(revision, r"^[0-9a-f]{40}$")
 
     def test_validation_steps_are_present_and_offline(self) -> None:
-        for variable in ("HF_HUB_OFFLINE: \"1\"", "HF_DATASETS_OFFLINE: \"1\"", "MPLBACKEND: Agg"):
+        for variable in ("HF_HUB_OFFLINE: \"1\"", "HF_DATASETS_OFFLINE: \"1\"", "MPLBACKEND: Agg", "PYTHONIOENCODING: utf-8"):
             self.assertIn(variable, self.workflow)
         for command in (
             "python -m pip check",
