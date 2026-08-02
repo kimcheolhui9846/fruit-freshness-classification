@@ -7,6 +7,7 @@
 - Repository: `kimcheolhui9846/fruit-freshness-classification`.
 - Default branch: `main`.
 - Initial audit snapshot after local Phase-branch creation and before its first push: 24 local branches, 21 origin-tracking branches excluding `origin/HEAD`, and 21 live GitHub branches.
+- Post-implementation CI recheck: 24 local branches, 22 origin-tracking branches, and 22 live GitHub branches. The only remote addition was this Phase branch. Every pre-existing remote branch retained its original SHA; `main` remained at the starting SHA.
 - Open pull requests: 0. No historical pull requests were returned by GitHub.
 - Active rulesets: `Protect main` (ID `20229405`) for the default branch and `Protect v0.1.0` (ID `20232130`) for the exact protected tag.
 - Known limitation: the externally managed Codex temporary ref can make `git fetch origin` fail. GitHub API and `git ls-remote` were used as remote sources of truth; no Codex ref was changed.
@@ -26,7 +27,7 @@
 | `docs/phase-6.3-release-audit` | local + remote | `243b7ea66d66a3cfd6621ee54ab21e05f9dd557b` | ancestor of main | 0 | no PR | historical: `SESSION_HANDOFF.md` | `TEMPORARY_RETAIN` | Retain through the policy window. |
 | `docs/phase-6.4-license-citation` | local + remote | `ff0b3f7bfcde95ff22893b142062f9746abf319b` | ancestor of main | 0 | no PR | historical: `SESSION_HANDOFF.md` | `TEMPORARY_RETAIN` | Retain through the policy window. |
 | `docs/phase-7.3-repository-metadata` | local + remote | `d205f2995b6b44345fba1efffa2bb9a6db44fb10` | identical to main | 0 | no PR | historical: `docs/repository-metadata.md`; release-tag ancestor | `TEMPORARY_RETAIN` | Retain as recent governance evidence. |
-| `docs/phase-7.4-branch-retention-policy` | local only at snapshot | `d205f2995b6b44345fba1efffa2bb9a6db44fb10` | identical to main | 0 | no PR | none at initial snapshot | `RETAIN_ACTIVE_OR_RECENT` | Retain as the current audit branch. |
+| `docs/phase-7.4-branch-retention-policy` | local + remote after recheck; local only initially | `4aff4a7dea4a5d5f6c0b6349a5f02ac6918fb87b` | ahead of main | 1 | no PR | historical: this inventory after recheck | `RETAIN_ACTIVE_OR_RECENT` | Retain as the current audit branch with one expected policy commit. |
 | `feat/phase-5.3-training-entrypoint` | local + remote | `c4e48a746e6117e044f9ff3a2f234551cedbd104` | ancestor of main | 0 | no PR | historical: `SESSION_HANDOFF.md` | `TEMPORARY_RETAIN` | Retain through the policy window. |
 | `feat/phase-5.4-evaluation-inference` | local + remote | `5537a8d45e17e8c727200ae33ac4b8f1188f5d58` | ancestor of main | 0 | no PR | historical: `SESSION_HANDOFF.md` | `TEMPORARY_RETAIN` | Retain through the policy window. |
 | `fix/phase-5.5-dataset-loader-compatibility` | local + remote | `6e6a6198598625945f98cf2b642de02f46b610c5` | ancestor of main | 0 | no PR | historical: `SESSION_HANDOFF.md` | `TEMPORARY_RETAIN` | Retain through the policy window. |
@@ -46,7 +47,13 @@ Every row has exactly one classification. No remote-only branch, stale origin-tr
 
 ## Unique-Commit Appendix
 
-Only `backup/before-fruit-freshness-switch-20260729` has commits not reachable from `main`. All 15 are reachable only from that local backup branch; no tag, other local branch, or other ref contains them.
+Two branches have commits not reachable from `main`. `backup/before-fruit-freshness-switch-20260729` has 15 historical commits reachable only from that local backup branch; no tag, other local branch, or other ref contains them. The current Phase branch has one expected documentation commit, reachable only from its local and matching origin-tracking refs while the Phase remains unmerged.
+
+| Unique commit | Date | Subject | Reachable elsewhere | Recommendation |
+|---|---|---|---|---|
+| `4aff4a7dea4a5d5f6c0b6349a5f02ac6918fb87b` | 2026-08-03 | docs: define branch retention and cleanup policy | Local and origin Phase refs only | Retain as the active Phase branch. |
+
+The historical backup commits follow.
 
 | Unique commit | Date | Subject | Reachable elsewhere | Recommendation |
 |---|---|---|---|---|
@@ -81,7 +88,7 @@ No branch is a `SAFE_DELETE_CANDIDATE` in this snapshot. All fully merged Phase 
 - `main`: mandatory protected default branch.
 - `backup/before-fruit-freshness-switch-20260729`: 15 unique commits reachable only from this local backup branch.
 - `release/phase-6.5-v0.1.0`: current release-preparation and publication audit context.
-- `docs/phase-7.4-branch-retention-policy`: current Phase branch.
+- `docs/phase-7.4-branch-retention-policy`: current Phase branch with one expected unmerged policy commit.
 - All remaining fully merged modernization and governance branches: temporary retention through the conservative policy window.
 
 ## Review and Blocker List
