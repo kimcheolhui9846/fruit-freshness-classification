@@ -52,3 +52,14 @@ The protected release remains a prerelease engineering milestone. Canonical trai
 ## Live ruleset record
 
 The exact live ruleset identifier, API readback, tag/ref integrity evidence, and protected-main fast-forward evidence are added after the approved ruleset is created and verified.
+
+## Live ruleset evidence
+
+- **Phase context:** Started from `main` SHA `5ba51ecc58176e8a97f0668ee0127823256563ad` on `chore/phase-7.2-release-tag-governance`. Implementation commit `9568b2b377de4946bfcf9e17201684da6fa5bf00` passed `Repository CI` run `30745036512` on both required jobs.
+- **Ruleset:** `Protect v0.1.0` (ID `20232130`, node ID `RRS_lACqUmVwb3NpdG9yec48FxsWzgE0t8I`), source type `Repository`, target `tag`, active enforcement.
+- **Exact scope:** The include condition is only `refs/tags/v0.1.0`; exclusions are empty. The complete rule list is `deletion` and `non_fast_forward`. `bypass_actors` is an empty list, and no creation, update, status-check, signature, or future-tag rule exists.
+- **Creation and readback:** Created at `2026-08-02T20:11:35.508+09:00` and read back at `2026-08-02T20:11:35.524+09:00`. The ruleset detail and tag-target ruleset list match the approved design. The temporary payload was stored outside the repository, contained no credentials, and was removed after readback. No ruleset configuration correction was required.
+- **Immutable-tag evidence:** The tag object remains `1044e6523a501fe82f5b59667c320ee2ec59eb89`; its peeled commit remains `b38ebd36f4fa4f1fe012b957095db6dcbce20832`; its annotation remains `Fruit Freshness Classification v0.1.0 engineering milestone`.
+- **Release evidence:** The associated GitHub Release remains the published source-only prerelease engineering milestone, is not a draft, and has zero uploaded assets.
+- **Boundary verification:** `Protect main` remains the separate active branch ruleset with its Phase 7.1 rule set unchanged. No classic branch protection, broad tag rule, future-tag rule, tag movement, tag deletion, force update, destructive enforcement test, or Release mutation was performed.
+- **Next protected update:** The evidence handoff commit must pass both required checks on the Phase branch before it is fast-forwarded into protected `main` through a normal push. The known external Codex temporary-ref limitation remains untouched; GitHub SHA comparison is the fallback if a fetch fails.
