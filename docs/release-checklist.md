@@ -1,6 +1,6 @@
 # Release checklist
 
-This is a decision checklist, not evidence that a tag or GitHub Release exists. `[x]` means the Phase 6.3 audit found evidence; `[ ]` requires a later owner decision or release-time verification.
+This checklist records verified repository state through Phase 6.4. `[x]` means committed evidence exists; `[ ]` requires a later owner decision or release-time verification. It does not mean that a tag or GitHub Release exists.
 
 ## Required for an engineering milestone
 
@@ -25,22 +25,30 @@ This is a decision checklist, not evidence that a tag or GitHub Release exists. 
 
 - [x] README documents setup, configuration, training, evaluation, limitations, and CI.
 - [x] Environment, dataset, configuration, training, evaluation, reproducibility, and CI documents exist.
-- [x] Release-readiness, governance, and changelog documents exist.
+- [x] Release-readiness, governance, citation, and changelog documents exist.
 - [ ] Owner reviews the draft release notes and changelog before publication.
 
 ### Governance
 
-- [ ] Select and approve a software license.
-- [ ] Review dataset attribution, terms, and redistribution boundaries.
-- [ ] Approve citation identity and author metadata.
-- [ ] Create `CITATION.cff` only after the identity and license decisions are approved.
+- [x] Software license selected: MIT.
+- [x] Canonical `LICENSE` added.
+- [x] Copyright identity approved: 2025 김철희.
+- [x] Citation identity approved: Choelhui Kim.
+- [x] `CITATION.cff` added with repository-only metadata.
+- [x] Software, dataset, and trained-weight licensing boundaries documented.
+- [ ] Dataset attribution, terms, and redistribution approved.
+- [ ] Trained-weight redistribution approved.
 
 ### Release artifacts
 
 - [ ] Approve or defer the proposed `v0.1.0` prerelease.
+- [ ] Approve a release date.
 - [ ] Finalize the changelog entry and release notes.
 - [ ] Authorize a Git tag.
-- [ ] Authorize a GitHub Release.
+- [ ] Create a Git tag.
+- [ ] Authorize a GitHub prerelease or Release.
+- [ ] Create a GitHub prerelease or Release.
+- [ ] Create a DOI.
 
 ## Required only for a model-performance release
 
@@ -50,9 +58,8 @@ This is a decision checklist, not evidence that a tag or GitHub Release exists. 
 - [ ] Validate a benchmark-quality result with experiment provenance.
 - [ ] Decide how weights, results, and model cards will be distributed and attributed.
 
-## Explicit non-actions in Phase 6.3
+## Explicit non-actions in Phase 6.4
 
-- [x] No software license was selected or added.
-- [x] No `CITATION.cff` was created.
-- [x] No Git tag or GitHub Release was created.
+- [x] No Git tag, GitHub prerelease, GitHub Release, release date, or DOI was created.
+- [x] No dataset contents or trained weights were distributed.
 - [x] No branch-protection, ruleset, or repository-metadata setting was changed.

@@ -2,7 +2,7 @@
 
 ## Decision boundary
 
-This document is a Phase 6.3 release audit for the repository state that began at commit `be6e347328f80c423d2358c291257640a8147fd4`. It is a decision package, not a release, tag, software-license selection, citation file, or repository-settings change.
+This document began as a Phase 6.3 release audit for the repository state that began at commit `be6e347328f80c423d2358c291257640a8147fd4`. Phase 6.4 applies the explicitly approved MIT software license and repository-only citation metadata. It remains a readiness record, not a release, tag, GitHub Release, DOI, or repository-settings change.
 
 ## Candidate milestone
 
@@ -41,22 +41,21 @@ It is **not a trained-model benchmark release**. No trained weights or benchmark
 | Reproducibility | Partially verified | Clean environment and bounded real-data evidence | No independent-machine or canonical-run proof |
 | README | Verified | Public commands, limits, and links are contract-tested | None |
 | Detailed documentation | Verified | Environment through CI documents | CI checkout wording corrected in this phase |
-| Software license | Missing | No `LICENSE`, metadata declaration, or headers | Owner must select a license |
-| Citation | Pending | No `CITATION.cff`, paper, DOI, or approved authors | Owner must approve identity fields |
-| Dataset attribution | Incomplete | Source is linked; Hub metadata labels it `openrail` | Terms and attribution requirements were not surfaced by the empty dataset card |
-| Trained artifacts | Unavailable | Git excludes weights and checkpoints | Authorize canonical training before a model release |
+| Software license | Resolved | Canonical MIT `LICENSE` added in Phase 6.4 | Software/dataset boundary remains documented separately |
+| Citation | Resolved repository metadata | `CITATION.cff` identifies Choelhui Kim for repository-only citation | Version, release date, paper, and DOI remain unavailable |
+| Dataset attribution | Incomplete | Source is linked; Hub metadata labels it `openrail` | Terms, attribution, and redistribution review remain pending |
+| Trained artifacts | Unavailable | Git excludes weights and checkpoints | Distribution remains subject to separate terms review and canonical-training authorization |
 | Benchmark evidence | Unavailable | No trained benchmark artifact exists | Authorize canonical training and evaluation |
 | Release notes | Draft ready | This document and [CHANGELOG](../CHANGELOG.md) | Owner review required |
-| Versioning | Recommended only | No prior Git tags or GitHub Releases | Approve or defer a first tag |
+| Versioning | Pending | No Git tags or GitHub Releases exist | Phase 6.5 approval is required before any first tag |
 | Branch protection | Not configured | `main` is unprotected; rulesets are empty | Owner must choose workflow policy |
 | Repository metadata | Needs review | Public repository, `main`, no homepage or topics | Owner approval required for metadata edits |
 
 ## Version recommendation
 
-There are no existing Git tags or GitHub Releases. Do **not** create a tag yet. After the license decision and citation identity are approved, the appropriate first public engineering milestone is **`v0.1.0` as a prerelease**.
+There are no existing Git tags or GitHub Releases. The MIT License and repository-only citation metadata resolve repository governance, but they do not authorize a release. The appropriate first public engineering milestone remains a possible **`v0.1.0` prerelease** only after separate Phase 6.5 approval.
 
-This follows semantic-versioning intent: it marks the first user-facing, documented engineering surface without implying stable benchmark performance or a mature model distribution. A `v0.2.0` recommendation would require an earlier public milestone, which does not exist. The absence of a selected software license is a governance blocker for a public release; the candidate should remain delayed rather than tagged today.
-
+A version tag and GitHub Release remain pending. A release date, final release notes, dataset-redistribution review, trained-weight-distribution review, and model-evidence decisions remain separate blockers. The repository is not ready for a trained-model or benchmark-performance release.
 ## Draft milestone release notes
 
 > Draft only. No Git tag or GitHub Release has been created.
@@ -84,7 +83,7 @@ The repository has passed its documented cross-platform health checks. No traine
 
 ### Governance and upgrade notes
 
-A software license, citation identity, dataset-governance review, version tag, GitHub Release, and branch-protection policy remain owner decisions. There are no upgrade notes because no prior versioned release exists.
+The MIT License and repository-only citation metadata are now committed. Dataset-governance review, version tag, GitHub Release, release date, DOI, and branch-protection policy remain owner decisions. There are no upgrade notes because no prior versioned release exists.
 
 ## Branch-protection recommendations
 
@@ -114,4 +113,4 @@ The retained notebooks and continuation log contain historical machine-specific 
 
 ## Recommendation
 
-**Ready for an engineering milestone after governance approval.** It is suitable for private portfolio review now and may become a public prerelease after the owner selects a software license, approves citation identity, and reviews the dataset governance risk. It is not ready for a trained-model or benchmark-performance release.
+**Eligible for Phase 6.5 engineering-milestone approval review.** MIT licensing and repository citation identity are resolved, but a version tag, release policy/date, final notes, dataset redistribution review, and trained-weight distribution review remain pending. It is not ready for a trained-model or benchmark-performance release.

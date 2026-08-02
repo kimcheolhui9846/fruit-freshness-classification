@@ -1,75 +1,68 @@
 # Governance decisions
 
-This package records owner decisions that are still required. It is informational only and is not legal advice. No repository license has been selected or added in Phase 6.3. No citation file has been created.
+This document records the Phase 6.3 audit history and the owner-approved governance decisions applied in Phase 6.4. It is informational only and is not legal advice.
 
-## Software license decision
+## Resolved software license
 
-No `LICENSE` file, repository license metadata, source-file license header, notebook license statement, or package license declaration was found in the audit.
+MIT was explicitly selected during Phase 6.4. The repository did not contain a software license before this explicit decision; this is a new licensing decision, not a restoration claim.
 
-| Option | High-level fit | Main tradeoff |
-|---|---|---|
-| MIT | Permissive reuse with minimal conditions; preserves attribution and license notice | No explicit patent grant |
-| Apache-2.0 | Permissive reuse with an explicit patent grant and notice requirements | More notice and license text requirements |
-| GPL-3.0 | Reciprocal open-source distribution terms | Derivative distribution has stronger copyleft obligations |
+| Item | Approved value |
+|---|---|
+| Software license | MIT |
+| SPDX identifier | MIT |
+| Copyright year | 2025 |
+| Copyright holder | 김철희 |
+| Canonical file | [`LICENSE`](../LICENSE) |
 
-The owner should decide:
+The repository software and project-authored documentation are licensed under the MIT License. The canonical file uses the approved copyright line `Copyright (c) 2025 김철희` and unmodified MIT terms. This software license does not determine the terms of the external dataset or any future trained-weight distribution.
 
-1. Should commercial reuse be allowed?
-2. Should derivative works remain open source?
-3. Is an explicit patent grant desired?
-4. Are there third-party code obligations?
-5. Is the dataset license compatible with the selected project license?
+## Dataset and trained-weight governance
 
-A license choice must be reviewed against the project dependencies, any future code contributions, the dataset source, and planned model-weight distribution. This document does not determine that compatibility.
-
-## Dataset governance and attribution
-
-| Item | Audit result |
+| Item | Current boundary |
 |---|---|
 | Dataset | [`Densu341/Fresh-rotten-fruit`](https://huggingface.co/datasets/Densu341/Fresh-rotten-fruit) |
 | Dataset owner | `Densu341` |
 | Public page metadata | Labeled `openrail` in the Hugging Face page/search metadata reviewed during the audit |
 | Dataset-card content | The surfaced dataset-card README was empty |
-| Access | Publicly accessible through the linked Hugging Face repository at audit time |
-| Attribution instructions | Not surfaced in the reviewed card content |
-| Redistribution permission | Not determined from the surfaced card content |
-| Repository data policy | Dataset archives, extracted images, and caches are not committed |
-| Weight implications | Future trained-weight distribution needs a separate terms review |
+| Dataset terms | Governed by the terms supplied by the original external source |
+| Dataset redistribution | Dataset contents are not redistributed through this repository |
+| Weight distribution | Trained weights are not currently distributed and require a separate review before publication |
 
-The Hugging Face page itself should remain the attribution and access reference. Because detailed license text, attribution instructions, and redistribution terms were not available in the card content surfaced during this audit, the repository must not claim project-license compatibility or redistribution permission. Link to the source, keep data out of Git, and obtain owner review before distributing data-derived artifacts.
+The MIT License applies to repository software and project-authored documentation only. The repository does not claim that the external dataset metadata is compatible with MIT, permission to redistribute external images, or automatic permission to distribute future trained weights. See the [dataset documentation](dataset.md) for dataset identity, source revision, and project data-handling boundaries.
 
-## Citation decision
+## Resolved repository-only citation
 
-| Citation input | Audit result |
+Repository-only citation was explicitly selected during Phase 6.4. [`CITATION.cff`](../CITATION.cff) contains truthful software metadata without claiming a paper, DOI, release, or artifact distribution.
+
+| Citation input | Approved value |
 |---|---|
-| Preferred project title | `Fruit Freshness Classification` |
-| Canonical repository URL | `https://github.com/kimcheolhui9846/fruit-freshness-classification` |
-| Paper | None found |
-| DOI | None found |
-| Approved author list | Not supplied |
-| Institution or affiliation | Not supplied |
-| Versioned release | None; no tag or GitHub Release exists |
-| Release date | Not applicable until a release is approved |
-| Software license | Not selected |
+| Project title | `Fruit Freshness Classification` |
+| Citation policy | Repository-only citation |
+| Citation author | Choelhui Kim |
+| Given names | `Choelhui` |
+| Family names | `Kim` |
+| Author email | Omitted by owner decision |
+| Author affiliation | Omitted |
+| Author ORCID | Omitted |
+| Additional authors | None |
+| Repository URL | `https://github.com/kimcheolhui9846/fruit-freshness-classification` |
+| Citation license | MIT |
+| Citation version and release date | Deferred to Phase 6.5 |
+| Paper and DOI | Unavailable |
 
-`CITATION.cff` remains pending owner-approved author and licensing information.
+No version, release date, DOI, paper citation, affiliation, ORCID, additional author, or email field was added to `CITATION.cff`. A future versioned release may update citation metadata only with separate Phase 6.5 authorization.
 
-### Citation paths to consider later
+## Remaining release and repository decisions
 
-- **Repository citation only:** suitable before a paper or DOI exists. It will need an approved title, authors, repository URL, version, release date, and license.
-- **Paper citation:** use only when an actual paper exists.
-- **Zenodo DOI integration:** optional later archival work after a release and citation identity are approved.
-
-Do not invent an author, affiliation, ORCID, paper, DOI, version, or release date.
-
-## Release and branch-governance decisions
-
-| Decision | Current recommendation | Owner action needed |
+| Decision | Current state | Owner action needed |
 |---|---|---|
-| First version | Delay a tag; later consider `v0.1.0` prerelease for the engineering milestone | Approve or defer |
-| GitHub Release | Do not publish yet | Approve only after governance review |
-| Branch protection | Recommend PRs, current CI, no force pushes, no deletion, and up-to-date branches | Choose tradeoff for solo workflow |
-| Repository metadata | Improve description and consider topics | Approve exact wording/topics |
-| Canonical training | Keep outside release scope unless separately authorized | Approve hardware/time/artifact plan |
+| Version tag | Pending; no tag exists | Approve or defer the proposed `v0.1.0` engineering milestone |
+| GitHub Release | Pending; no Release exists | Approve prerelease or normal-release policy and final notes |
+| Release date | Pending | Approve only with a release action |
+| Dataset redistribution | Pending source-terms review | Confirm attribution and redistribution boundary |
+| Trained-weight distribution | Pending separate review | Confirm applicable terms before publication |
+| Branch protection | Not configured | Choose the solo-workflow tradeoff separately |
+| Repository metadata | Unchanged | Approve exact wording/topics separately |
+| Canonical training | Not run | Authorize hardware, time, and artifact plan separately |
 
-No branch protection, ruleset, repository metadata, tag, or GitHub Release was changed in Phase 6.3. See [release readiness](release-readiness.md) and the [release checklist](release-checklist.md) for the operational decision boundaries.
+No Git tag, GitHub Release, repository setting, branch protection, ruleset, DOI, dataset copy, or trained weight was created in Phase 6.4.

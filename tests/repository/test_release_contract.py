@@ -41,26 +41,29 @@ class ReleaseDocumentationContractTests(unittest.TestCase):
         self.assertNotIn("0.097356", self.combined)
         self.assertNotIn("523/5,372", self.combined)
 
-    def test_license_and_citation_remain_pending(self) -> None:
+    def test_governance_is_resolved_without_authorizing_a_release(self) -> None:
         governance = self.contents[self.governance]
         checklist = self.contents[self.release_checklist]
-        self.assertIn("No repository license has been selected or added in Phase 6.3.", governance)
-        self.assertRegex(governance, r"`?CITATION\.cff`? remains pending")
-        self.assertIn("No `CITATION.cff` was created.", checklist)
-        self.assertIn("No software license was selected or added.", checklist)
+        readiness = self.contents[self.release_readiness]
+        self.assertIn("MIT was explicitly selected during Phase 6.4.", governance)
+        self.assertIn("Repository-only citation", governance)
+        self.assertIn("`CITATION.cff`", governance)
+        self.assertIn("[x] Canonical `LICENSE` added.", checklist)
+        self.assertIn("[x] `CITATION.cff` added with repository-only metadata.", checklist)
+        self.assertIn("A version tag and GitHub Release remain pending.", readiness)
 
     def test_no_version_is_presented_as_released(self) -> None:
         changelog = self.contents[self.changelog]
         self.assertIn("## Unreleased", changelog)
         self.assertNotRegex(changelog, r"(?m)^##\s+v?\d+\.\d+\.\d+")
-        self.assertIn("Do **not** create a tag yet.", self.contents[self.release_readiness])
+        self.assertIn("No tag or GitHub Release has been created.", changelog)
 
     def test_governance_recommendations_are_explicitly_non_operational(self) -> None:
         readiness = self.contents[self.release_readiness]
         governance = self.contents[self.governance]
         self.assertIn("Recommendations only; no branch protection or ruleset changes were made.", readiness)
-        self.assertIn("No branch protection, ruleset, repository metadata, tag, or GitHub Release was changed", governance)
-        self.assertIn("No Git tag or GitHub Release was created.", self.contents[self.release_checklist])
+        self.assertIn("No Git tag, GitHub Release, repository setting, branch protection, ruleset", governance)
+        self.assertIn("No branch-protection, ruleset, or repository-metadata setting was changed.", self.contents[self.release_checklist])
 
     def test_release_links_resolve(self) -> None:
         for path, content in self.contents.items():

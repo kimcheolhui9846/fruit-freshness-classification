@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata in this file."
+title: "Fruit Freshness Classification"
+type: software
+authors:
+  - given-names: "Choelhui"
+    family-names: "Kim"
+repository-code: "https://github.com/kimcheolhui9846/fruit-freshness-classification"
+license: MIT

@@ -4,6 +4,8 @@
 
 ### Added
 
+- Canonical MIT software license and repository-only citation metadata.
+
 - Modular `src/` architecture for the dataset, transforms, model, losses, training engine, evaluation, inference, and utilities.
 - Version-controlled `configs/deep3.toml` experiment configuration.
 - Training and labeled-holdout evaluation CLI entry points.
@@ -11,6 +13,8 @@
 - Portfolio-oriented README, detailed operation documents, release-readiness audit, governance decision package, and release checklist.
 
 ### Changed
+
+- Governance documentation now records approved MIT software-license and repository-only citation decisions; release readiness distinguishes these resolved repository decisions from pending release authorization.
 
 - The active `deep3.ipynb` notebook delegates reusable implementation to modular source APIs while retaining orchestration and presentation.
 - CI now checks out the complete repository history so the existing historical architecture-parity test can access its fixed baseline.
@@ -28,5 +32,5 @@
 
 - Canonical three-fold training, trained-checkpoint evaluation, benchmark reproduction, full notebook execution, and independent-machine reproduction have not been completed.
 - No trained weights or benchmark-quality metrics are distributed.
-- Software license and citation identity decisions are pending.
+- Dataset attribution and redistribution, trained-weight distribution, release authorization, release date, and DOI decisions remain pending.
 - No tag or GitHub Release has been created.

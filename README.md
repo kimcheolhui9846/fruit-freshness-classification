@@ -176,6 +176,14 @@ The temporary compatibility-checkpoint holdout measurement is an interoperabilit
 - CI is CPU-only and offline; it does not test CUDA, production loading, training, or real holdout evaluation.
 - The configured batch size may be constrained by available GPU memory.
 
+## License
+
+The repository software and project-authored documentation are licensed under the MIT [LICENSE](LICENSE). The external Hugging Face dataset is governed separately by its original source terms; see the [dataset documentation](docs/dataset.md). Dataset files are not included in this repository.
+
+## Citation
+
+Repository-only citation metadata is available in [CITATION.cff](CITATION.cff). The approved repository author is Choelhui Kim. No DOI, paper citation, or released software version is claimed.
+
 ## Documentation
 
 | Document | Purpose |
@@ -193,4 +201,4 @@ The temporary compatibility-checkpoint holdout measurement is an interoperabilit
 
 ## Contribution boundary
 
-Use feature branches, run the full unittest suite, and keep production artifacts out of Git. Repository license and citation policy have not yet been selected; dataset terms remain available through the dataset documentation.
+Use feature branches, run the full unittest suite, and keep production artifacts out of Git. Repository software and project-authored documentation are licensed under the MIT [LICENSE](LICENSE). Repository citation metadata is available in [CITATION.cff](CITATION.cff); dataset terms remain available through the [dataset documentation](docs/dataset.md).
