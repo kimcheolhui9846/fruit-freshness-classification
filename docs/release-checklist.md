@@ -1,6 +1,6 @@
 # Release checklist
 
-This checklist records the authorized Phase 6.5 engineering-milestone preparation state. `[x]` means the documented prerequisite or approval exists; `[ ]` marks a release action or model-performance requirement that is still incomplete at this document-edit time.
+This checklist records the published Phase 6.5 engineering milestone. `[x]` means a documented prerequisite or external publication action is complete; `[ ]` marks a model-performance requirement that remains incomplete.
 
 ## Approved release identity
 
@@ -37,11 +37,12 @@ This checklist records the authorized Phase 6.5 engineering-milestone preparatio
 
 ## External publication actions
 
-- [ ] Final release-branch CI passes on Windows and Ubuntu.
-- [ ] Annotated Git tag created.
-- [ ] Tag pushed.
-- [ ] GitHub prerelease created.
-- [ ] GitHub prerelease verified.
+- [x] Final release-branch CI passed on Windows and Ubuntu.
+- [x] Annotated Git tag created.
+- [x] Tag pushed.
+- [x] GitHub prerelease created.
+- [x] GitHub prerelease verified.
+- [x] Tagged main CI run 30738724706 passed on Windows and Ubuntu.
 
 ## Required only for a model-performance release
 
@@ -51,8 +52,11 @@ This checklist records the authorized Phase 6.5 engineering-milestone preparatio
 - [ ] Benchmark result validated.
 - [ ] Weight, result, and model-card distribution governance approved.
 
-## Explicit non-actions in Phase 6.5 preparation
+## Publication evidence and non-actions
 
-- [x] No tag or GitHub Release has been created at this document-edit time.
-- [x] No dataset contents, trained weights, checkpoints, or binary artifacts were attached.
+- [x] Annotated tag `v0.1.0` was pushed and peels to the CI-verified release commit.
+- [x] GitHub prerelease was published from the committed release notes and verified with no uploaded assets.
+- [x] Historical pre-publication state is retained for audit: before external actions, `[ ] Annotated Git tag created.` and `[ ] GitHub prerelease created.` were intentionally pending.
+- [x] No dataset contents, trained weights, checkpoints, caches, environments, logs, or manually uploaded binary artifacts were attached.
+- [x] GitHub source archives, when offered by the platform, are platform-generated defaults rather than manual uploads.
 - [x] No branch-protection, ruleset, or repository-metadata setting was changed. No DOI was created.

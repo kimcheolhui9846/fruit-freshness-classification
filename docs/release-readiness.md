@@ -24,8 +24,28 @@ Authorized release target: `v0.1.0`.
 Approved release type: `PRERELEASE`.
 Approved release date: `2026-08-02`.
 
-At this document-edit time, the annotated tag and GitHub Release are authorized but have not yet been created. The release will be published only after the release branch and merged `main` pass their required Windows and Ubuntu CI checks.
+The authorization was recorded before the external actions. After the release branch and merged main passed their required Windows and Ubuntu CI checks, the approved prerelease was published with the evidence below.
 
+## Publication record
+
+Release status: **published engineering milestone**.
+
+| Publication evidence | Verified value |
+|---|---|
+| Release commit | `b38ebd36f4fa4f1fe012b957095db6dcbce20832` |
+| Annotated tag object | `1044e6523a501fe82f5b59667c320ee2ec59eb89` |
+| Peeled tag commit | `b38ebd36f4fa4f1fe012b957095db6dcbce20832` |
+| Tag verification | Local and remote annotated tag verification passed; the tag message matches the owner approval |
+| Tag push | Only `v0.1.0` was pushed |
+| GitHub Release | [https://github.com/kimcheolhui9846/fruit-freshness-classification/releases/tag/v0.1.0](https://github.com/kimcheolhui9846/fruit-freshness-classification/releases/tag/v0.1.0) |
+| Publication timestamp | `2026-08-02T08:00:52Z` |
+| Release state | Prerelease, published, and not draft |
+| Uploaded assets | None |
+| Dataset, weights, and checkpoints | Not attached or redistributed |
+| Main CI at tag target | Run `30738724706` passed on Windows and Ubuntu |
+| Source archives | GitHub platform-generated source archives only; no manual archive upload |
+
+The `v0.1.0` tag remains on the verified release commit. A later documentation-only publication record may advance `main`, but it must not move the tag.
 ## Candidate milestone
 
 The truthful candidate is an **engineering and reproducibility milestone**: a modular PyTorch research repository with a committed experiment configuration, production dataset compatibility, thin training and holdout-evaluation CLIs, reproducibility evidence, and cross-platform repository CI.
@@ -68,7 +88,7 @@ It is **not a trained-model benchmark release**. No trained weights or benchmark
 | Trained artifacts | Unavailable | Git excludes weights and checkpoints | Distribution remains subject to separate review and canonical-training authorization |
 | Benchmark evidence | Unavailable | No trained benchmark artifact exists | Canonical training and evaluation remain deferred |
 | Release notes | Finalized | [`docs/releases/v0.1.0.md`](releases/v0.1.0.md) | Must remain truthful at publication |
-| Versioning | Authorized | Owner-approved `v0.1.0` prerelease | Tag and GitHub Release not yet created at document-edit time |
+| Versioning | Published engineering milestone | `v0.1.0` annotated prerelease | Tag points to the CI-verified release commit |
 | Branch protection | Deferred | `main` is unprotected; rulesets are empty | Separate owner decision |
 | Repository metadata | Unchanged | Public repository, `main`, no homepage or topics | Separate owner decision |
 
@@ -106,4 +126,4 @@ The retained notebooks and continuation log contain historical machine-specific 
 
 ## Release decision
 
-The owner explicitly authorized `v0.1.0` as a prerelease engineering milestone dated `2026-08-02`. This authorization applies to source code and documentation only. Dataset redistribution, trained-weight distribution, branch protection, canonical training, a model-performance release, and a DOI remain separate decisions.
+The owner explicitly authorized `v0.1.0` as a prerelease engineering milestone dated `2026-08-02`, and the source-only prerelease was published with the verified evidence above. Dataset redistribution, trained-weight distribution, branch protection, canonical training, a model-performance release, and a DOI remain separate decisions.
