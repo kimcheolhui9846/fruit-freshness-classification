@@ -2,7 +2,29 @@
 
 ## Decision boundary
 
-This document began as a Phase 6.3 release audit for the repository state that began at commit `be6e347328f80c423d2358c291257640a8147fd4`. Phase 6.4 applies the explicitly approved MIT software license and repository-only citation metadata. It remains a readiness record, not a release, tag, GitHub Release, DOI, or repository-settings change.
+This document began as a Phase 6.3 release audit for the repository state that began at commit `be6e347328f80c423d2358c291257640a8147fd4`. Phase 6.4 applied the explicitly approved MIT software license and repository-only citation metadata. Phase 6.5 records the owner-authorized first engineering release preparation; this document is not itself a Git tag, GitHub Release, DOI, or repository-settings change.
+
+The release is an engineering and reproducibility milestone, not a trained-model benchmark release. No trained weights or benchmark-quality metrics are included.
+
+## Phase 6.5 release authorization
+
+| Approval | Value |
+|---|---|
+| Authorized release target | `v0.1.0` |
+| Approved release type | `PRERELEASE` |
+| Approved release date | `2026-08-02` |
+| Approved release title | `Fruit Freshness Classification v0.1.0 — Engineering Milestone` |
+| Release-note source | Phase 6.3 draft finalized as [`docs/releases/v0.1.0.md`](releases/v0.1.0.md) |
+| Tag type | Annotated |
+| Artifact attachment policy | No dataset, trained weights, checkpoints, or other binary artifacts |
+| Branch protection | Deferred |
+| Canonical training | Deferred |
+
+Authorized release target: `v0.1.0`.
+Approved release type: `PRERELEASE`.
+Approved release date: `2026-08-02`.
+
+At this document-edit time, the annotated tag and GitHub Release are authorized but have not yet been created. The release will be published only after the release branch and merged `main` pass their required Windows and Ubuntu CI checks.
 
 ## Candidate milestone
 
@@ -16,7 +38,7 @@ It is **not a trained-model benchmark release**. No trained weights or benchmark
 - A committed TOML experiment contract shared by `deep3.ipynb`, `python -m scripts.train`, and `python -m scripts.evaluate`.
 - Fixed-revision Hugging Face archive loading with safe managed extraction and explicit ImageFolder handling.
 - Clean-environment installation evidence, real-data CUDA CMT smoke coverage, checkpoint interoperability, and full-holdout evaluation-path execution with untrained compatibility fixtures.
-- Offline Windows and Ubuntu CPU CI, currently passing 136 tests per runner with five intentional CUDA-only skips.
+- Offline Windows and Ubuntu CPU CI, currently passing 148 tests per runner with five intentional CUDA-only skips.
 - Portfolio-oriented [README](../README.md) and detailed usage documentation.
 
 ### Unverified or unavailable capabilities
@@ -28,62 +50,33 @@ It is **not a trained-model benchmark release**. No trained weights or benchmark
 
 ## Release-readiness matrix
 
-| Area | Status | Evidence | Blocker or required decision |
+| Area | Status | Evidence | Boundary |
 |---|---|---|---|
 | Source architecture | Verified | Modular packages and parity/integration tests | None for an engineering milestone |
 | Configuration | Verified | Committed `configs/deep3.toml` and loader tests | None |
 | Dependencies | Verified boundary | Exact direct pins and clean-environment evidence | Other Python versions are not independently verified |
-| Dataset loading | Verified | Fixed archive, safe extraction, counts, and loader tests | Dataset governance review remains required |
+| Dataset loading | Verified | Fixed archive, safe extraction, counts, and loader tests | Dataset governance remains separate |
 | Training CLI | Available | Parser, orchestration, and checkpoint-policy tests | Canonical training not run |
 | Evaluation CLI | Available | Complete-fold validation and real holdout-path evidence | Only untrained compatibility fixtures were evaluated |
-| Tests | Verified | Local full suite and repository contracts | Re-run before any release action |
-| CI | Verified | Windows/Ubuntu CPU run `30696266143` | CPU/offline health gate only |
+| Tests | Verified | Local full suite and repository contracts | Re-run at the final release commits |
+| CI | Verified | Windows/Ubuntu CPU run `30733985992` | CPU/offline health gate only |
 | Reproducibility | Partially verified | Clean environment and bounded real-data evidence | No independent-machine or canonical-run proof |
-| README | Verified | Public commands, limits, and links are contract-tested | None |
-| Detailed documentation | Verified | Environment through CI documents | CI checkout wording corrected in this phase |
-| Software license | Resolved | Canonical MIT `LICENSE` added in Phase 6.4 | Software/dataset boundary remains documented separately |
-| Citation | Resolved repository metadata | `CITATION.cff` identifies Choelhui Kim for repository-only citation | Version, release date, paper, and DOI remain unavailable |
-| Dataset attribution | Incomplete | Source is linked; Hub metadata labels it `openrail` | Terms, attribution, and redistribution review remain pending |
-| Trained artifacts | Unavailable | Git excludes weights and checkpoints | Distribution remains subject to separate terms review and canonical-training authorization |
-| Benchmark evidence | Unavailable | No trained benchmark artifact exists | Authorize canonical training and evaluation |
-| Release notes | Draft ready | This document and [CHANGELOG](../CHANGELOG.md) | Owner review required |
-| Versioning | Pending | No Git tags or GitHub Releases exist | Phase 6.5 approval is required before any first tag |
-| Branch protection | Not configured | `main` is unprotected; rulesets are empty | Owner must choose workflow policy |
-| Repository metadata | Needs review | Public repository, `main`, no homepage or topics | Owner approval required for metadata edits |
+| README and detailed docs | Verified | Public commands, limits, and links are contract-tested | None |
+| Software license | Resolved | Canonical MIT `LICENSE` | Software/dataset boundary remains separate |
+| Citation | Resolved repository metadata | `CITATION.cff` identifies Choelhui Kim | No DOI, paper, or release metadata claim |
+| Dataset attribution | Incomplete | Source is linked; public metadata labels it `openrail` | Terms, attribution, and redistribution review remain pending |
+| Trained artifacts | Unavailable | Git excludes weights and checkpoints | Distribution remains subject to separate review and canonical-training authorization |
+| Benchmark evidence | Unavailable | No trained benchmark artifact exists | Canonical training and evaluation remain deferred |
+| Release notes | Finalized | [`docs/releases/v0.1.0.md`](releases/v0.1.0.md) | Must remain truthful at publication |
+| Versioning | Authorized | Owner-approved `v0.1.0` prerelease | Tag and GitHub Release not yet created at document-edit time |
+| Branch protection | Deferred | `main` is unprotected; rulesets are empty | Separate owner decision |
+| Repository metadata | Unchanged | Public repository, `main`, no homepage or topics | Separate owner decision |
 
-## Version recommendation
+## Approved release target
 
-There are no existing Git tags or GitHub Releases. The MIT License and repository-only citation metadata resolve repository governance, but they do not authorize a release. The appropriate first public engineering milestone remains a possible **`v0.1.0` prerelease** only after separate Phase 6.5 approval.
+`v0.1.0` is the first authorized public engineering milestone. It uses the approved prerelease type and release date above. The finalized release notes preserve the Phase 6.3 draft's scope: modular research code, shared configuration, training and labeled-holdout evaluation commands, fixed-revision dataset compatibility, bounded reproducibility evidence, Windows/Ubuntu CPU CI, MIT licensing, and repository-only citation metadata.
 
-A version tag and GitHub Release remain pending. A release date, final release notes, dataset-redistribution review, trained-weight-distribution review, and model-evidence decisions remain separate blockers. The repository is not ready for a trained-model or benchmark-performance release.
-## Draft milestone release notes
-
-> Draft only. No Git tag or GitHub Release has been created.
-
-### Summary
-
-This milestone packages the repository as a reproducible engineering baseline for fresh/rotten fruit classification research.
-
-### Included
-
-- Modular research code and a shared TOML experiment configuration.
-- Training and labeled-holdout evaluation commands:
-
-```powershell
-python -m scripts.train --config configs/deep3.toml --output-dir weights
-python -m scripts.evaluate --config configs/deep3.toml --checkpoint-dir weights
-```
-
-- Fixed-revision Hugging Face dataset compatibility, clean-environment evidence, real-data CUDA smoke coverage, checkpoint interoperability, and Windows/Ubuntu CPU CI.
-- Installation instructions in [environment documentation](environment.md) and operational details in [training](training.md) and [evaluation](evaluation.md).
-
-### Verification and limits
-
-The repository has passed its documented cross-platform health checks. No trained weights or benchmark-quality metrics are included. Canonical training, trained-checkpoint evaluation, benchmark reproduction, full notebook execution, and independent-machine verification remain outside this milestone.
-
-### Governance and upgrade notes
-
-The MIT License and repository-only citation metadata are now committed. Dataset-governance review, version tag, GitHub Release, release date, DOI, and branch-protection policy remain owner decisions. There are no upgrade notes because no prior versioned release exists.
+There is no prior versioned release, so no upgrade path or previous-version comparison is claimed. The external dataset is not redistributed; trained weights remain unavailable and excluded. Canonical training, trained-checkpoint evaluation, benchmark reproduction, full notebook execution, and independent-machine verification remain incomplete.
 
 ## Branch-protection recommendations
 
@@ -111,6 +104,6 @@ The current tree and normal local/origin branch history contain no tracked datas
 
 The retained notebooks and continuation log contain historical machine-specific path literals. The portable CLI entry points do not use those literals, but the notebook path is a reproducibility risk and should not be presented as a portable notebook workflow until a separately authorized behavior-preserving migration is completed. No history rewrite is recommended.
 
-## Recommendation
+## Release decision
 
-**Eligible for Phase 6.5 engineering-milestone approval review.** MIT licensing and repository citation identity are resolved, but a version tag, release policy/date, final notes, dataset redistribution review, and trained-weight distribution review remain pending. It is not ready for a trained-model or benchmark-performance release.
+The owner explicitly authorized `v0.1.0` as a prerelease engineering milestone dated `2026-08-02`. This authorization applies to source code and documentation only. Dataset redistribution, trained-weight distribution, branch protection, canonical training, a model-performance release, and a DOI remain separate decisions.

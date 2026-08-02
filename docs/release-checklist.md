@@ -1,65 +1,58 @@
 # Release checklist
 
-This checklist records verified repository state through Phase 6.4. `[x]` means committed evidence exists; `[ ]` requires a later owner decision or release-time verification. It does not mean that a tag or GitHub Release exists.
+This checklist records the authorized Phase 6.5 engineering-milestone preparation state. `[x]` means the documented prerequisite or approval exists; `[ ]` marks a release action or model-performance requirement that is still incomplete at this document-edit time.
 
-## Required for an engineering milestone
+## Approved release identity
 
-### Repository state
+- [x] Approved version tag: `v0.1.0`.
+- [x] Approved release type: `PRERELEASE`.
+- [x] Approved release date: `2026-08-02`.
+- [x] Approved title: `Fruit Freshness Classification v0.1.0 — Engineering Milestone`.
+- [x] Approved annotated tag message: `Fruit Freshness Classification v0.1.0 engineering milestone`.
+- [x] Approved final notes use the Phase 6.3 draft as their source.
+- [x] Engineering-milestone scope is distinguished from a model-performance release.
+
+## Repository state
 
 - [x] Phase branches are retained for audit.
 - [x] Generated datasets, caches, checkpoints, weights, and virtual environments are excluded from Git.
 - [x] Protected nested repository content is not tracked by this repository.
-- [ ] Reconfirm a clean, synchronized `main` immediately before any tag or GitHub Release action.
-- [ ] Reconfirm local, `origin/main`, and GitHub `main` resolve to the same release candidate SHA.
-
-### Code and tests
-
-- [x] Full local `unittest` validation was completed for the audited commit.
-- [x] Windows CPU CI passed.
-- [x] Ubuntu CPU CI passed.
-- [x] `compileall` and both CLI help paths passed.
-- [x] CI repository-cleanliness checks passed.
-- [ ] Re-run the full suite and CI at the final proposed release SHA.
-
-### Documentation
-
-- [x] README documents setup, configuration, training, evaluation, limitations, and CI.
-- [x] Environment, dataset, configuration, training, evaluation, reproducibility, and CI documents exist.
-- [x] Release-readiness, governance, citation, and changelog documents exist.
-- [ ] Owner reviews the draft release notes and changelog before publication.
-
-### Governance
-
-- [x] Software license selected: MIT.
+- [x] Starting local `main`, `origin/main`, and GitHub `main` were verified at the Phase 6.4 SHA.
+- [x] Windows CPU CI passed for the starting `main` candidate.
+- [x] Ubuntu CPU CI passed for the starting `main` candidate.
+- [x] README, changelog, release-readiness audit, governance documentation, and release checklist were reviewed.
 - [x] Canonical `LICENSE` added.
-- [x] Copyright identity approved: 2025 김철희.
-- [x] Citation identity approved: Choelhui Kim.
 - [x] `CITATION.cff` added with repository-only metadata.
-- [x] Software, dataset, and trained-weight licensing boundaries documented.
-- [ ] Dataset attribution, terms, and redistribution approved.
-- [ ] Trained-weight redistribution approved.
+- [x] MIT `LICENSE` and repository-only `CITATION.cff` are present.
+- [x] Release documentation and offline release-publication contracts are prepared.
 
-### Release artifacts
+## Artifact policy
 
-- [ ] Approve or defer the proposed `v0.1.0` prerelease.
-- [ ] Approve a release date.
-- [ ] Finalize the changelog entry and release notes.
-- [ ] Authorize a Git tag.
-- [ ] Create a Git tag.
-- [ ] Authorize a GitHub prerelease or Release.
-- [ ] Create a GitHub prerelease or Release.
-- [ ] Create a DOI.
+- [x] No dataset attachment is authorized.
+- [x] No trained-weight attachment is authorized.
+- [x] No checkpoint attachment is authorized.
+- [x] No cache, environment, log, or other binary artifact attachment is authorized.
+- [x] Dataset redistribution remains excluded.
+- [x] Trained-weight distribution remains excluded.
+
+## External publication actions
+
+- [ ] Final release-branch CI passes on Windows and Ubuntu.
+- [ ] Annotated Git tag created.
+- [ ] Tag pushed.
+- [ ] GitHub prerelease created.
+- [ ] GitHub prerelease verified.
 
 ## Required only for a model-performance release
 
-- [ ] Complete the canonical three-fold training run.
-- [ ] Produce traceable trained fold checkpoints outside Git or through an approved distribution channel.
-- [ ] Reproduce trained-checkpoint holdout evaluation.
-- [ ] Validate a benchmark-quality result with experiment provenance.
-- [ ] Decide how weights, results, and model cards will be distributed and attributed.
+- [ ] Canonical training completed.
+- [ ] Trained checkpoints produced.
+- [ ] Trained evaluation reproduced.
+- [ ] Benchmark result validated.
+- [ ] Weight, result, and model-card distribution governance approved.
 
-## Explicit non-actions in Phase 6.4
+## Explicit non-actions in Phase 6.5 preparation
 
-- [x] No Git tag, GitHub prerelease, GitHub Release, release date, or DOI was created.
-- [x] No dataset contents or trained weights were distributed.
-- [x] No branch-protection, ruleset, or repository-metadata setting was changed.
+- [x] No tag or GitHub Release has been created at this document-edit time.
+- [x] No dataset contents, trained weights, checkpoints, or binary artifacts were attached.
+- [x] No branch-protection, ruleset, or repository-metadata setting was changed. No DOI was created.

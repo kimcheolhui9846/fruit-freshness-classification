@@ -86,9 +86,9 @@ class GovernanceMetadataContractTests(unittest.TestCase):
         self.assertIn("Choelhui Kim", self.governance)
         self.assertIn("Dataset contents are not redistributed through this repository", self.governance)
         self.assertIn("Trained weights are not currently distributed", self.governance)
-        self.assertIn("A version tag and GitHub Release remain pending.", self.readiness)
-        self.assertIn("[ ] Create a Git tag.", self.checklist)
-        self.assertIn("[ ] Create a GitHub prerelease or Release.", self.checklist)
+        self.assertIn("Authorized release target: `v0.1.0`", self.readiness)
+        self.assertIn("[ ] Annotated Git tag created.", self.checklist)
+        self.assertIn("[ ] GitHub prerelease created.", self.checklist)
         self.assertIn("Canonical three-fold training has not been run.", self.readiness)
         self.assertIn("No trained weights or benchmark-quality metrics are distributed.", self.changelog)
 

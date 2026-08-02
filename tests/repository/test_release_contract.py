@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 class ReleaseDocumentationContractTests(unittest.TestCase):
-    """Keep release materials truthful before a future owner-approved release."""
+    """Keep release materials truthful across approved engineering-milestone preparation and publication."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -41,7 +41,7 @@ class ReleaseDocumentationContractTests(unittest.TestCase):
         self.assertNotIn("0.097356", self.combined)
         self.assertNotIn("523/5,372", self.combined)
 
-    def test_governance_is_resolved_without_authorizing_a_release(self) -> None:
+    def test_governance_and_release_authorization_are_truthful(self) -> None:
         governance = self.contents[self.governance]
         checklist = self.contents[self.release_checklist]
         readiness = self.contents[self.release_readiness]
@@ -50,13 +50,13 @@ class ReleaseDocumentationContractTests(unittest.TestCase):
         self.assertIn("`CITATION.cff`", governance)
         self.assertIn("[x] Canonical `LICENSE` added.", checklist)
         self.assertIn("[x] `CITATION.cff` added with repository-only metadata.", checklist)
-        self.assertIn("A version tag and GitHub Release remain pending.", readiness)
+        self.assertIn("Authorized release target: `v0.1.0`", readiness)
 
-    def test_no_version_is_presented_as_released(self) -> None:
+    def test_versioned_changelog_preserves_truthful_model_boundaries(self) -> None:
         changelog = self.contents[self.changelog]
-        self.assertIn("## Unreleased", changelog)
-        self.assertNotRegex(changelog, r"(?m)^##\s+v?\d+\.\d+\.\d+")
-        self.assertIn("No tag or GitHub Release has been created.", changelog)
+        self.assertIn("## [Unreleased]", changelog)
+        self.assertIn("## [0.1.0] - 2026-08-02", changelog)
+        self.assertIn("No trained weights or benchmark-quality metrics are distributed.", changelog)
 
     def test_governance_recommendations_are_explicitly_non_operational(self) -> None:
         readiness = self.contents[self.release_readiness]
