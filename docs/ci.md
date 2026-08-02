@@ -35,7 +35,7 @@ Validation steps set `HF_HUB_OFFLINE=1`, `HF_DATASETS_OFFLINE=1`, and `MPLBACKEN
 
 ## Supply-Chain and Permission Policy
 
-Workflow permissions are restricted to `contents: read`. `actions/checkout` and `actions/setup-python` are official Actions pinned to immutable full commit SHAs, with their reviewed release tags recorded inline. Checkout fetches a depth of 32: enough for the committed historical parity baselines (currently at most 29 commits behind the Phase 6.1 head) plus the planned handoff commit, while avoiding an unnecessary full-history fetch. It disables credential persistence and submodules. Concurrency cancels an older in-progress run for the same workflow/ref pair, and each job has a 30-minute timeout.
+Workflow permissions are restricted to `contents: read`. `actions/checkout` and `actions/setup-python` are official Actions pinned to immutable full commit SHAs, with their reviewed release tags recorded inline. Checkout fetches full history (`fetch-depth: 0`) because the active architecture-parity test reads a fixed historical notebook baseline; this preserves that test as the repository history grows. It disables credential persistence and submodules. Concurrency cancels an older in-progress run for the same workflow/ref pair, and each job has a 30-minute timeout.
 
 ## Interpreting Results
 

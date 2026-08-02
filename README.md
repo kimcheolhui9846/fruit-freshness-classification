@@ -187,6 +187,9 @@ The temporary compatibility-checkpoint holdout measurement is an interoperabilit
 | [Evaluation](docs/evaluation.md) | Holdout evaluation CLI |
 | [Reproducibility](docs/reproducibility.md) | Verified reproducibility evidence and boundaries |
 | [Continuous Integration](docs/ci.md) | GitHub Actions repository health |
+| [Release readiness](docs/release-readiness.md) | Engineering-milestone audit and release-note draft |
+| [Governance decisions](docs/governance-decisions.md) | License, citation, dataset, and repository-policy decisions |
+| [Changelog](CHANGELOG.md) | Unreleased capability and limitation summary |
 
 ## Contribution boundary
 
