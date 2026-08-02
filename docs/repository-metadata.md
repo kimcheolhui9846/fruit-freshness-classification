@@ -53,4 +53,12 @@ Record all original metadata before mutation. If a partial API mutation fails, r
 
 ## Live Execution Record
 
-The execution record is added only after the approved live readback completes. It records the approved metadata operations and integrity checks without credentials, private email addresses, temporary payload locations, or machine-specific paths.
+- Starting `main` SHA: `ec5b3d8af8d1ab2e72c64f23d0dc8d6144344412`.
+- Phase branch: `docs/phase-7.3-repository-metadata`.
+- Original metadata: description `For my data science studies`; empty homepage; no topics.
+- Implementation commit: `2f75ea400dc85d5eda563969d5b9318184cc2c64` (`docs: define repository metadata and discoverability`). GitHub Actions run `30746176046` passed both required jobs before any metadata mutation.
+- Approved API operations: `PATCH /repos/{owner}/{repo}` changed only the description, then `PUT /repos/{owner}/{repo}/topics` replaced the empty topic list with the exact approved ten-topic set documented above.
+- Live readback confirms the approved description, an empty homepage, public visibility, default branch `main`, an unchanged deferred custom social-preview state, and all ten approved topics. GitHub may return topic names in a normalized order; set equality and lowercase uniqueness were verified.
+- No rollback was required. The two external temporary JSON payloads contained no credentials and were removed after readback.
+- `Protect main` (ID `20229405`) and `Protect v0.1.0` (ID `20232130`) remain active and unchanged. The protected tag still peels to `b38ebd36f4fa4f1fe012b957095db6dcbce20832`; the GitHub prerelease remains published, non-draft, and has zero assets.
+- The final handoff commit is intended for a protected fast-forward-only update of `main` after exact-SHA CI verification. A known Codex-managed temporary-ref issue can make `git fetch origin` fail; it is not modified, and local/remote/GitHub SHA comparison is the safe fallback.
