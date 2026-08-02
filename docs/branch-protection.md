@@ -61,3 +61,13 @@ The published annotated tag `v0.1.0` is unaffected by this branch ruleset. Tag p
 ## Repository-setting scope
 
 The approved `Protect main` branch ruleset is the only repository-setting mutation in Phase 7.1. This Phase does not create a classic branch-protection rule, change repository metadata, alter the default branch, create tag rules, require pull requests, require signed commits, or change the GitHub Release.
+
+## Live ruleset record
+
+- **Ruleset:** GitHub repository ruleset `Protect main` (ID `20229405`), source type `Repository`, target `branch`, active enforcement.
+- **Target condition:** includes only `~DEFAULT_BRANCH` and has no exclusions; on this repository, that is `main`.
+- **Creation evidence:** Created through GitHub's repository-ruleset REST endpoint on `2026-08-02T18:40:33.840+09:00`, after the Phase branch commit `4e655a39c1f58f6c05c6551144009757b7b54a0f` passed `Repository CI` run `30742002870` on both required jobs.
+- **API readback:** The ruleset contains exactly `deletion`, `non_fast_forward`, `required_linear_history`, and `required_status_checks`. The status-check rule has `do_not_enforce_on_create: false`, `strict_required_status_checks_policy: false`, and exactly the two documented contexts. `bypass_actors` is an empty list.
+- **Effective-rule evidence:** GitHub's active-rules endpoint for `main` returned exactly those same four rule types after creation. No integration-ID constraint was added; the two exact contexts remain the approved check selectors.
+- **Scope confirmation:** This live ruleset does not require pull requests, reviews, signed commits, merge queue, deployments, code scanning, push-actor restrictions, or tag protection. It does not alter the published `v0.1.0` annotated tag or its source-only prerelease.
+- **Operational check pending at this record:** The documentation handoff commit must pass both required checks on its Phase branch before the normal fast-forward-only update of `main` is attempted. No force push, bypass, direct deletion test, tag mutation, or branch-protection weakening is authorized.
