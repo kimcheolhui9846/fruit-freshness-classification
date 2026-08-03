@@ -77,37 +77,29 @@ class CanonicalTrainingReadinessContractTests(unittest.TestCase):
         ):
             self.assertIn(fragment, self.documents)
 
-    def test_runbook_preserves_exact_cli_and_interruptibility_boundary(self) -> None:
-        self.assertIn(
-            "python scripts/train.py --config configs/deep3.toml --output-dir weights/<run-id>",
-            self.runbook,
-        )
+    def test_runbook_preserves_current_cli_and_owner_gate(self) -> None:
         for fragment in (
-            "No resume implementation exists in the frozen training entry point.",
-            "optimizer, scheduler, AMP scaler, EMA, and RNG states are not checkpointed",
-            "restart from the beginning",
-            "python scripts/evaluate.py --config configs/deep3.toml --checkpoint-dir weights/<run-id>",
+            "python -m scripts.train",
+            "configs/deep3_canonical.toml",
+            "--save-training-state",
+            "--require-empty-output-dir",
+            "--resume-state weights/deep3-canonical-reference-01/training_state.pt",
+            "A `COMPLETED` state cannot be resumed normally.",
+            "APPROVED_CANONICAL_TRAINING_ACTION:",
         ):
             self.assertIn(fragment, self.runbook)
 
-    def test_owner_approvals_and_publication_prohibitions_are_unresolved(self) -> None:
-        approvals = (
-            "OWNER_CANONICAL_TRAINING_APPROVAL:",
-            "PENDING",
-            "OWNER_BATCH_SIZE_DECISION:",
-            "OWNER_OUTPUT_DIRECTORY_APPROVAL:",
-            "OWNER_INTERRUPTION_RISK_ACCEPTANCE:",
-        )
-        for fragment in approvals:
-            self.assertIn(fragment, self.documents)
+    def test_approved_phase_82_and_publication_prohibitions_are_recorded(self) -> None:
         for fragment in (
+            "OWNER_APPROVAL_STATUS: APPROVED",
+            "APPROVED_TARGET_BATCH_SIZE: 64",
+            "APPROVED_RESUME_POLICY: IMPLEMENT_EPOCH_BOUNDARY_RESUME",
             "DATASET_PUBLICATION: NO",
             "WEIGHT_PUBLICATION: NO",
             "CHECKPOINT_PUBLICATION: NO",
             "OTHER_BINARY_ARTIFACT_PUBLICATION: NO",
         ):
             self.assertIn(fragment, self.documents)
-
     def test_documents_are_private_portable_and_non_destructive(self) -> None:
         self.assertNotRegex(
             self.documents,

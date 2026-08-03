@@ -1,112 +1,127 @@
 # Canonical Training Runbook
 
-## Purpose and Preconditions
+## Status and Scope
 
-This runbook describes the exact operator sequence for a future owner-approved canonical run of the frozen `deep3` experiment. It is not an authorization to run it now.
+This runbook describes the owner-approved derived configuration prepared in Phase 8.2. It is not authorization to execute a full canonical three-fold training run. `configs/deep3.toml` remains historically blocked on the audited RTX 3070 Ti 8 GiB because its batch-192 projection was unsafe. The candidate for a future owner action is `configs/deep3_canonical.toml` with batch size 64.
 
-The readiness decision is `BLOCKED` because the configured training batch size 192 is `LIKELY_UNSAFE` on the audited 8 GiB GPU. Do not start the command below until a new explicit owner approval resolves the batch-size or hardware decision, output-directory decision, and interruption-risk acceptance.
+No full canonical three-fold training was run in Phase 8.2. No benchmark result is claimed in Phase 8.2. Dataset, weights, checkpoints, and other binary artifacts remain unpublished.
 
-No canonical three-fold training was run in Phase 8.1. No canonical checkpoint, weight, result, benchmark, or publication artifact was created.
+## Frozen and Derived Inputs
 
-## Frozen Inputs
+- Original config: `configs/deep3.toml`, SHA-256 `62c7ae4ee5c33974fa48342b6af1b7b54c2e4938159429cbd1a86524fc7c13f1`; unchanged and blocked on the audited hardware.
+- Derived config: `configs/deep3_canonical.toml`; only `training.batch_size` changes, from 192 to 64.
+- Learning-rate policy: `KEEP_EXISTING_UNSCALED`.
+- Dataset: `Densu341/Fresh-rotten-fruit` at revision `2077850adc575aa1e8d6029e6cd6cefe9e403a1c`; archive SHA-256 `a34c57ba3354f94d4cc04c4b83939bd6a3105d3708b9a0cd57145b6fc127254e`.
+- Target device: NVIDIA GeForce RTX 3070 Ti, 8 GiB.
+- Approved run ID: `deep3-canonical-reference-01`.
 
-Verify all of these before a future run:
+The derived configuration is a different optimization trajectory because its mini-batch update sequence differs from batch 192. It is not a result-comparable substitution until an explicitly approved full run is executed and reviewed.
 
-| Input | Required identity |
-|---|---|
-| Base commit | `046760e19e77c7aa0c6cbc065358acfd46aac346` |
-| Experiment config | `configs/deep3.toml`, SHA-256 `62c7ae4ee5c33974fa48342b6af1b7b54c2e4938159429cbd1a86524fc7c13f1` |
-| Dataset revision | `2077850adc575aa1e8d6029e6cd6cefe9e403a1c` |
-| Dataset archive SHA-256 | `a34c57ba3354f94d4cc04c4b83939bd6a3105d3708b9a0cd57145b6fc127254e` |
-| Environment | Python 3.12.10, torch 2.6.0+cu124, torchvision 0.21.0+cu124, datasets 5.0.1, huggingface-hub 1.26.0 |
-| Split | 21,486 training rows, 5,372 holdout rows, 3 stratified folds, random state 42 |
+## Fresh Canonical Run
 
-The expected class count is 14. Dataset files remain in the Hugging Face cache and must not be added to Git.
+Only after a separate Phase 8.3 owner approval, run from the repository root:
 
-## Required Owner Approval Record
+```powershell
+python -m scripts.train `
+  --config configs/deep3_canonical.toml `
+  --output-dir weights/deep3-canonical-reference-01 `
+  --save-training-state `
+  --require-empty-output-dir `
+  --run-id deep3-canonical-reference-01
+```
 
-Fill and approve this record in a new explicit Phase before starting a canonical run:
+The fresh command rejects a non-empty output directory, including hidden entries, before production dataset preparation or model construction. An absent output directory may be created. Do not pre-create files in the checkpoint directory.
 
-OWNER_CANONICAL_TRAINING_APPROVAL:
-PENDING
+The approved external log is outside the checkpoint directory, so it does not violate the empty-output rule:
 
-OWNER_BATCH_SIZE_DECISION:
-PENDING
+```powershell
+<approved command> 2>&1 | Tee-Object `
+  -FilePath results/deep3-canonical-reference-01.log
+```
 
-OWNER_OUTPUT_DIRECTORY_APPROVAL:
-PENDING
+Do not use the angle-bracket placeholder literally. Substitute the approved fresh or resume command as one command line before piping. Do not start a second process against the same output directory.
 
-OWNER_INTERRUPTION_RISK_ACCEPTANCE:
-PENDING
+Expected canonical artifacts are `run_manifest.json`, `training_state.pt`, `label_names.json`, `best_model_fold1.pt`, `best_model_fold2.pt`, `best_model_fold3.pt`, and `last_model_weights.pt`. Best-fold files preserve the EMA state-dict checkpoint policy; the final file preserves the raw final-fold state-dict policy. Evaluation does not depend on `training_state.pt`.
 
-DATASET_PUBLICATION: NO
+## Resume a Single Interrupted Run
 
-WEIGHT_PUBLICATION: NO
+Use only a state generated locally by this project for this same run:
 
-CHECKPOINT_PUBLICATION: NO
+```powershell
+python -m scripts.train `
+  --config configs/deep3_canonical.toml `
+  --output-dir weights/deep3-canonical-reference-01 `
+  --resume-state weights/deep3-canonical-reference-01/training_state.pt `
+  --save-training-state `
+  --run-id deep3-canonical-reference-01
+```
 
-OTHER_BINARY_ARTIFACT_PUBLICATION: NO
+The fresh command and resume command are different. Never use `--require-empty-output-dir` on resume. The existing output directory, `run_manifest.json`, and `training_state.pt` must exist; config hash, run ID, repository identity, dataset identity, labels, fold indices, folds, epochs, and batch size must validate. A `COMPLETED` state cannot be resumed normally. Remote URLs, downloaded state files, and untrusted state files are prohibited.
 
-A configuration change is outside this Phase and requires a new explicit approval.
+State saving is epoch-boundary only. It happens after successful training, validation, metrics, best-model decision, history update, and `scheduler.step()`. The state is atomic and includes model, EMA, optimizer, scheduler, GradScaler, Python/NumPy/Torch CPU/Torch CUDA RNG, histories, and fold-index hashes. RNG is restored after runtime reconstruction. This supports continuation of the same interrupted run; it does not promise deterministic reproduction from a new run.
 
-## Preflight Checklist
+If an incident occurs, stop the process, retain partial artifacts for review, and do not delete partial artifacts during incident review. Do not manually stitch folds, overwrite the run manifest, or automatically publish any output.
 
-1. Check out the approved frozen commit or its explicitly approved successor.
-2. Create a clean virtual environment and install the exact committed requirements.
-3. Confirm `python -m pip check` succeeds.
-4. Confirm CUDA is available, record GPU model, driver, free VRAM, temperature, and free disk space.
-5. Run the committed dataset loader once and verify repository, revision, archive SHA-256, 30,357 source rows, 26,858 filtered rows, 21,486 training rows, 5,372 holdout rows, and 14 classes.
-6. Confirm the requested output directory is fresh, untracked, and empty. Do not reuse a directory containing `best_model_fold*.pt` or `last_model_weights.pt`.
-7. Record the approved run identifier in the form `deep3-canonical-YYYYMMDD-<shortsha>`.
-8. Confirm the owner has accepted the restart-from-zero interruption consequence.
+## Preflight and Monitoring
 
-## Training Command
+1. Verify the explicitly approved Phase 8.3 action, config, batch, run ID, output directory, log path, and no-publication policy.
+2. Install the committed pinned requirements in an isolated environment and confirm `python -m pip check`.
+3. Verify CUDA device identity, free VRAM, temperature, driver, and disk space.
+4. Verify the pinned dataset revision, archive hash, expected 14 classes, and existing split contract.
+5. Confirm the output directory is absent or empty for a fresh run; do not reuse an existing canonical directory.
+6. Record per-fold progress, memory, temperature, metrics, checkpoints, and file hashes.
 
-After every preflight condition and owner approval is satisfied, run the frozen entry point from the repository root:
+Stop and report if dataset identity or configuration hash differs, an OOM occurs, temperature or disk capacity becomes unsafe, the expected state/manifest is invalid, or runtime behavior diverges. Do not modify model, transforms, loss, optimizer, scheduler, epochs, folds, global seeding, or cuDNN policy during a run.
 
-    python scripts/train.py --config configs/deep3.toml --output-dir weights/<run-id>
+## Legacy Invocation
 
-For the frozen config, this runs 3 folds for 120 epochs. The final 20 epochs use the existing fine-tuning transform path; the implementation's existing Mixup, EMA, loss selection, optimizer, scheduler, validation, and checkpoint behavior remain unchanged.
+When none of the optional stateful controls are provided, the existing command remains supported and does not create a resume state:
 
-Expected files within the fresh output directory are:
+```powershell
+python -m scripts.train --config configs/deep3.toml --output-dir weights
+```
 
-- `label_names.json`
-- `best_model_fold1.pt`
-- `best_model_fold2.pt`
-- `best_model_fold3.pt`
-- `last_model_weights.pt`
+This legacy invocation preserves prior behavior. It is not the approved canonical command for the audited RTX 3070 Ti 8 GiB.
 
-The three best-fold files are the required ensemble inputs. The last-model file is the final raw model state from the last fold; it is not a substitute for a complete best-fold ensemble.
+## Phase 8.3 Owner Approval Block
 
-## Monitoring and Stop Conditions
+APPROVED_CANONICAL_TRAINING_ACTION:
+<RUN_DERIVED_CONFIG | DEFER | BLOCKED>
 
-Record at least once per fold:
+APPROVED_CONFIG:
+configs/deep3_canonical.toml
 
-- start/end time and epoch progress;
-- GPU free/reserved memory and temperature;
-- disk free space in the output volume;
-- dataset revision and archive hash;
-- validation accuracy, F1, balanced accuracy, top-2, and top-3 values printed by the existing pipeline;
-- output filenames and file hashes after each completed fold.
+APPROVED_BATCH_SIZE:
+64
 
-Stop and report, rather than modifying code in place, if the dataset identity changes, an out-of-memory error occurs, disk capacity becomes unsafe, a required checkpoint is absent, or runtime behavior diverges from the frozen configuration.
+APPROVED_DEVICE:
+NVIDIA GeForce RTX 3070 Ti, 8 GiB
 
-## Interruption and Resume Policy
+APPROVED_RUN_ID:
+deep3-canonical-reference-01
 
-No resume implementation exists in the frozen training entry point. The optimizer, scheduler, AMP scaler, EMA, and RNG states are not checkpointed. If the process is interrupted, the frozen workflow must restart from the beginning; do not manually stitch partially completed folds into a canonical run.
+APPROVED_OUTPUT_DIRECTORY:
+weights/deep3-canonical-reference-01
 
-This restart-from-zero consequence is classified as `ACCEPTABLE_WITH_OWNER_RISK` only after an explicit owner decision. It is not silently accepted by this runbook.
+APPROVED_LOG_FILE:
+results/deep3-canonical-reference-01.log
 
-## Evaluation Command
+APPROVED_RESUME_POLICY:
+USE_EPOCH_BOUNDARY_RESUME
 
-After all three best-fold checkpoints exist in the same fresh run directory, evaluate the frozen holdout ensemble:
+APPROVED_INTERRUPTION_POLICY:
+RESUME_FROM_LAST_COMPLETED_EPOCH
 
-    python scripts/evaluate.py --config configs/deep3.toml --checkpoint-dir weights/<run-id>
+APPROVED_CHECKPOINT_RETENTION:
+KEEP_ALL_FOLD_BEST_FINAL_AND_RESUME_STATE
 
-The evaluation entry point requires every `best_model_fold1.pt` through `best_model_fold3.pt` file and uses the existing ensemble plus horizontal-flip TTA path. Treat its metrics as a new canonical result only after the run record, input hashes, and checkpoint identity have been reviewed.
+APPROVED_WEIGHT_PUBLICATION:
+NO
 
-## Storage and Publication Boundaries
+APPROVED_DATASET_PUBLICATION:
+NO
 
-The observed raw state dictionary is about 51.7 MiB; four nominal model-state files are about 206.7 MiB before serialization overhead. Plan capacity beyond that estimate for logs and incidental filesystem overhead.
+APPROVED_RELEASE_CREATION:
+NO
 
-Dataset, trained weights, checkpoints, and other binary artifacts remain uncommitted and unpublished unless a later explicit approval says otherwise. This runbook does not create a release, a tag, a dataset mirror, or a model upload.
+Do not infer this approval from Phase 8.2 completion. Do not begin Phase 8.3 without an explicit owner decision.

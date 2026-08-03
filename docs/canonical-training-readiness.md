@@ -151,3 +151,90 @@ A future approval must either keep the frozen batch-192 configuration and provid
 ## Governance Boundaries
 
 The `v0.1.0` prerelease, its annotated tag, the protected `main` ruleset, the protected `v0.1.0` tag ruleset, and the local-only backup branch policy remain unchanged. The Phase does not publish data, weights, checkpoints, or other binary artifacts.
+
+## Phase 8.2 — Approved Derived Configuration and Resume Evidence
+
+Phase 8.1 remains the historical audit for the original frozen configuration. Phase 8.2 does not alter that configuration. It applies the owner-approved derived configuration and optional operational resume support without starting canonical three-fold training.
+
+### Approved Decisions
+
+OWNER_APPROVAL_STATUS: APPROVED
+
+APPROVED_CANONICAL_CONFIG_STRATEGY: CREATE_DERIVED_CANONICAL_CONFIG
+
+APPROVED_DERIVED_CONFIG_PATH: configs/deep3_canonical.toml
+
+APPROVED_TARGET_BATCH_SIZE: 64
+
+APPROVED_LEARNING_RATE_POLICY: KEEP_EXISTING_UNSCALED
+
+APPROVED_RESUME_POLICY: IMPLEMENT_EPOCH_BOUNDARY_RESUME
+
+APPROVED_OUTPUT_DIRECTORY: weights/deep3-canonical-reference-01
+
+APPROVED_OUTPUT_COLLISION_POLICY: FAIL_IF_NOT_EMPTY
+
+APPROVED_LOG_FILE: results/deep3-canonical-reference-01.log
+
+APPROVED_GLOBAL_SEED_CHANGE: NO
+
+APPROVED_CUDNN_POLICY_CHANGE: NO
+
+DATASET_PUBLICATION: NO
+
+WEIGHT_PUBLICATION: NO
+
+CHECKPOINT_PUBLICATION: NO
+
+OTHER_BINARY_ARTIFACT_PUBLICATION: NO
+
+### Configuration Classification
+
+| Configuration | Classification | Reason |
+|---|---|---|
+| `configs/deep3.toml` | BLOCKED on RTX 3070 Ti 8 GiB | Phase 8.1’s batch-192 probe projected 107.2% reserved VRAM. |
+| `configs/deep3_canonical.toml` | READY_FOR_OWNER_APPROVAL | The approved batch-64 bounded CUDA and resume probes passed under the recorded conditions. |
+
+configs/deep3.toml:
+BLOCKED on RTX 3070 Ti 8 GiB
+
+configs/deep3_canonical.toml differs from `configs/deep3.toml` at exactly one parsed key: `training.batch_size`, from 192 to 64. The original SHA-256 remains `62c7ae4ee5c33974fa48342b6af1b7b54c2e4938159429cbd1a86524fc7c13f1`. Epochs (120), fine-tuning epochs (20), folds (3), random state (42), Mixup, optimizer parameters, learning rates, weight decay, EMA, checkpoint name, global-seed posture, and cuDNN policy are unchanged. Learning rates use `KEEP_EXISTING_UNSCALED`; no learning-rate scaling was applied.
+
+The derived batch changes the optimization trajectory because its mini-batch composition and update sequence differ. It is therefore a separately identified canonical candidate, not a performance-equivalent continuation of the original batch-192 configuration.
+
+### Bounded CUDA Evidence
+
+The external, exact-pinned environment used Python 3.12.10, torch `2.6.0+cu124`, torchvision `0.21.0+cu124`, and the pinned dataset route. It ran the actual pinned dataset loader, existing training transform, CMT factory, selected cross-entropy criterion, optimizer, scheduler, AMP GradScaler, EMA, and `train_one_epoch`. It did not run a full epoch, validation epoch, fold, or canonical training job.
+
+At preflight, NVIDIA GeForce RTX 3070 Ti had 7,031 MiB free of 8,192 MiB, was 44 C, and used driver 591.86. Display processes reported by the driver had no numeric compute-memory use; total pre-probe occupancy was below the documented 20% material-use guard.
+
+| Batch | Limited optimizer step | Peak allocated | Peak reserved | Reserved VRAM | Temperature | Duration | Result |
+|---:|---:|---:|---:|---:|---:|---:|---|
+| 64 | 1 | 2,032 MiB | 2,716 MiB | 33.2% | 47 C | 0.8763 s | forward, backward, finite gradients, optimizer, EMA, and scheduler completed |
+| 64 | 2 | 2,108 MiB | 2,720 MiB | 33.2% | 49 C | 0.4458 s | forward, backward, finite gradients, optimizer, EMA, and scheduler completed |
+
+The AMP GradScaler remained at 65,536 after both completed steps; no repeated overflow occurred. The peak-reserved threshold was below 70% of total VRAM, no CUDA OOM occurred, and temperature remained below the conservative 80 C guard. Observed loss and accuracy values are diagnostic only and are not model-quality, benchmark, or performance claims.
+
+### Resume Interoperability Evidence
+
+The external probe saved a trusted local `training_state.pt` after a controlled completed sequence, destroyed the CMT training objects, rebuilt model/EMA/criterion/optimizer/scheduler/GradScaler, loaded and validated the state, restored RNG last, and completed a further batch-64 optimizer step.
+
+The resumed step used 2,254 MiB peak allocated and 2,924 MiB peak reserved (35.7% of total VRAM), completed at 49 C, and retained a GradScaler scale of 65,536. Model, EMA, optimizer, scheduler, scaler, metadata, histories, and RNG restoration all completed. Optimizer state tensors were restored to CUDA; scheduler state advanced from 1 before resume to 2 after continuation. The controlled sequence recorded no repeated fold or epoch.
+
+The production implementation saves an epoch-boundary state only after training, validation, metric calculation, best-checkpoint decision, history update, and `scheduler.step()`. `RUNNING` records the fully completed epoch and next epoch. `FOLD_COMPLETE` records completed fold histories and starts the next fold at epoch 1. After the final raw-model save, `COMPLETED` is written and is rejected for normal resume.
+
+The schema includes `model_state_dict`, `ema_state_dict`, `optimizer_state_dict`, `scheduler_state_dict`, `grad_scaler_state_dict`, `python_rng_state`, `numpy_rng_state`, `torch_cpu_rng_state`, and `torch_cuda_rng_states`, plus immutable run, dataset, label, fold-index, and configuration identity. State is written atomically through a unique same-directory temporary file and replacement. A state may be loaded only as a trusted local file generated by this project; operators must not load a downloaded or untrusted state file.
+
+This is same-run continuation evidence, not a claim of bit-for-bit reproducibility from scratch. The project still does not introduce global initial seeding or a changed cuDNN policy.
+
+### Current Readiness and Boundaries
+
+ORIGINAL_CONFIG_READINESS:
+BLOCKED
+
+DERIVED_CANONICAL_CONFIG_READINESS:
+READY_FOR_OWNER_APPROVAL
+
+No full canonical three-fold training was run in Phase 8.2. No canonical weights, checkpoints, result files, benchmark result, release, or publication artifact was created. No benchmark result is claimed in Phase 8.2. The approved output and external log paths remain absent from the repository after bounded validation.
+
+Phase 8.3 remains owner-gated. Passing Phase 8.2 does not authorize a full canonical run, publication, or release.
