@@ -1,7 +1,8 @@
-"""Offline documentation contracts for Phase 7.5 backup-branch governance."""
+"""Offline documentation contracts for backup-branch governance."""
 
 from __future__ import annotations
 
+import re
 import unittest
 from pathlib import Path
 
@@ -26,18 +27,21 @@ class BackupBranchAuditContractTests(unittest.TestCase):
         )
         self.assertIn("Unique commits relative to `main`:** 15", self.audit)
         self.assertIn("The branch is local-only.", self.audit)
+        self.assertIn(
+            "a9a6d1d28e35a4cc587860ae09534f5c827e43da",
+            self.preservation,
+        )
+        self.assertIn("Total reachable commits: 15", self.preservation)
 
     def test_read_only_methodology_and_safety_prohibitions_are_explicit(self) -> None:
         for fragment in (
             "Git-object inspection only.",
             "not checked out",
             "not executed",
-            "Backup branch deletion is prohibited.",
-            "Public push is prohibited without owner approval.",
-            "Merge into `main` is prohibited.",
-            "Cherry-pick from this history is prohibited.",
-            "History rewrite or sanitization is prohibited.",
-            "Unreviewed bundle creation is prohibited.",
+            "Public disclosure and remote publication remain prohibited.",
+            "Private-repository creation remains prohibited.",
+            "Git bundle and archive creation remain prohibited.",
+            "Backup branch deletion, rename, reset, merge, cherry-pick, tag creation, and history rewrite remain prohibited.",
         ):
             self.assertIn(fragment, self.documents)
 
@@ -58,22 +62,39 @@ class BackupBranchAuditContractTests(unittest.TestCase):
         self.assertIn("`RELATED_RESEARCH_HISTORY`", self.audit)
         self.assertIn("Execution performed: No.", self.audit)
 
-    def test_primary_decision_and_owner_gate_are_explicit(self) -> None:
-        self.assertRegex(
+    def test_approved_local_only_preservation_is_explicit(self) -> None:
+        approvals = {
+            "APPROVED_BACKUP_ACTION:": "KEEP_LOCAL_ONLY",
+            "APPROVED_PUBLIC_DISCLOSURE:": "NO",
+            "APPROVED_ARCHIVE_LOCATION_POLICY:": "NOT_APPLICABLE",
+            "APPROVED_ENCRYPTION_POLICY:": "NOT_APPLICABLE",
+            "APPROVED_RETENTION_PERIOD:": "PERMANENT",
+            "APPROVED_BRANCH_DELETION_AFTER_PRESERVATION:": "NO",
+            "APPROVED_REMOTE_PUBLICATION:": "NO",
+            "APPROVED_PRIVATE_REPOSITORY_CREATION:": "NO",
+            "APPROVED_GIT_BUNDLE_CREATION:": "NO",
+            "APPROVED_SELECTED_CONTENT_EXTRACTION:": "NO",
+            "APPROVED_HISTORY_REWRITE:": "NO",
+        }
+        for field, value in approvals.items():
+            self.assertRegex(
+                self.preservation,
+                rf"{re.escape(field)}\s*\n{re.escape(value)}\b",
+            )
+        self.assertNotIn("[owner input required]", self.preservation)
+        self.assertNotIn("CREATE_OFFLINE_GIT_BUNDLE", self.preservation)
+
+    def test_risk_acceptance_and_future_authorization_boundary_are_explicit(self) -> None:
+        self.assertIn(
+            "owner accepts the remaining single-machine loss risk",
             self.preservation,
-            r"PRIMARY_RECOMMENDATION:\s*\nREVIEW_REQUIRED",
         )
-        self.assertIn("SECONDARY_RECOMMENDATION:", self.preservation)
-        for field in (
-            "APPROVED_BACKUP_ACTION:",
-            "APPROVED_PUBLIC_DISCLOSURE:",
-            "APPROVED_ARCHIVE_LOCATION_POLICY:",
-            "APPROVED_ENCRYPTION_POLICY:",
-            "APPROVED_RETENTION_PERIOD:",
-            "APPROVED_BRANCH_DELETION_AFTER_PRESERVATION:",
-        ):
-            self.assertIn(field, self.preservation)
-        self.assertIn("Phase 7.6 — Apply the Approved Backup Preservation Action", self.preservation)
+        self.assertIn(
+            "only through a new explicit owner-approved preservation Phase",
+            self.preservation,
+        )
+        self.assertIn("No archive destination", self.preservation)
+        self.assertIn("No archive, encrypted archive, plaintext Git bundle", self.preservation)
 
     def test_documents_do_not_expose_private_values_or_machine_paths(self) -> None:
         self.assertNotRegex(
