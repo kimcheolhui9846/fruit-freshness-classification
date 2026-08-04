@@ -252,4 +252,6 @@ configs/deep3_canonical.toml:
 CANONICAL TRAINING COMPLETED
 
 TRAINED_CHECKPOINT_HOLDOUT_EVALUATION:
-PENDING
+COMPLETED
+
+Phase 8.4 recorded the first trained canonical holdout evaluation in [canonical-holdout-evaluation.md](canonical-holdout-evaluation.md). The frozen fold-best EMA ensemble and local-only artifact boundary remain unchanged.
