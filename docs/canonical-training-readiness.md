@@ -238,3 +238,18 @@ READY_FOR_OWNER_APPROVAL
 No full canonical three-fold training was run in Phase 8.2. No canonical weights, checkpoints, result files, benchmark result, release, or publication artifact was created. No benchmark result is claimed in Phase 8.2. The approved output and external log paths remain absent from the repository after bounded validation.
 
 Phase 8.3 remains owner-gated. Passing Phase 8.2 does not authorize a full canonical run, publication, or release.
+
+## Phase 8.3 — Canonical Training Completion
+
+Phase 8.3 executed the owner-approved `deep3-canonical-reference-01` run on the frozen commit `0c669d58852082785c79699231e09b5ae26757cc`. It used `configs/deep3_canonical.toml` with batch size 64, completed three folds and 120 epochs per fold, and reached trusted state `COMPLETED`. Training artifacts remain local-only and ignored; no holdout evaluation, numeric metric publication, binary publication, Release, or tag was created.
+
+| Configuration | Current classification |
+|---|---|
+| `configs/deep3.toml` | BLOCKED on RTX 3070 Ti 8 GiB |
+| `configs/deep3_canonical.toml` | CANONICAL TRAINING COMPLETED |
+
+configs/deep3_canonical.toml:
+CANONICAL TRAINING COMPLETED
+
+TRAINED_CHECKPOINT_HOLDOUT_EVALUATION:
+PENDING
