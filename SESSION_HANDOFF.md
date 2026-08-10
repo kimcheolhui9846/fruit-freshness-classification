@@ -814,3 +814,79 @@ NOT STARTED
 ```
 
 No training, holdout reevaluation, alternate-checkpoint evaluation, or post-holdout tuning occurred in Phase 8.6. The canonical holdout is already observed; future model development requires a new experiment identity, and the observed holdout may not be presented as untouched evidence after future tuning. The Phase worktree remains isolated; private artifact paths and binary contents are not recorded here.
+## Phase 9.1 — Post-Holdout Research Planning and New Experiment Identity Freeze
+
+```text
+PHASE:
+9.1 — Post-Holdout Research Planning and New Experiment Identity Freeze
+STARTING_MAIN:
+17581306a8a0bcbda3b9d2a5af6575eada1cf617
+PHASE_BRANCH:
+research/phase-9.1-post-holdout-planning
+IMPLEMENTATION_SHA:
+20394d5e54c6f17a16d73baa88a9a0f730915127
+PR:
+#3
+PR_STATE:
+DRAFT
+CANONICAL_REFERENCE:
+deep3-canonical-reference-01
+CANONICAL_STATUS:
+CLOSED_REFERENCE
+NEW_EXPERIMENT_ID:
+deep3-postholdout-research-01
+NEW_EXPERIMENT_STATUS:
+PLANNING
+POST_HOLDOUT_RESEARCH:
+YES
+CANONICAL_HOLDOUT:
+HISTORICAL_EVALUATION_ONLY
+CANONICAL_HOLDOUT_TUNING:
+PROHIBITED
+CANONICAL_HOLDOUT_CHECKPOINT_SELECTION:
+PROHIBITED
+FINAL_CLAIM_REQUIRES_NEW_UNTOUCHED_EVALUATION:
+YES
+RECOMMENDED_PHASE_9_PROTOCOL:
+DEV_PLUS_LOCKED_TEST
+STATUS:
+RECOMMENDATION_ONLY
+PHASE_9_2:
+NOT STARTED
+PHASE_9_2_OWNER_APPROVAL:
+REQUIRED
+Repository contracts:
+80 passed
+Full suite:
+219 passed
+compileall:
+passed
+train CLI help:
+passed
+evaluate CLI help:
+passed
+Push CI:
+31370849797
+PR CI:
+31370853884
+Ubuntu:
+success
+Windows:
+success
+Actions artifacts:
+0
+training:
+NO
+evaluation:
+NO
+new data split:
+NO
+dataset download:
+NO
+checkpoint modification:
+NO
+binary publication:
+NO
+```
+
+Phase 9.1 created planning records only. No training, evaluation, split, dataset download, checkpoint modification, or binary publication occurred. Phase 9.2 remains owner-gated.
