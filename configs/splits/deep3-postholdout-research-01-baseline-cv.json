@@ -5,7 +5,7 @@
     "shuffle": true
   },
   "development_count": 17188,
-  "development_manifest_sha256": "bd35423bd226f41ec73d03632d01b0cd30c572ba982880d23acbccae08025b2d",
+  "development_manifest_sha256": "cd7182c18d81cfac877fb2dab8573695b6bdd8116aeb23b19c3e4457e36be169",
   "experiment_id": "deep3-postholdout-research-01-baseline",
   "folds": [
     {

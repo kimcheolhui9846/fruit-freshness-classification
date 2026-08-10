@@ -60,6 +60,7 @@ class PostHoldoutTrainingRouteTest(unittest.TestCase):
         dependencies = SimpleNamespace(
             load_fruit_freshness_dataset=lambda: final_dataset,
             load_frozen_postholdout_manifest=lambda path: events.append(("split", path)) or frozen_manifest,
+            sha256_json_identity_file=lambda path: "c" * 64,
             select_frozen_development_pool=lambda historical_train, historical_holdout, manifest: events.append(
                 ("select", historical_train, historical_holdout, manifest)
             ) or "development-only",

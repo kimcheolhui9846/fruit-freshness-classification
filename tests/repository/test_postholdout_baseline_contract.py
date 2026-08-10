@@ -55,8 +55,8 @@ class PostHoldoutBaselineContractTest(unittest.TestCase):
         document = BASELINE_DOCUMENT.read_text(encoding="utf-8")
 
         self.assertEqual(
-            hashlib.sha256(manifest_bytes).hexdigest(),
-            "0b147f2f1353c45a497ad45db647a6e8c23989115c4a814d643ac7473793a799",
+            hashlib.sha256(manifest_bytes.replace(b"\r\n", b"\n")).hexdigest(),
+            "494bbc47a75aa35ab436d48899d531febc079301c15cdcf659df18e0fac2352f",
         )
         self.assertEqual(manifest["experiment_id"], "deep3-postholdout-research-01-baseline")
         self.assertEqual(manifest["development_count"], 17188)
@@ -65,7 +65,7 @@ class PostHoldoutBaselineContractTest(unittest.TestCase):
             [(11458, 5730), (11459, 5729), (11459, 5729)],
         )
         self.assertIn("CV_IDENTITY_STATUS:\nMATERIALIZED", document)
-        self.assertIn("CV_MANIFEST_SHA256:\n0b147f2f1353c45a497ad45db647a6e8c23989115c4a814d643ac7473793a799", document)
+        self.assertIn("CV_MANIFEST_LF_NORMALIZED_SHA256:\n494bbc47a75aa35ab436d48899d531febc079301c15cdcf659df18e0fac2352f", document)
 
 if __name__ == "__main__":
     unittest.main()

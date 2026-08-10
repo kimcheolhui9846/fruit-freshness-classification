@@ -378,6 +378,7 @@ def _load_training_dependencies() -> SimpleNamespace:
         load_frozen_postholdout_manifest,
         load_postholdout_cv_manifest,
         select_frozen_development_pool,
+        sha256_json_identity_file,
     )
     from src.datasets.fruit_freshness import (
         DATASET_REPOSITORY_ID,
@@ -428,6 +429,7 @@ def _load_training_dependencies() -> SimpleNamespace:
         save_model_state=save_model_state,
         select_fold_datasets=select_fold_datasets,
         select_frozen_development_pool=select_frozen_development_pool,
+        sha256_json_identity_file=sha256_json_identity_file,
         train_one_epoch=train_one_epoch,
         validate_one_epoch=validate_one_epoch,
     )
@@ -509,7 +511,7 @@ def prepare_training_dataset_and_folds(
     )
     cv_manifest = dependencies.load_postholdout_cv_manifest(
         cv_path,
-        development_manifest_sha256=_sha256_file(split_path),
+        development_manifest_sha256=dependencies.sha256_json_identity_file(split_path),
         development_count=frozen_manifest["development_count"],
     )
     folds = dependencies.cv_folds_from_manifest(cv_manifest)
@@ -518,9 +520,9 @@ def prepare_training_dataset_and_folds(
         "parent_experiment_id": post_holdout["parent_experiment_id"],
         "artifact_namespace": post_holdout["artifact_namespace"],
         "split_manifest_path": post_holdout["split_manifest_path"],
-        "split_manifest_sha256": _sha256_file(split_path),
+        "split_manifest_sha256": dependencies.sha256_json_identity_file(split_path),
         "cv_manifest_path": post_holdout["cv_manifest_path"],
-        "cv_manifest_sha256": _sha256_file(cv_path),
+        "cv_manifest_sha256": dependencies.sha256_json_identity_file(cv_path),
         "development_count": frozen_manifest["development_count"],
         "locked_test_count": frozen_manifest["locked_test_count"],
         "locked_test_model_access": "NO",

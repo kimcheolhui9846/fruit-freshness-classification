@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 from pathlib import Path
 
@@ -11,6 +10,7 @@ from src.datasets.postholdout import (
     build_postholdout_cv_manifest,
     load_frozen_postholdout_manifest,
     select_frozen_development_pool,
+    sha256_json_identity_file,
 )
 from src.utils.config import load_experiment_config, validate_postholdout_baseline_config
 
@@ -33,9 +33,6 @@ def _resolve_repository_path(path: str | Path) -> Path:
     candidate = Path(path).expanduser()
     return candidate if candidate.is_absolute() else REPOSITORY_ROOT / candidate
 
-
-def _sha256_file(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def write_cv_manifest(path: Path, manifest: dict) -> None:
@@ -74,7 +71,7 @@ def freeze_cv_manifest(config_path: str | Path, output_path: str | Path) -> Path
         development["label"],
         experiment_id=protocol["experiment_id"],
         parent_experiment_id=protocol["parent_experiment_id"],
-        development_manifest_sha256=_sha256_file(split_path),
+        development_manifest_sha256=sha256_json_identity_file(split_path),
         n_splits=config["cross_validation"]["n_splits"],
         shuffle=config["cross_validation"]["shuffle"],
         random_state=config["cross_validation"]["random_state"],
