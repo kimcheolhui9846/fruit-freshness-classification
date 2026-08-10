@@ -5,4 +5,4 @@ from src.inference.ensemble import (
     ensemble_logits_tta_hflip,
     run_ensemble_holdout,
 )
-from src.inference.loading import load_fold_models
+from src.inference.loading import load_fold_model, load_fold_models

@@ -101,4 +101,4 @@ PHASE_9_4:
 NOT STARTED
 ```
 
-No hyperparameter tuning, loss/augmentation/sampler/optimization/architecture experiment, external data acquisition, binary publication, Release, or tag is approved by this decision.
+The deterministic development-CV identity is materialized once as a tracked index record; it is not a dataset or prediction artifact. No hyperparameter tuning, loss/augmentation/sampler/optimization/architecture experiment, external data acquisition, binary publication, Release, or tag is approved by this decision.

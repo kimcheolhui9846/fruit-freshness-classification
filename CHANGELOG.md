@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- Materialized the deterministic Phase 9.3 development-CV identity without training, model construction, or model inference.
 - Authorized the Phase 9.3 post-holdout development baseline without starting training or publishing artifacts.
 - Froze the Phase 9 post-holdout development and locked-test protocol.
 - Added a reproducible stratified split derived only from the historical canonical training pool.
@@ -28,6 +29,7 @@
 ## [0.1.0] - 2026-08-02
 
 ### Added
+- Materialized the deterministic Phase 9.3 development-CV identity without training, model construction, or model inference.
 - Froze the Phase 9 post-holdout development and locked-test protocol.
 - Added a reproducible stratified split derived only from the historical canonical training pool.
 - Preserved both the historical canonical holdout and the newly locked Phase 9 test pool outside model-development feedback.
