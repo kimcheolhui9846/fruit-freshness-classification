@@ -717,3 +717,100 @@ For all future implementation work:
 - **Completed record:** `docs/canonical-results.md` now records the frozen 239 top-1 errors, 194 concentrated errors (approximately 81.17%), 5,271 top-2 correct, 5,333 top-3 correct, 138 rank-2 recoveries, 62 additional rank-3 recoveries, and 39 outside top-3. It explicitly separates observed facts, supported inferences, and unverified hypotheses; no causal claim, image inspection, retraining, evaluation rerun, or post-holdout tuning occurred.
 - **Publication governance:** `docs/artifact-publication-decision.md` is the canonical documentation-only publication decision. Aggregate documentation and the model card are public; trained weights and fold checkpoints are blocked pending separate license/provenance clearance; all local binary artifacts remain local-only through Phase 8.6. Dataset, states, logs, raw logits, raw predictions, Actions artifacts, Release assets, Releases, and tags remain unpublished.
 - **Safety and next gate:** The model card now excludes food-safety, health, regulatory, laboratory-replacement, autonomous disposal/rejection, and unvalidated-domain use. The Phase 8.6 owner-gate fields remain deliberately unresolved. Do not merge the draft PR, mark it ready for review, publish binaries, or begin Phase 8.6 without a new explicit owner approval.
+## Phase 8.6 — Canonical Run Closure and Local-Only Artifact Preservation
+
+```text
+PHASE:
+8.6 — Canonical Run Closure and Local-Only Artifact Preservation
+OWNER_APPROVAL_STATUS:
+APPROVED
+STARTING_MAIN:
+9fc7477bb1da43eeefbae5e497a2ca76310871f5
+PHASE_BRANCH:
+docs/phase-8.6-canonical-run-closure
+RUN_ID:
+deep3-canonical-reference-01
+CANONICAL_RUN_STATUS:
+CLOSED_REFERENCE
+IMPLEMENTATION_COMMIT:
+f62156d3c38116f80a92d9d86a77c95099325226
+
+Closure contract:
+passed
+Repository contracts:
+79 passed
+Full suite:
+218 passed
+compileall:
+passed
+scripts.train --help:
+passed
+scripts.evaluate --help:
+passed
+
+Push CI:
+31364353731
+PR CI:
+31364357148
+Ubuntu:
+success
+Windows:
+success
+Actions artifacts:
+0
+
+APPROVED_NEXT_ACTION:
+KEEP_ALL_BINARY_ARTIFACTS_LOCAL_ONLY
+APPROVED_DATASET_LICENSE_CLEARANCE:
+NOT_CONFIRMED
+BINARY_PUBLICATION_GATE:
+CLOSED_WITHOUT_PUBLICATION
+MODEL_WEIGHT_PUBLICATION:
+NO
+CHECKPOINT_PUBLICATION:
+NO
+DATASET_PUBLICATION:
+NO
+BINARY_RETENTION:
+KEEP_LOCAL_ONLY
+RETENTION_DURATION:
+UNTIL_EXPLICIT_OWNER_CHANGE
+DELETION:
+NOT AUTHORIZED
+RELOCATION:
+NOT AUTHORIZED
+CONVERSION:
+NOT AUTHORIZED
+PACKAGING:
+NOT AUTHORIZED
+REMOTE UPLOAD:
+NOT AUTHORIZED
+
+retained canonical artifacts:
+13
+size verification:
+passed
+SHA-256 verification:
+passed
+mutation:
+none
+publication:
+none
+
+PR:
+#2
+state:
+Draft
+base:
+main
+implementation head:
+f62156d3c38116f80a92d9d86a77c95099325226
+READY_FOR_OWNER_PR_REVIEW:
+PENDING_HANDOFF_CI
+OWNER_PR_MERGE_APPROVAL:
+NOT YET REQUESTED
+PHASE_9:
+NOT STARTED
+```
+
+No training, holdout reevaluation, alternate-checkpoint evaluation, or post-holdout tuning occurred in Phase 8.6. The canonical holdout is already observed; future model development requires a new experiment identity, and the observed holdout may not be presented as untouched evidence after future tuning. The Phase worktree remains isolated; private artifact paths and binary contents are not recorded here.
