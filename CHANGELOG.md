@@ -10,6 +10,10 @@
 - Recorded local-only retention for canonical binary artifacts until an explicit future owner decision.
 - No model weights, checkpoints, training state, logs, raw predictions, raw logits, dataset content, GitHub Actions artifacts, Release assets, Release, or tag were published.
 
+- Started post-holdout research planning under a new experiment identity.
+- Defined the boundary between the closed canonical holdout and future development/evaluation.
+- Added experiment-registration and pre-registration rules before any Phase 9 training.
+
 ### Changed
 
 - README and reproducibility status now distinguish the completed local canonical run and locked internal holdout from the historical untrained compatibility evidence.

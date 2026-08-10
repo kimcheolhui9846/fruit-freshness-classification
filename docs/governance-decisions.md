@@ -76,3 +76,7 @@ No Git tag, GitHub Release, repository setting, branch-protection rule, dataset 
 The canonical reference run is CLOSED_REFERENCE; documentation remains public while all canonical binaries remain local-only. Dataset license clearance remains NOT_CONFIRMED. Weight and checkpoint publication is not authorized, and no artifact deletion, relocation, conversion, or packaging is authorized. No Release or tag was created.
 
 Future binary publication requires a separate explicit owner-approved governance Phase. Future post-holdout research requires a new experiment identity. The already-observed canonical holdout must not be treated as untouched test evidence for tuned successors.
+
+## Phase 9.1 — Post-Holdout Research Planning
+
+Phase 8 remains closed and its holdout is historical evidence only. Phase 9 is explicitly post-holdout research: no training, new split, or metric result was authorized in Phase 9.1. Phase 9.2 requires explicit owner approval and a new experiment identity; the observed canonical holdout may not be treated as untouched evidence for tuned successors.
