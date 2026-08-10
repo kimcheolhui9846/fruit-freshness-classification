@@ -68,5 +68,6 @@ No Git tag, GitHub Release, repository setting, branch protection, ruleset, DOI,
 | Branch protection | `Protect main` and `Protect v0.1.0` rulesets active | Change only through a separate governance Phase |
 | Repository metadata | Approved description and topics applied in Phase 7.3 | Change only through a separate metadata Phase |
 | Canonical training and result documentation | One local-only run and one internal fixed-holdout evaluation documented | Decide artifact retention or publication only through a new explicit Phase |
+| Phase 8.5 artifact publication | [Documentation-only publication decision](artifact-publication-decision.md); binary publication blocked | Resolve only through the explicit Phase 8.6 owner gate |
 
 No Git tag, GitHub Release, repository setting, branch-protection rule, dataset copy, trained weight, checkpoint, or binary artifact was created in Phase 8.5.

@@ -2,9 +2,9 @@
 
 ## Scope
 
-This Phase 8.5 record interprets the frozen result for `deep3-canonical-reference-01` and states the owner-approved publication boundary. It publishes aggregate metrics, per-class metrics, and aggregated confusion-matrix documentation only. The evaluated set is the fixed 5,372-example internal holdout described in [canonical-holdout-evaluation.md](canonical-holdout-evaluation.md).
+This Phase 8.5 record interprets the frozen result for `deep3-canonical-reference-01` and records the approved documentation-only publication boundary. It publishes aggregate metrics, per-class metrics, and aggregated confusion-matrix documentation only. The evaluated set is the fixed 5,372-example internal holdout described in [canonical-holdout-evaluation.md](canonical-holdout-evaluation.md).
 
-No post-holdout tuning occurred. No holdout reevaluation, alternate-checkpoint evaluation, sample-level image review, or inference rerun occurred in this Phase. This is an internal fixed holdout result, not an external benchmark, leaderboard, production-validation, or generalization claim.
+No post-holdout tuning occurred. No holdout reevaluation, alternate-checkpoint evaluation, sample-level image review, inference rerun, or causal analysis occurred in this Phase. This is an internal fixed holdout result, not an external benchmark, leaderboard, production-validation, or generalization claim.
 
 ## Locked Result Summary
 
@@ -39,6 +39,26 @@ The locked protocol used three fold-best EMA checkpoints, equal raw-logit averag
 | rottenpotato | 0.679426 | 0.893082 | 0.771739 | 159 |
 | rottentomato | 0.970370 | 0.746439 | 0.843800 | 351 |
 
+## Error Concentration and Rank Recovery
+
+The frozen aggregate output has 5,372 examples, 5,133 top-1 correct predictions, and 239 top-1 errors. Top-2 has 5,271 top-2 correct predictions and top-3 has 5,333 top-3 correct predictions. Therefore, 138 top-1 errors recovered at rank 2, 62 additional errors recovered at rank 3, and 39 outside top-3.
+
+`freshpotato` has 72 errors, `rottentomato` has 89 errors, and `rottencucumber` has 33 errors. Together these 194 concentrated errors account for 194 / 239 = approximately 81.17% of all top-1 errors. Overall accuracy is high, but the errors are disproportionately concentrated in a small number of classes; macro F1 and balanced accuracy are therefore essential context alongside accuracy. top-k rank recovery does not imply calibrated confidence.
+
+### Observed fact
+
+- `freshpotato` recall is 0.300971.
+- 44 freshpotato examples were classified as rottenpotato.
+- The three listed classes account for 194 concentrated errors among 239 top-1 errors in this locked aggregate result.
+
+### Supported inference
+
+The locked holdout result shows a class-specific weakness that is hidden by aggregate accuracy. The observed concentration justifies reporting macro F1, balanced accuracy, per-class metrics, and aggregated confusion counts rather than interpreting top-1 accuracy alone.
+
+### Unverified hypothesis
+
+Visual similarity, source composition, labeling characteristics, class balance, acquisition conditions, or other unmeasured factors may contribute. These are hypotheses only: no causal mechanism is established, and no individual holdout image was inspected in this Phase.
+
 ## Aggregated Confusion-Matrix Interpretation
 
 The complete true-row / predicted-column aggregated matrix is published in [canonical-holdout-evaluation.md](canonical-holdout-evaluation.md). It contains 5,372 counts and a 5,133-count diagonal. The largest off-diagonal counts are summarized below; these are aggregate counts, not sample-level predictions or images.
@@ -54,44 +74,22 @@ The complete true-row / predicted-column aggregated matrix is published in [cano
 | rottencucumber | rottenbanana | 13 |
 | rottencucumber | rottenpotato | 13 |
 
-The lower `freshpotato` recall (0.300971) and its 44 predictions as `rottenpotato` are the clearest class-specific limitation. `rottencucumber` and `rottentomato` also have lower recall than the strongest classes. These observations describe the locked aggregate outcome only; they do not establish a causal explanation without a separately approved analysis.
+The lower `freshpotato` recall and the displayed aggregate confusions identify reporting priorities, not their cause. `rottencucumber` and `rottentomato` also have lower recall than the strongest classes.
 
 ## Interpretation Boundary
 
-The high aggregate top-1 result coexists with uneven class behavior. Macro F1 and balanced accuracy are reported alongside top-1 accuracy because the holdout supports differ by class. The result is limited by this fixed source, the project cleaning and split policy, the absence of external validation, and the absence of post-holdout analysis. It must not be used to claim state-of-the-art performance, production readiness, fairness, safety, or performance on another dataset.
+The high aggregate top-1 result coexists with uneven class behavior. This result is limited by the fixed source, project cleaning and split policy, absence of external validation, and absence of post-holdout analysis. No state-of-the-art claim is made. It must not be used to claim production readiness, fairness, food safety, or performance on another dataset.
 
-## Approved Publication Decision
+## Publication Boundary
 
-Aggregate metrics, the per-class table, and aggregated confusion-matrix documentation are tracked Markdown. They are derived summaries, not releases of the underlying evaluation outputs.
-
-Raw logits and predictions published: No
-
-Checkpoint publication: No
-
-Weight publication: No
-
-Dataset publication: No
-
-Training-state publication: No
-
-Execution-log publication: No
-
-GitHub Actions artifact upload: No
-
-Release asset upload: No
-
-Release creation: No
-
-Tag creation: No
-
-Retained locally through Phase 8.6.
+Aggregate metrics, the per-class table, and aggregated confusion-matrix documentation are tracked Markdown. They are derived summaries, not releases of the underlying evaluation outputs. The canonical Phase 8.5 publication decision, binary-publication block, and unresolved Phase 8.6 owner gate are in [artifact-publication-decision.md](artifact-publication-decision.md).
 
 The local CLI log, evaluation JSON, classification CSV, confusion-matrix CSV, prediction archive, checkpoints, weights, and training state are neither copied nor moved into this worktree. Their exact local-only inventory remains in [canonical-holdout-artifacts.md](canonical-holdout-artifacts.md).
 
-## License and Provenance Audit
+## License and Provenance Boundary
 
 The MIT License applies to repository source code and project-authored documentation, including this result interpretation and the model card. It does not transfer rights to the external dataset or to future trained-weight distribution.
 
 The evaluation source is `Densu341/Fresh-rotten-fruit` at the pinned revision recorded in the holdout evaluation. The public dataset metadata observed during the earlier governance audit was labeled `openrail`, while the surfaced dataset-card README was empty. This record does not infer additional permission, ownership, attribution completeness, or redistribution rights from that metadata. Dataset images are not redistributed through this repository.
 
-Trained checkpoints and weights remain unpublished and require a separate review before publication. The approved aggregate result documentation contains no dataset image, checkpoint tensor, training state, raw logit, raw prediction, sample identifier, or local path. This is an operational governance record, not legal advice.
+Trained checkpoints and weights remain unpublished pending a separate rights/provenance review. The approved aggregate result documentation contains no dataset image, checkpoint tensor, training state, raw logit, raw prediction, sample identifier, or local path. This is an operational governance record, not legal advice.

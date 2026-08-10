@@ -94,7 +94,7 @@ python -m scripts.evaluate `
 
 The frozen `deep3-canonical-reference-01` three-fold EMA ensemble was evaluated once on the fixed 5,372-example internal holdout. It achieved 5,133 / 5,372 top-1 correct predictions (0.955510), macro F1 of 0.903737, and balanced accuracy of 0.899969. The protocol used equal three-fold raw-logit averaging plus equal original/horizontal-flip TTA; no post-holdout tuning, alternate checkpoint evaluation, or rerun was performed.
 
-This is an internal fixed holdout result, not an external benchmark, production-validation result, or generalization claim. The complete per-class metrics and aggregated confusion matrix are in the [canonical result interpretation](docs/canonical-results.md); model scope and limitations are in the [model card](docs/model-card.md). Checkpoints, weights, raw logits, predictions, logs, and dataset contents are not published.
+This is an internal fixed holdout result, not an external benchmark, production-validation result, or generalization claim. The complete per-class metrics and aggregated confusion matrix are in the [canonical result interpretation](docs/canonical-results.md); model scope and limitations are in the [model card](docs/model-card.md); and the documentation-only artifact boundary is in the [artifact publication decision](docs/artifact-publication-decision.md). Checkpoints, weights, raw logits, predictions, logs, and dataset contents are not published.
 
 ## Notebook usage
 
@@ -199,6 +199,7 @@ Repository-only citation metadata is available in [CITATION.cff](CITATION.cff). 
 | [Evaluation](docs/evaluation.md) | Holdout evaluation CLI |
 | [Canonical results](docs/canonical-results.md) | Frozen internal-holdout interpretation and publication boundary |
 | [Model card](docs/model-card.md) | Model scope, performance, limitations, and provenance boundary |
+| [Artifact publication decision](docs/artifact-publication-decision.md) | Documentation-only publication boundary and unresolved Phase 8.6 owner gate |
 | [Reproducibility](docs/reproducibility.md) | Verified reproducibility evidence and boundaries |
 | [Continuous Integration](docs/ci.md) | GitHub Actions repository health |
 | [Release readiness](docs/release-readiness.md) | Engineering-milestone audit and release-note draft |

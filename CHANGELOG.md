@@ -4,7 +4,7 @@
 
 ### Added
 
-- Canonical internal-holdout result interpretation, per-class metrics, aggregated confusion-matrix documentation, and a model card for `deep3-canonical-reference-01`.
+- Canonical internal-holdout result interpretation, per-class metrics, aggregated confusion-matrix documentation, a model card, and a documentation-only [artifact publication decision](docs/artifact-publication-decision.md) for `deep3-canonical-reference-01`.
 
 ### Changed
 

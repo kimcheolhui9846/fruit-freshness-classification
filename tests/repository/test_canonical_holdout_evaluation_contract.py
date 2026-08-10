@@ -63,7 +63,7 @@ class CanonicalHoldoutEvaluationContractTest(unittest.TestCase):
             "No post-holdout tuning occurred.",
             "No state-of-the-art claim is made.",
             "batch 64 is a different training trajectory from batch 192",
-            "Phase 8.5 documentation and publication decision is recorded.",
+            "Phase 8.5 remains owner-gated.",
         ):
             self.assertIn(value, self.evaluation)
         for label in (
@@ -99,7 +99,7 @@ class CanonicalHoldoutEvaluationContractTest(unittest.TestCase):
             "CI CUDA requirement: No",
             "CI production dataset access: No",
             "CI local evaluation output requirement: No",
-            "Phase 8.5 documentation and publication decision is recorded.",
+            "Phase 8.5 remains owner-gated.",
         ):
             self.assertIn(value, self.artifacts)
         self.assertNotRegex(self.artifacts, r"[A-Za-z]:[\\/]")

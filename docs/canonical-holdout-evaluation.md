@@ -114,8 +114,4 @@ The initial external detailed runner encountered a UTF-16 CLI-log decoding fault
 - The Wilson interval is descriptive only; it does not remove dataset-dependence assumptions.
 - Dataset composition, labels, and source quality remain limitations.
 
-## Phase 8.5 documentation status
-
-Phase 8.5 documentation and publication decision is recorded. It adds only aggregate result interpretation, per-class metrics, aggregated confusion-matrix documentation, a model card, and a concise README summary. It does not rerun the holdout, tune after the holdout, evaluate alternate checkpoints, inspect sample images, or publish a dataset, checkpoint, weight, training state, execution log, raw logit, or raw prediction.
-
-See [canonical-results.md](canonical-results.md) for interpretation and the approved publication boundary, and [model-card.md](model-card.md) for intended use and limitations. The binary artifact retention decision continues through Phase 8.6.
+Phase 8.5 remains owner-gated.

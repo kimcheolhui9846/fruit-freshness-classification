@@ -19,9 +19,25 @@
 
 The frozen label order is `freshapples`, `freshbanana`, `freshcapsicum`, `freshcucumber`, `freshoranges`, `freshpotato`, `freshtomato`, `rottenapples`, `rottenbanana`, `rottencapsicum`, `rottencucumber`, `rottenoranges`, `rottenpotato`, and `rottentomato`.
 
-## Intended Use
+## Permitted Use
 
-This model is documented for research reproduction, experiment comparison, and study of the recorded internal holdout result. The repository provides labeled-holdout evaluation only. It does not provide a supported generic unlabeled-image inference interface, a clinical or food-safety decision workflow, or a production deployment contract.
+Permitted use is limited to research, education, portfolio demonstration, internal experiment comparison, and human-reviewed prototyping. The repository provides labeled-holdout evaluation only; it does not provide a supported generic unlabeled-image inference interface or a production deployment contract.
+
+## Out-of-Scope Uses
+
+Visual freshness classification does not establish whether food is safe to eat.
+
+This model must not be described or used as suitable for:
+
+- food-safety decisions;
+- pathogen or toxin detection;
+- mold-safety determination;
+- laboratory inspection replacement;
+- health or medical decisions;
+- regulatory decisions;
+- autonomous commercial disposal;
+- autonomous inventory rejection; or
+- deployment to unvalidated cameras, lighting, fruit varieties, or domains.
 
 ## Training and Evaluation Data
 
@@ -45,10 +61,10 @@ The complete frozen protocol, per-class metrics, and aggregated confusion matrix
 
 ## Artifact Availability
 
-No checkpoint, trained weight, training state, execution log, raw logit, raw prediction, dataset, or other binary artifact is downloadable from this repository, GitHub Actions, or a Release. A separate owner-approved artifact and provenance review is required before any publication change.
+No checkpoint, trained weight, training state, execution log, raw logit, raw prediction, dataset, or other binary artifact is downloadable from this repository, GitHub Actions, or a Release. The canonical publication boundary is [artifact-publication-decision.md](artifact-publication-decision.md): trained-weight and fold-checkpoint publication are blocked pending a separate rights/provenance review.
 
 ## License and Provenance
 
 The MIT License applies to the repository software and project-authored documentation. The external `Densu341/Fresh-rotten-fruit` dataset is governed separately by its original-source terms and is not redistributed here. The public metadata observed during the governance audit was labeled `openrail`, but the surfaced dataset-card README was empty; this model card does not infer redistribution permission from that metadata.
 
-Trained weights are not distributed and require a separate review before publication. See [governance-decisions.md](governance-decisions.md) for the repository license, citation, dataset, and trained-weight boundaries.
+Trained weights are not distributed and require a separate review before publication. This model card is an operational research record, not legal advice.
