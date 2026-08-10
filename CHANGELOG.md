@@ -3,6 +3,9 @@
 ## [Unreleased]
 
 ### Added
+- Froze the Phase 9 post-holdout development and locked-test protocol.
+- Added a reproducible stratified split derived only from the historical canonical training pool.
+- Preserved both the historical canonical holdout and the newly locked Phase 9 test pool outside model-development feedback.
 
 - Canonical internal-holdout result interpretation, per-class metrics, aggregated confusion-matrix documentation, a model card, and a documentation-only [artifact publication decision](docs/artifact-publication-decision.md) for `deep3-canonical-reference-01`.
 
@@ -24,6 +27,9 @@
 ## [0.1.0] - 2026-08-02
 
 ### Added
+- Froze the Phase 9 post-holdout development and locked-test protocol.
+- Added a reproducible stratified split derived only from the historical canonical training pool.
+- Preserved both the historical canonical holdout and the newly locked Phase 9 test pool outside model-development feedback.
 
 - Canonical MIT software license and repository-only `CITATION.cff` metadata.
 - Modular `src/` architecture for the dataset, transforms, model, losses, training engine, evaluation, inference, and utilities.

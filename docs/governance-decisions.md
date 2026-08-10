@@ -80,3 +80,9 @@ Future binary publication requires a separate explicit owner-approved governance
 ## Phase 9.1 — Post-Holdout Research Planning
 
 Phase 8 remains closed and its holdout is historical evidence only. Phase 9 is explicitly post-holdout research: no training, new split, or metric result was authorized in Phase 9.1. Phase 9.2 requires explicit owner approval and a new experiment identity; the observed canonical holdout may not be treated as untouched evidence for tuned successors.
+
+## Phase 9.2 — Post-Holdout Protocol Freeze
+
+Phase 9.1 is complete. The owner approved `DEV_PLUS_LOCKED_TEST` with a pre-registered split seed of `20260810`. The Phase 9 source is restricted to the 21,486-example historical canonical training pool; the 5,372-example historical canonical holdout is excluded and remains `HISTORICAL_EVIDENCE_ONLY`.
+
+The new locked test is frozen as `FROZEN_UNOBSERVED_BY_MODEL`. No model training, model evaluation, canonical-holdout evaluation, new locked-test model evaluation, sample-level image review, external dataset acquisition, checkpoint creation, binary publication, Release creation, or tag creation occurred in Phase 9.2. Future model development requires a separate Phase authorization and may use only the post-holdout development pool.

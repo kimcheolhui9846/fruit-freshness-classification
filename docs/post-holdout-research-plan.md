@@ -99,23 +99,33 @@ YES
 
 Every future experiment records parent, hypothesis, exact config, commit SHA, data/split identity, seed, metrics, resource use, success/failure, and decision. All planned experiments stay registered, including unsuccessful ones. Checkpoints are selected only through the Phase 9 development protocol. No Phase 9.1 artifact, checkpoint, split, training, evaluation, download, or publication is authorized.
 
-## Phase 9.2 entry gate
+## Phase 9.2 frozen protocol
 
 ```text
 PHASE_9_2:
-NOT STARTED
+PROTOCOL_FROZEN
 APPROVED_PHASE_9_DATA_PROTOCOL:
-<NESTED_CV | DEV_PLUS_LOCKED_TEST | NEW_EXTERNAL_TEST | DEFER>
+DEV_PLUS_LOCKED_TEST
 APPROVED_PHASE_9_SPLIT_SEED:
-<PENDING>
+20260810
 APPROVED_PHASE_9_DEVELOPMENT_METRIC:
-<MACRO_F1 | DEFER>
+MACRO_F1
+APPROVED_PHASE_9_INTERNAL_CV:
+3_FOLD_STRATIFIED
+APPROVED_PHASE_9_INTERNAL_CV_RANDOM_STATE:
+42
 APPROVED_PHASE_9_BASELINE_EXECUTION:
-<YES | NO | DEFER>
+NO
 APPROVED_PHASE_9_FIRST_HYPOTHESIS:
-<LOSS | AUGMENTATION | SAMPLER | OPTIMIZATION | ARCHITECTURE | DEFER>
+LOSS
 APPROVED_SAMPLE_LEVEL_REVIEW:
-<YES | NO | DEFER>
+NO
 APPROVED_EXTERNAL_DATA_ACQUISITION:
-<YES | NO | DEFER>
+NO
+POST_HOLDOUT_LOCKED_TEST_STATUS:
+FROZEN_UNOBSERVED_BY_MODEL
+PHASE_9_3_TRAINING_AUTHORIZATION:
+NOT GRANTED
 ```
+
+The source is restricted to the historical canonical training pool. The frozen split record is [`configs/splits/deep3-postholdout-research-01.json`](../configs/splits/deep3-postholdout-research-01.json); the original canonical holdout remains historical evidence only. No Phase 9.2 model training, model evaluation, checkpoint creation, or locked-test model evaluation occurred.
