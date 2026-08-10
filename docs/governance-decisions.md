@@ -71,3 +71,8 @@ No Git tag, GitHub Release, repository setting, branch protection, ruleset, DOI,
 | Phase 8.5 artifact publication | [Documentation-only publication decision](artifact-publication-decision.md); binary publication blocked | Resolve only through the explicit Phase 8.6 owner gate |
 
 No Git tag, GitHub Release, repository setting, branch-protection rule, dataset copy, trained weight, checkpoint, or binary artifact was created in Phase 8.5.
+## Phase 8.6 — Canonical Run Closure
+
+The canonical reference run is CLOSED_REFERENCE; documentation remains public while all canonical binaries remain local-only. Dataset license clearance remains NOT_CONFIRMED. Weight and checkpoint publication is not authorized, and no artifact deletion, relocation, conversion, or packaging is authorized. No Release or tag was created.
+
+Future binary publication requires a separate explicit owner-approved governance Phase. Future post-holdout research requires a new experiment identity. The already-observed canonical holdout must not be treated as untouched test evidence for tuned successors.

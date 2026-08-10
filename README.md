@@ -96,6 +96,13 @@ The frozen `deep3-canonical-reference-01` three-fold EMA ensemble was evaluated 
 
 This is an internal fixed holdout result, not an external benchmark, production-validation result, or generalization claim. The complete per-class metrics and aggregated confusion matrix are in the [canonical result interpretation](docs/canonical-results.md); model scope and limitations are in the [model card](docs/model-card.md); and the documentation-only artifact boundary is in the [artifact publication decision](docs/artifact-publication-decision.md). Checkpoints, weights, raw logits, predictions, logs, and dataset contents are not published.
 
+## Canonical run closure
+
+- Canonical reference run: Closed
+- Training completed; locked internal-holdout evaluation completed.
+- Binaries are not published; no post-holdout tuning was performed.
+
+See [canonical run closure](docs/canonical-run-closure.md), [canonical artifact retention](docs/canonical-artifact-retention.md), the prior [artifact publication decision](docs/artifact-publication-decision.md), and [Phase 8.6 governance resolution](docs/phase-8.6-governance-resolution.md). These documents do not provide binary downloads.
 ## Notebook usage
 
 `deep3.ipynb` is the active orchestration notebook. It loads the same configuration and calls the modular source APIs while retaining plotting and exploratory presentation. `deep.ipynb`, `deep1.ipynb`, and `deep2.ipynb` are historical experiment notebooks, not current entry points. Full `deep3.ipynb` execution has not been verified.

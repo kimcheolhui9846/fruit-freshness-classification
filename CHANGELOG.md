@@ -6,6 +6,10 @@
 
 - Canonical internal-holdout result interpretation, per-class metrics, aggregated confusion-matrix documentation, a model card, and a documentation-only [artifact publication decision](docs/artifact-publication-decision.md) for `deep3-canonical-reference-01`.
 
+- Closed the canonical reference run after completed training, locked holdout evaluation, and result interpretation.
+- Recorded local-only retention for canonical binary artifacts until an explicit future owner decision.
+- No model weights, checkpoints, training state, logs, raw predictions, raw logits, dataset content, GitHub Actions artifacts, Release assets, Release, or tag were published.
+
 ### Changed
 
 - README and reproducibility status now distinguish the completed local canonical run and locked internal holdout from the historical untrained compatibility evidence.
