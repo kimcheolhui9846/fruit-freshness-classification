@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Added
+
+- Canonical internal-holdout result interpretation, per-class metrics, aggregated confusion-matrix documentation, and a model card for `deep3-canonical-reference-01`.
+
+### Changed
+
+- README and reproducibility status now distinguish the completed local canonical run and locked internal holdout from the historical untrained compatibility evidence.
+
+### Artifact policy
+
+- Aggregate metrics and documentation are public; dataset content, checkpoints, weights, training state, logs, raw logits, raw predictions, and all binary artifacts remain local-only through Phase 8.6.
 ## [0.1.0] - 2026-08-02
 
 ### Added

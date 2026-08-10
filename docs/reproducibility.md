@@ -2,7 +2,13 @@
 
 ## Scope and verification boundary
 
-Phase 5.5 rerun verified the committed project in newly created, isolated Windows virtual environments on **2026-08-01**. It verifies installation, the production dataset path, bounded real-data CMT execution, temporary checkpoint interoperability, and the labeled holdout evaluation path. It does not claim a completed canonical training experiment or a benchmark-quality result.
+Phase 5.5 rerun verified the committed project in newly created, isolated Windows virtual environments on **2026-08-01**. It verifies installation, the production dataset path, bounded real-data CMT execution, temporary checkpoint interoperability, and the labeled holdout evaluation path. The historical Phase 5.5 evidence did not claim a completed canonical training experiment or a benchmark-quality result.
+
+## Current canonical experiment status (2026-08-10)
+
+A later owner-approved canonical run, `deep3-canonical-reference-01`, completed once with the derived batch-64 configuration. Its fold-best EMA checkpoints were then assessed once against the locked 5,372-example internal holdout. The result is 5,133 / 5,372 top-1 correct predictions (0.955510), macro F1 of 0.903737, and balanced accuracy of 0.899969. The full identity, protocol, metrics, and confusion matrix are recorded in [canonical-holdout-evaluation.md](canonical-holdout-evaluation.md); interpretation and publication limits are in [canonical-results.md](canonical-results.md).
+
+This is not a benchmark, production, external-validation, or independent-machine reproduction claim. Checkpoints, weights, training state, execution logs, raw logits, raw predictions, dataset contents, and other binary artifacts remain local-only and are retained through Phase 8.6.
 
 | Component | Verified value |
 | --- | --- |

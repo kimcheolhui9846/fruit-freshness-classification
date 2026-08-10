@@ -6,7 +6,7 @@ A modular, reproducible PyTorch research pipeline for fresh/rotten fruit classif
 
 ## Overview
 
-This repository is designed as a research-oriented computer-vision project: reusable implementation lives in `src/`, `deep3.ipynb` remains the active orchestration and presentation notebook, and `scripts/` exposes thin training and labeled-holdout evaluation entry points. Reproducibility evidence and CI validate the repository mechanics; they do not substitute for a trained-model benchmark.
+This repository is designed as a research-oriented computer-vision project: reusable implementation lives in `src/`, `deep3.ipynb` remains the active orchestration and presentation notebook, and `scripts/` exposes thin training and labeled-holdout evaluation entry points. Reproducibility evidence and CI validate repository mechanics. A frozen canonical run and one trained-checkpoint internal holdout evaluation are documented separately; neither substitutes for external validation, deployment validation, or a benchmark claim.
 
 ## Verified capabilities
 
@@ -90,6 +90,11 @@ python -m scripts.evaluate `
 ```
 
 `--checkpoint-dir` is required. Every configured fold checkpoint must exist; partial ensembles are rejected, fold order is deterministic, and no result file is written by default. Evaluation applies horizontal-flip TTA and averages raw logits on the production holdout split. Generic unlabeled image inference is not implemented. See [evaluation documentation](docs/evaluation.md).
+## Canonical Result (Internal Holdout)
+
+The frozen `deep3-canonical-reference-01` three-fold EMA ensemble was evaluated once on the fixed 5,372-example internal holdout. It achieved 5,133 / 5,372 top-1 correct predictions (0.955510), macro F1 of 0.903737, and balanced accuracy of 0.899969. The protocol used equal three-fold raw-logit averaging plus equal original/horizontal-flip TTA; no post-holdout tuning, alternate checkpoint evaluation, or rerun was performed.
+
+This is an internal fixed holdout result, not an external benchmark, production-validation result, or generalization claim. The complete per-class metrics and aggregated confusion matrix are in the [canonical result interpretation](docs/canonical-results.md); model scope and limitations are in the [model card](docs/model-card.md). Checkpoints, weights, raw logits, predictions, logs, and dataset contents are not published.
 
 ## Notebook usage
 
@@ -158,24 +163,23 @@ CI does not download the production dataset, run CUDA, train the model, perform 
 | CUDA CMT smoke | Verified |
 | Checkpoint interoperability | Verified |
 | Evaluation CLI on the full holdout | Verified with untrained compatibility checkpoints |
-| Full canonical three-fold training | Not run |
-| Trained-checkpoint evaluation | Not run |
-| Benchmark reproduction | Not run |
+| Full canonical three-fold training | Completed once with the derived batch-64 configuration; checkpoints remain local-only |
+| Trained-checkpoint evaluation | Completed once on the locked internal holdout |
+| Benchmark reproduction | Not verified |
 | Independent-machine reproduction | Not verified |
 
-The temporary compatibility-checkpoint holdout measurement is an interoperability check, not model performance. No performance table is reported until a separately authorized canonical training run produces traceable trained checkpoints. See [reproducibility documentation](docs/reproducibility.md).
-
+The temporary compatibility-checkpoint holdout measurement remains an interoperability check, not model performance. The documented canonical result is a separate locked internal holdout assessment; it is not a benchmark or production claim. See [reproducibility documentation](docs/reproducibility.md) and the [canonical result interpretation](docs/canonical-results.md).
 ## Limitations
 
-- Full canonical three-fold training has not been run.
-- No trained fold checkpoints are committed; trained-checkpoint accuracy and benchmark results are not verified.
+- Full canonical three-fold training completed once. Its checkpoints remain local-only; no trained binary is committed or published.
+- The reported model result is one internal fixed holdout, not an external benchmark, production-validation result, or generalization claim.
+- No post-holdout tuning, holdout reevaluation, alternate-checkpoint evaluation, or sample-level image review was performed.
 - Full notebook execution is not verified.
 - Generic unlabeled image inference is not implemented.
 - A same-machine clean environment is verified; independent-machine reproduction is not.
 - Dataset contents and checkpoints are intentionally excluded from Git. Production dataset access requires network or an existing cache outside CI.
 - CI is CPU-only and offline; it does not test CUDA, production loading, training, or real holdout evaluation.
-- The configured batch size may be constrained by available GPU memory.
-
+- The derived batch-64 run is a different training trajectory from the original batch-192 configuration.
 ## License
 
 The repository software and project-authored documentation are licensed under the MIT [LICENSE](LICENSE). The external Hugging Face dataset is governed separately by its original source terms; see the [dataset documentation](docs/dataset.md). Dataset files are not included in this repository.
@@ -193,6 +197,8 @@ Repository-only citation metadata is available in [CITATION.cff](CITATION.cff). 
 | [Configuration](docs/configuration.md) | Experiment configuration |
 | [Training](docs/training.md) | Training CLI and checkpoint policy |
 | [Evaluation](docs/evaluation.md) | Holdout evaluation CLI |
+| [Canonical results](docs/canonical-results.md) | Frozen internal-holdout interpretation and publication boundary |
+| [Model card](docs/model-card.md) | Model scope, performance, limitations, and provenance boundary |
 | [Reproducibility](docs/reproducibility.md) | Verified reproducibility evidence and boundaries |
 | [Continuous Integration](docs/ci.md) | GitHub Actions repository health |
 | [Release readiness](docs/release-readiness.md) | Engineering-milestone audit and release-note draft |

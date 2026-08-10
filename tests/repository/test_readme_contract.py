@@ -66,7 +66,7 @@ class ReadmeContractTests(unittest.TestCase):
         self.assertNotRegex(self.readme, r"(?i)(ghp_|github_pat_|ctx7sk-|sk-[a-z0-9]{16,})")
         self.assertNotIn("0.097356", self.readme)
         self.assertNotIn("523/5,372", self.readme)
-        self.assertIn("Full canonical three-fold training has not been run.", self.readme)
+        self.assertIn("Full canonical three-fold training completed once.", self.readme)
         self.assertIn("independent-machine reproduction is not.", self.readme)
         self.assertIn("Generic unlabeled image inference is not implemented.", self.readme)
         self.assertIn("CI is CPU-only and offline", self.readme)

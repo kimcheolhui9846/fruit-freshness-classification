@@ -1,6 +1,6 @@
 # Canonical Holdout Evaluation Artifacts
 
-The Phase 8.4 outputs below are retained locally through Phase 8.5. Exact local paths are intentionally omitted. Every artifact is ignored by Git, unstaged, untracked, uncommitted, and unpublished.
+The Phase 8.4 outputs below are retained locally through Phase 8.6. Exact local paths are intentionally omitted. Every artifact is ignored by Git, unstaged, untracked, uncommitted, and unpublished.
 
 | Artifact | Purpose | Size | SHA-256 | Local-only | Ignored | Tracked | Published |
 | --- | --- | ---: | --- | --- | --- | --- | --- |
@@ -30,12 +30,16 @@ Training-state publication: No
 
 Execution-log publication: No
 
+GitHub Actions artifact upload: No
+
+Release asset upload: No
+
 Release creation: No
 
 Tag creation: No
 
-The prediction archive is never copied into tracked Markdown, GitHub releases, or CI artifacts. Deletion, rename, relocation, or any publication of these artifacts requires a later explicit artifact-governance approval. Retention continues through Phase 8.5.
+The prediction archive is never copied into tracked Markdown, GitHub releases, or CI artifacts. Deletion, rename, relocation, or any publication of these artifacts requires a later explicit artifact-governance approval. Retained locally through Phase 8.6.
 
 The committed documentation is an offline contract only. CI checkpoint requirement: No. CI CUDA requirement: No. CI production dataset access: No. CI local evaluation output requirement: No. CI neither loads the local ensemble nor reruns production evaluation.
 
-Phase 8.5 remains owner-gated.
+Phase 8.5 documentation and publication decision is recorded. Phase 8.6 remains owner-gated for any new artifact-retention or publication decision.

@@ -52,17 +52,21 @@ Repository-only citation was explicitly selected during Phase 6.4. [`CITATION.cf
 
 No version, release date, DOI, paper citation, affiliation, ORCID, additional author, or email field was added to `CITATION.cff`. A future versioned release may update citation metadata only with separate Phase 6.5 authorization.
 
+## Historical Phase 6.4 non-actions
+
+No Git tag, GitHub Release, repository setting, branch protection, ruleset, DOI, dataset copy, or trained weight was created in Phase 6.4. This is a historical record for that Phase; later owner-approved Phases established the current release, ruleset, and repository-metadata state below.
+
 ## Remaining release and repository decisions
 
 | Decision | Current state | Owner action needed |
 |---|---|---|
-| Version tag | Pending; no tag exists | Approve or defer the proposed `v0.1.0` engineering milestone |
-| GitHub Release | Pending; no Release exists | Approve prerelease or normal-release policy and final notes |
-| Release date | Pending | Approve only with a release action |
+| Version tag | `v0.1.0` engineering-milestone tag published | A new tag requires separate explicit approval |
+| GitHub Release | `v0.1.0` prerelease published with zero assets | A new Release requires separate explicit approval |
+| Release date | `2026-08-02` for the engineering milestone | A new release date requires a new release action |
 | Dataset redistribution | Pending source-terms review | Confirm attribution and redistribution boundary |
 | Trained-weight distribution | Pending separate review | Confirm applicable terms before publication |
-| Branch protection | Not configured | Choose the solo-workflow tradeoff separately |
-| Repository metadata | Unchanged | Approve exact wording/topics separately |
-| Canonical training | Not run | Authorize hardware, time, and artifact plan separately |
+| Branch protection | `Protect main` and `Protect v0.1.0` rulesets active | Change only through a separate governance Phase |
+| Repository metadata | Approved description and topics applied in Phase 7.3 | Change only through a separate metadata Phase |
+| Canonical training and result documentation | One local-only run and one internal fixed-holdout evaluation documented | Decide artifact retention or publication only through a new explicit Phase |
 
-No Git tag, GitHub Release, repository setting, branch protection, ruleset, DOI, dataset copy, or trained weight was created in Phase 6.4.
+No Git tag, GitHub Release, repository setting, branch-protection rule, dataset copy, trained weight, checkpoint, or binary artifact was created in Phase 8.5.
