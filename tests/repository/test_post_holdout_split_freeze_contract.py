@@ -95,7 +95,7 @@ class PostHoldoutSplitFreezeContractTest(unittest.TestCase):
             with self.subTest(required_text=required_text):
                 self.assertIn(required_text, text)
 
-    def test_registry_and_research_plan_do_not_authorize_phase_9_3(self):
+    def test_registry_and_research_plan_preserve_the_frozen_boundary_after_phase_93_approval(self):
         registry = (REPOSITORY_ROOT / "docs/experiment-registry.md").read_text(
             encoding="utf-8"
         )
@@ -110,7 +110,7 @@ class PostHoldoutSplitFreezeContractTest(unittest.TestCase):
         self.assertIn("APPROVED_PHASE_9_DATA_PROTOCOL:\nDEV_PLUS_LOCKED_TEST", plan)
         self.assertIn("APPROVED_PHASE_9_SPLIT_SEED:\n20260810", plan)
         self.assertIn("APPROVED_PHASE_9_DEVELOPMENT_METRIC:\nMACRO_F1", plan)
-        self.assertIn("PHASE_9_3_TRAINING_AUTHORIZATION:\nNOT GRANTED", plan)
+        self.assertIn("PHASE_9_3_TRAINING_AUTHORIZATION:\nAPPROVED", plan)
 
 
 if __name__ == "__main__":

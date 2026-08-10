@@ -125,7 +125,10 @@ NO
 POST_HOLDOUT_LOCKED_TEST_STATUS:
 FROZEN_UNOBSERVED_BY_MODEL
 PHASE_9_3_TRAINING_AUTHORIZATION:
-NOT GRANTED
+APPROVED
 ```
 
 The source is restricted to the historical canonical training pool. The frozen split record is [`configs/splits/deep3-postholdout-research-01.json`](../configs/splits/deep3-postholdout-research-01.json); the original canonical holdout remains historical evidence only. No Phase 9.2 model training, model evaluation, checkpoint creation, or locked-test model evaluation occurred.
+## Phase 9.3 approved baseline
+
+The owner approved exactly one child run, `deep3-postholdout-research-01-baseline`, to reproduce the canonical recipe on the frozen development pool using deterministic 3-fold stratified CV (`random_state=42`). The locked test remains `FROZEN_UNOBSERVED_BY_MODEL`, and the historical canonical holdout remains `HISTORICAL_EVALUATION_ONLY`. The baseline may not tune the recipe or make a final-test claim. Its current execution status is `NOT_YET_RUN`; Phase 9.4 remains `NOT STARTED`.
