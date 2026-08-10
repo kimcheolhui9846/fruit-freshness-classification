@@ -43,6 +43,11 @@ The locked protocol used three fold-best EMA checkpoints, equal raw-logit averag
 
 The frozen aggregate output has 5,372 examples, 5,133 top-1 correct predictions, and 239 top-1 errors. Top-2 has 5,271 top-2 correct predictions and top-3 has 5,333 top-3 correct predictions. Therefore, 138 top-1 errors recovered at rank 2, 62 additional errors recovered at rank 3, and 39 outside top-3.
 
+For the frozen Phase 8.5 merge contract, the exact recovery wording is:
+
+- 138 rank-2 recovery
+- 62 additional rank-3 recovery
+
 `freshpotato` has 72 errors, `rottentomato` has 89 errors, and `rottencucumber` has 33 errors. Together these 194 concentrated errors account for 194 / 239 = approximately 81.17% of all top-1 errors. Overall accuracy is high, but the errors are disproportionately concentrated in a small number of classes; macro F1 and balanced accuracy are therefore essential context alongside accuracy. top-k rank recovery does not imply calibrated confidence.
 
 ### Observed fact
