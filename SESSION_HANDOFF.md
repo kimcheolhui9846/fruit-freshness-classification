@@ -890,3 +890,80 @@ NO
 ```
 
 Phase 9.1 created planning records only. No training, evaluation, split, dataset download, checkpoint modification, or binary publication occurred. Phase 9.2 remains owner-gated.
+
+## Phase 9.2 — Evaluation Protocol Freeze and Locked Split Materialization
+
+```text
+PHASE:
+9.2 — Evaluation Protocol Freeze and Locked Split Materialization
+PHASE_9_1_FINAL_MAIN:
+b81ab1aedb19b35beef4db215c04746bb50c030c
+PHASE_BRANCH:
+research/phase-9.2-protocol-freeze
+IMPLEMENTATION_SHA:
+ba50f6dee1b098ccf4995570d3a18772e1f5904d
+PR:
+#4
+PR_STATE:
+DRAFT
+PROTOCOL:
+DEV_PLUS_LOCKED_TEST
+EXPERIMENT_ID:
+deep3-postholdout-research-01
+SOURCE_POOL:
+HISTORICAL_CANONICAL_TRAIN_ONLY
+SOURCE_POOL_SIZE:
+21486
+DEVELOPMENT_COUNT:
+17188
+LOCKED_TEST_COUNT:
+4298
+CANONICAL_HOLDOUT_SIZE:
+5372
+CANONICAL_HOLDOUT_OVERLAP:
+0
+SPLIT_SEED:
+20260810
+STRATIFIED:
+YES
+SOURCE_LABEL_SEQUENCE_SHA256:
+69dd64bc924bc70c13eb80f9c728635e7a60e2e813b0a636d54f964dc2fd0460
+DEVELOPMENT_INDICES_SHA256:
+329086d616fbf72e79bb65f00966259d6788cd8ff85daf4aff444688e06dfc19
+LOCKED_TEST_INDICES_SHA256:
+386498e238b2e5b905b599c63f633b3482f08370f111fcf5bca08dea2b9166c2
+LOCKED_TEST_STATUS:
+FROZEN_UNOBSERVED_BY_MODEL
+MODEL_TRAINING:
+NO
+MODEL_EVALUATION:
+NO
+CANONICAL_HOLDOUT_EVALUATION:
+NO
+NEW_LOCKED_TEST_EVALUATION:
+NO
+EXTERNAL_DATA_ACQUISITION:
+NO
+CHECKPOINT_CREATION:
+NO
+BINARY_PUBLICATION:
+NO
+IMPLEMENTATION_PUSH_CI:
+31377615633
+IMPLEMENTATION_PR_CI:
+31377654505
+CI_UBUNTU:
+success
+CI_WINDOWS:
+success
+ACTIONS_ARTIFACTS:
+0
+PHASE_9_3:
+NOT STARTED
+READY_FOR_OWNER_PR_REVIEW:
+PENDING_HANDOFF_CI
+OWNER_PR_MERGE_APPROVAL:
+NOT YET GRANTED
+```
+
+The tracked manifest contains only source-relative indices, label-count metadata, and hashes. The frozen locked test remains unevaluated by a model; Phase 9.3 requires a separate explicit authorization. This handoff does not authorize a merge.
