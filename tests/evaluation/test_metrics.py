@@ -4,6 +4,7 @@ import warnings
 import numpy as np
 from sklearn.metrics import balanced_accuracy_score, f1_score, top_k_accuracy_score
 
+from src.evaluation.diagnostics import compute_classification_diagnostics
 from src.evaluation.metrics import compute_validation_metrics
 
 
@@ -116,6 +117,41 @@ class ValidationMetricParityTest(unittest.TestCase):
             top_k_accuracy_score(labels, logits, k=3, labels=np.arange(logits.shape[1])),
         )
 
+
+class ClassificationDiagnosticTest(unittest.TestCase):
+    def test_diagnostics_include_oof_summary_per_class_and_confusion_matrix(self):
+        labels = np.array([0, 1, 2, 3], dtype=np.int64)
+        predictions = np.array([0, 2, 1, 3], dtype=np.int64)
+        logits = np.array(
+            [
+                [4.0, 1.0, 0.0, -1.0],
+                [1.0, 0.0, 4.0, -1.0],
+                [0.0, 4.0, 1.0, -1.0],
+                [0.0, 1.0, 0.0, 4.0],
+            ]
+        )
+
+        diagnostics = compute_classification_diagnostics(
+            labels,
+            predictions,
+            logits,
+            ["fresh", "ripe", "rotten", "other"],
+        )
+
+        self.assertEqual(diagnostics["sample_count"], 4)
+        self.assertEqual(diagnostics["top1_accuracy"], 0.5)
+        self.assertEqual(
+            diagnostics["confusion_matrix"],
+            [[1, 0, 0, 0], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 1]],
+        )
+        self.assertEqual(
+            [row["class_name"] for row in diagnostics["per_class"]],
+            ["fresh", "ripe", "rotten", "other"],
+        )
+        self.assertIn("macro_f1", diagnostics)
+        self.assertIn("balanced_accuracy", diagnostics)
+        self.assertIn("top2_accuracy", diagnostics)
+        self.assertIn("top3_accuracy", diagnostics)
 
 if __name__ == "__main__":
     unittest.main()

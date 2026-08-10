@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 
 from src.engine.checkpoint import load_model_state, save_model_state
-from src.inference.loading import load_fold_models
+from src.inference.loading import load_fold_model, load_fold_models
 from src.utils.paths import build_fold_checkpoint_path
 
 
@@ -145,6 +145,26 @@ class FoldModelLoadingParityTest(unittest.TestCase):
             self.assertEqual(output.device.type, "cuda")
             self.assertFalse(output.requires_grad)
 
+
+class SingleFoldModelLoadingTest(unittest.TestCase):
+    def test_single_fold_loader_reuses_checkpoint_contract_without_loading_other_folds(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = build_tiny_classifier(3)
+            checkpoint = Path(build_fold_checkpoint_path(directory, 2))
+            save_model_state(source, checkpoint)
+
+            with patch(
+                "src.inference.loading.build_cmt_classifier",
+                side_effect=build_tiny_classifier,
+            ), patch(
+                "src.inference.loading.build_fold_checkpoint_path",
+                wraps=build_fold_checkpoint_path,
+            ) as path_helper:
+                loaded = load_fold_model(3, "cpu", directory, 2)
+
+        self.assertFalse(loaded.training)
+        self.assertEqual([call.args for call in path_helper.call_args_list], [(directory, 2)])
+        assert_state_dict_equal(self, loaded.state_dict(), source.state_dict())
 
 if __name__ == "__main__":
     unittest.main()

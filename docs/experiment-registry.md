@@ -4,7 +4,7 @@
 |---|---:|---|---|---|
 | `deep3-canonical-reference-01` | 8 | `CLOSED_REFERENCE` | None | `OBSERVED`; historical evidence only |
 | `deep3-postholdout-research-01` | 9.2 | `PROTOCOL_FROZEN` | `deep3-canonical-reference-01` | Historical canonical holdout excluded; new locked test is frozen and unobserved by a model |
-| `deep3-postholdout-research-01-baseline` | 9.3 | `PRE_TRAINING_IMPLEMENTATION` | `deep3-postholdout-research-01` | Development CV only; locked test and canonical holdout are model-inaccessible |
+| `deep3-postholdout-research-01-baseline` | 9.3 | `PRE_TRAINING_CV_FROZEN` | `deep3-postholdout-research-01` | Development CV only; locked test and canonical holdout are model-inaccessible |
 
 Future child runs use: `deep3-postholdout-research-01-baseline`, `deep3-postholdout-research-01-loss-001`, `deep3-postholdout-research-01-aug-001`, `deep3-postholdout-research-01-sampler-001`, `deep3-postholdout-research-01-opt-001`, and `deep3-postholdout-research-01-arch-001`.
 
