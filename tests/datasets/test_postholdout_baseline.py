@@ -12,6 +12,7 @@ from src.datasets.postholdout import (
     build_postholdout_cv_manifest,
     load_frozen_postholdout_manifest,
     load_postholdout_cv_manifest,
+    sha256_json_identity_file,
 )
 
 
@@ -95,6 +96,16 @@ class PostHoldoutBaselineTest(unittest.TestCase):
                     development_count=len(labels),
                 )
 
+
+    def test_json_identity_hash_normalizes_crlf_to_lf(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "identity.json"
+            path.write_bytes(b"{\r\n  \"schema_version\": 1\r\n}\r\n")
+
+            self.assertEqual(
+                sha256_json_identity_file(path),
+                hashlib.sha256(b"{\n  \"schema_version\": 1\n}\n").hexdigest(),
+            )
 
 if __name__ == "__main__":
     unittest.main()

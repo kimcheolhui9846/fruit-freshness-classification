@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import argparse
 import csv
-from hashlib import sha256
 import json
 from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
 import torch
+
+from src.datasets.postholdout import sha256_json_identity_file
 
 from src.utils.config import (
     load_experiment_config,
@@ -59,10 +60,6 @@ def _resolve_repository_path(path: str | Path) -> Path:
         return candidate
     return REPOSITORY_ROOT / candidate
 
-
-def _sha256_file(path: Path) -> str:
-    """Return the SHA-256 digest of one tracked identity file."""
-    return sha256(path.read_bytes()).hexdigest()
 
 
 def resolve_fold_checkpoint_paths(checkpoint_dir: Path, num_folds: int) -> list[Path]:
@@ -139,7 +136,7 @@ def prepare_development_dataset_and_folds(
     )
     cv_manifest = dependencies.load_postholdout_cv_manifest(
         cv_path,
-        development_manifest_sha256=_sha256_file(split_path),
+        development_manifest_sha256=sha256_json_identity_file(split_path),
         development_count=frozen_manifest["development_count"],
     )
     folds = dependencies.cv_folds_from_manifest(cv_manifest)
@@ -149,8 +146,8 @@ def prepare_development_dataset_and_folds(
         "data_protocol": "DEV_PLUS_LOCKED_TEST",
         "development_count": frozen_manifest["development_count"],
         "locked_test_count": frozen_manifest["locked_test_count"],
-        "split_manifest_sha256": _sha256_file(split_path),
-        "cv_manifest_sha256": _sha256_file(cv_path),
+        "split_manifest_sha256": sha256_json_identity_file(split_path),
+        "cv_manifest_sha256": sha256_json_identity_file(cv_path),
         "locked_test_model_access": "NO",
         "canonical_holdout_model_access": "NO",
     }

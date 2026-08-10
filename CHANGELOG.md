@@ -19,6 +19,9 @@
 - Defined the boundary between the closed canonical holdout and future development/evaluation.
 - Added experiment-registration and pre-registration rules before any Phase 9 training.
 
+### Fixed
+- Normalized tracked post-holdout JSON identity hashes to LF before SHA-256 calculation, preventing cross-platform CI mismatches.
+
 ### Changed
 
 - README and reproducibility status now distinguish the completed local canonical run and locked internal holdout from the historical untrained compatibility evidence.

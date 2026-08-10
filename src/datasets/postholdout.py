@@ -25,6 +25,12 @@ def _sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def sha256_json_identity_file(path: str | Path) -> str:
+    """Hash JSON identity bytes after normalizing CRLF to portable LF."""
+    raw_bytes = Path(path).read_bytes()
+    return hashlib.sha256(raw_bytes.replace(b"\r\n", b"\n")).hexdigest()
+
+
 def _require_sha256(value: object, name: str) -> str:
     if not isinstance(value, str) or len(value) != 64:
         raise ValueError(f"{name} must be a SHA-256 hex digest.")
