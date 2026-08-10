@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- Authorized the Phase 9.3 post-holdout development baseline without starting training or publishing artifacts.
 - Froze the Phase 9 post-holdout development and locked-test protocol.
 - Added a reproducible stratified split derived only from the historical canonical training pool.
 - Preserved both the historical canonical holdout and the newly locked Phase 9 test pool outside model-development feedback.

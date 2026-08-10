@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path, PureWindowsPath
 import tomllib
 
@@ -69,6 +70,8 @@ def _validate_config(config: dict) -> None:
     _require_open_unit_interval(config["ema"]["decay"], "[ema].decay")
     _validate_filename(config["checkpoint"]["final_model_filename"])
     _validate_figure_size(config["reporting"]["figure_size"])
+    if "post_holdout" in config:
+        _validate_postholdout_section(config["post_holdout"])
 
 
 def _require_section(config: dict, section_name: str) -> dict:
@@ -112,3 +115,72 @@ def _validate_filename(value: str) -> None:
 def _validate_figure_size(value: list) -> None:
     if len(value) != 2 or any(type(dimension) is not int or dimension <= 0 for dimension in value):
         raise ValueError("[reporting].figure_size must be a two-item list of positive integers.")
+
+
+def _validate_postholdout_section(section: dict) -> None:
+    required = {
+        "experiment_id": str,
+        "parent_experiment_id": str,
+        "split_manifest_path": str,
+        "cv_manifest_path": str,
+        "artifact_namespace": str,
+    }
+    if type(section) is not dict:
+        raise TypeError("Configuration section [post_holdout] must be a table.")
+    for key, expected_type in required.items():
+        value = _require_key(section, "post_holdout", key)
+        if type(value) is not expected_type or not value:
+            raise TypeError(f"Configuration value [post_holdout].{key} must be a non-empty string.")
+    for key in ("split_manifest_path", "cv_manifest_path"):
+        _validate_repository_relative_path(section[key], f"[post_holdout].{key}")
+    for key in ("experiment_id", "parent_experiment_id", "artifact_namespace"):
+        if any(character in section[key] for character in "\\/:"):
+            raise ValueError(f"Configuration value [post_holdout].{key} must be portable.")
+
+
+def _validate_repository_relative_path(value: str, name: str) -> None:
+    path = Path(value)
+    if path.is_absolute() or PureWindowsPath(value).is_absolute() or ".." in path.parts:
+        raise ValueError(f"Configuration value {name} must be repository-relative.")
+
+
+def baseline_recipe_differences(canonical: dict, baseline: dict) -> dict:
+    """Return every semantic difference between canonical and baseline configs."""
+    differences = {}
+    for section in sorted(set(canonical) | set(baseline)):
+        canonical_value = canonical.get(section)
+        baseline_value = baseline.get(section)
+        if canonical_value == baseline_value:
+            continue
+        if section == "post_holdout" and section not in canonical:
+            differences[section] = baseline_value
+        else:
+            differences[section] = {
+                "canonical": canonical_value,
+                "baseline": baseline_value,
+            }
+    return differences
+
+
+def _sha256_file(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def validate_postholdout_baseline_config(
+    canonical_path: str | Path,
+    baseline_path: str | Path,
+) -> dict[str, object]:
+    """Validate that a Phase 9 baseline changes only protocol identity fields."""
+    canonical_resolved = Path(canonical_path)
+    baseline_resolved = Path(baseline_path)
+    canonical = load_experiment_config(canonical_resolved)
+    baseline = load_experiment_config(baseline_resolved)
+    differences = baseline_recipe_differences(canonical, baseline)
+    if set(differences) != {"post_holdout"}:
+        raise ValueError("Post-holdout baseline recipe differs from canonical values.")
+    return {
+        "recipe_equivalent": True,
+        "canonical_config_sha256": _sha256_file(canonical_resolved),
+        "baseline_config_sha256": _sha256_file(baseline_resolved),
+        "allowed_differences": differences,
+    }

@@ -237,7 +237,7 @@ def _build_run_manifest(
     resume_enabled: bool,
 ) -> dict[str, object]:
     gpu_model = torch.cuda.get_device_name(device) if device.type == "cuda" else None
-    return {
+    manifest = {
         "schema_version": RUN_MANIFEST_SCHEMA_VERSION,
         "run_id": metadata["run_id"],
         "repository_commit": metadata["repository_commit"],
@@ -272,6 +272,9 @@ def _build_run_manifest(
             "other_binary_artifacts": "NO",
         },
     }
+    if "post_holdout" in metadata:
+        manifest["post_holdout"] = copy.deepcopy(metadata["post_holdout"])
+    return manifest
 
 
 def _write_run_manifest(path: Path, manifest: dict[str, object]) -> None:
@@ -370,6 +373,12 @@ def _restore_runtime_state(
 def _load_training_dependencies() -> SimpleNamespace:
     """Import production training dependencies only when training is requested."""
     from src.datasets.folds import iter_stratified_folds, select_fold_datasets
+    from src.datasets.postholdout import (
+        cv_folds_from_manifest,
+        load_frozen_postholdout_manifest,
+        load_postholdout_cv_manifest,
+        select_frozen_development_pool,
+    )
     from src.datasets.fruit_freshness import (
         DATASET_REPOSITORY_ID,
         DATASET_REVISION,
@@ -397,6 +406,7 @@ def _load_training_dependencies() -> SimpleNamespace:
         FocalLoss=FocalLoss,
         ModelEma=ModelEma,
         build_class_balanced_alpha=build_class_balanced_alpha,
+        cv_folds_from_manifest=cv_folds_from_manifest,
         build_cmt_classifier=build_cmt_classifier,
         build_finetune_transform=build_finetune_transform,
         build_fold_checkpoint_path=build_fold_checkpoint_path,
@@ -411,10 +421,13 @@ def _load_training_dependencies() -> SimpleNamespace:
         dataset_revision=DATASET_REVISION,
         ensure_output_directory=ensure_output_directory,
         iter_stratified_folds=iter_stratified_folds,
+        load_frozen_postholdout_manifest=load_frozen_postholdout_manifest,
         load_fruit_freshness_dataset=load_fruit_freshness_dataset,
+        load_postholdout_cv_manifest=load_postholdout_cv_manifest,
         save_label_names=save_label_names,
         save_model_state=save_model_state,
         select_fold_datasets=select_fold_datasets,
+        select_frozen_development_pool=select_frozen_development_pool,
         train_one_epoch=train_one_epoch,
         validate_one_epoch=validate_one_epoch,
     )
@@ -466,6 +479,55 @@ def _save_operational_state(
     return state
 
 
+
+def prepare_training_dataset_and_folds(
+    config: dict,
+    dependencies: SimpleNamespace,
+) -> tuple[object, list[tuple[np.ndarray, np.ndarray]], dict[str, object] | None]:
+    """Select the canonical train route or the frozen post-holdout development route."""
+    historical_dataset = dependencies.load_fruit_freshness_dataset()
+    post_holdout = config.get("post_holdout")
+    if post_holdout is None:
+        training_dataset = historical_dataset["train"]
+        folds = list(
+            dependencies.iter_stratified_folds(
+                training_dataset,
+                n_splits=config["cross_validation"]["n_splits"],
+                shuffle=config["cross_validation"]["shuffle"],
+                random_state=config["cross_validation"]["random_state"],
+            )
+        )
+        return training_dataset, folds, None
+
+    split_path = _resolve_repository_path(post_holdout["split_manifest_path"])
+    cv_path = _resolve_repository_path(post_holdout["cv_manifest_path"])
+    frozen_manifest = dependencies.load_frozen_postholdout_manifest(split_path)
+    training_dataset = dependencies.select_frozen_development_pool(
+        historical_dataset["train"],
+        historical_dataset["test"],
+        frozen_manifest,
+    )
+    cv_manifest = dependencies.load_postholdout_cv_manifest(
+        cv_path,
+        development_manifest_sha256=_sha256_file(split_path),
+        development_count=frozen_manifest["development_count"],
+    )
+    folds = dependencies.cv_folds_from_manifest(cv_manifest)
+    protocol = {
+        "experiment_id": post_holdout["experiment_id"],
+        "parent_experiment_id": post_holdout["parent_experiment_id"],
+        "artifact_namespace": post_holdout["artifact_namespace"],
+        "split_manifest_path": post_holdout["split_manifest_path"],
+        "split_manifest_sha256": _sha256_file(split_path),
+        "cv_manifest_path": post_holdout["cv_manifest_path"],
+        "cv_manifest_sha256": _sha256_file(cv_path),
+        "development_count": frozen_manifest["development_count"],
+        "locked_test_count": frozen_manifest["locked_test_count"],
+        "locked_test_model_access": "NO",
+        "canonical_holdout_model_access": "NO",
+    }
+    return training_dataset, folds, protocol
+
 def run_training(args: argparse.Namespace) -> dict:
     """Run the notebook-equivalent training flow with optional stateful resume."""
     config_path = _resolve_repository_path(args.config)
@@ -481,8 +543,11 @@ def run_training(args: argparse.Namespace) -> dict:
     dependencies = _load_training_dependencies()
     train_transform = dependencies.build_train_transform()
     validation_transform = dependencies.build_validation_transform()
-    final_dataset = dependencies.load_fruit_freshness_dataset()
-    names = list(final_dataset["train"].features["label"].names)
+    training_dataset, folds, post_holdout_protocol = prepare_training_dataset_and_folds(
+        config,
+        dependencies,
+    )
+    names = list(training_dataset.features["label"].names)
 
     state_path = output_directory / TRAINING_STATE_FILENAME
     manifest_path = output_directory / RUN_MANIFEST_FILENAME
@@ -497,6 +562,8 @@ def run_training(args: argparse.Namespace) -> dict:
             repository_commit=_repository_commit(),
             dependencies=dependencies,
         )
+        if post_holdout_protocol is not None:
+            metadata["post_holdout"] = post_holdout_protocol
         if options["resume_state"] is None:
             dependencies.save_label_names(names, str(output_directory))
             _write_run_manifest(
@@ -522,7 +589,7 @@ def run_training(args: argparse.Namespace) -> dict:
 
     save_dir = str(output_directory)
     num_classes = len(names)
-    train_labels = [int(label) for label in final_dataset["train"]["label"]]
+    train_labels = [int(label) for label in training_dataset["label"]]
     counts = Counter(train_labels)
     class_counts = [counts[index] for index in range(num_classes)]
     alpha = dependencies.build_class_balanced_alpha(
@@ -536,14 +603,7 @@ def run_training(args: argparse.Namespace) -> dict:
     fine_tuning_epochs = config["fine_tuning"]["epochs"]
     batch_size = config["training"]["batch_size"]
     num_folds = config["cross_validation"]["n_splits"]
-    folds = list(
-        dependencies.iter_stratified_folds(
-            final_dataset["train"],
-            n_splits=num_folds,
-            shuffle=config["cross_validation"]["shuffle"],
-            random_state=config["cross_validation"]["random_state"],
-        )
-    )
+
     if len(folds) != num_folds:
         raise RuntimeError("The configured fold generator returned an unexpected count.")
 
@@ -590,7 +650,7 @@ def run_training(args: argparse.Namespace) -> dict:
         print(f"\n================ Fold {fold}/{num_folds} starting ================")
         fold_start = time.time()
         train_split, validation_split = dependencies.select_fold_datasets(
-            final_dataset["train"],
+            training_dataset,
             train_indices,
             validation_indices,
         )

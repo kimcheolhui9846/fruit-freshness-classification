@@ -86,3 +86,19 @@ Phase 8 remains closed and its holdout is historical evidence only. Phase 9 is e
 Phase 9.1 is complete. The owner approved `DEV_PLUS_LOCKED_TEST` with a pre-registered split seed of `20260810`. The Phase 9 source is restricted to the 21,486-example historical canonical training pool; the 5,372-example historical canonical holdout is excluded and remains `HISTORICAL_EVIDENCE_ONLY`.
 
 The new locked test is frozen as `FROZEN_UNOBSERVED_BY_MODEL`. No model training, model evaluation, canonical-holdout evaluation, new locked-test model evaluation, sample-level image review, external dataset acquisition, checkpoint creation, binary publication, Release creation, or tag creation occurred in Phase 9.2. Future model development requires a separate Phase authorization and may use only the post-holdout development pool.
+## Phase 9.3 — Development Baseline Authorization
+
+The owner approved one canonical-recipe reproduction: `deep3-postholdout-research-01-baseline`. It is limited to the 17,188-example frozen development pool, 3-fold stratified CV with random state 42, batch size 64, and the unmodified canonical recipe. The 4,298-example locked test is `FROZEN_UNOBSERVED_BY_MODEL`; the 5,372-example historical canonical holdout remains historical evidence only.
+
+```text
+OWNER_PHASE_9_3_APPROVAL:
+APPROVED
+BASELINE_ARTIFACT_PUBLICATION:
+LOCAL_ONLY
+BASELINE_EXECUTION_STATUS:
+NOT_YET_RUN
+PHASE_9_4:
+NOT STARTED
+```
+
+No hyperparameter tuning, loss/augmentation/sampler/optimization/architecture experiment, external data acquisition, binary publication, Release, or tag is approved by this decision.
