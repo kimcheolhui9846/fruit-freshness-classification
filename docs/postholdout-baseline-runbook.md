@@ -2,17 +2,19 @@
 
 ## Status and Scope
 
-This runbook describes how the owner-approved Phase 9.3 baseline would be executed. It is **not** authorization to execute it. Execution requires a separate explicit owner decision recorded in the approval block at the end of this document.
+This runbook describes how the owner-approved Phase 9.3 baseline is executed. The owner granted the separate explicit execution decision recorded in the approval block at the end of this document on 2026-08-12. Authorization covers baseline training and development-only OOF evaluation; every other boundary in this document stays closed.
 
 ```text
 RUNBOOK_STATUS:
-PREPARED
+APPROVED_FOR_EXECUTION
 BASELINE_EXECUTION_STATUS:
-NOT_YET_RUN
+IN_PROGRESS
 PHASE_9_4:
-RUNBOOK_PREPARED
+BASELINE_EXECUTION_AUTHORIZED
 PHASE_9_4_TRAINING_AUTHORIZATION:
-NOT GRANTED
+GRANTED
+PHASE_9_4_TRAINING_AUTHORIZATION_DATE:
+2026-08-12
 ```
 
 The baseline is a controlled canonical-recipe reproduction on the frozen Phase 9 development pool. It is not a new canonical reference, a locked-test result, an external benchmark, or an improvement claim. See [post-holdout-baseline.md](post-holdout-baseline.md) for the frozen protocol and [post-holdout-research-plan.md](post-holdout-research-plan.md) for the research boundary.
@@ -141,7 +143,7 @@ If an incident occurs, stop the process, retain partial artifacts for review, an
 ## Owner Approval Block
 
 APPROVED_BASELINE_EXECUTION_ACTION:
-<RUN_BASELINE | DEFER>
+RUN_BASELINE
 
 APPROVED_CONFIG:
 configs/deep3_postholdout_baseline.toml
@@ -182,4 +184,21 @@ NO
 APPROVED_RELEASE_CREATION:
 NO
 
-Do not infer this approval from Phase 9.3 completion. Do not begin baseline execution without an explicit owner decision.
+This approval was not inferred from Phase 9.3 completion. The owner granted it explicitly on 2026-08-12 after the preflight below was executed and recorded. It authorizes exactly one baseline training run against `weights/deep3-postholdout-research-01-baseline` and the development-only OOF evaluation that follows it. It does not authorize locked-test evaluation, canonical-holdout re-evaluation, weight or dataset publication, release creation, or any second run; each of those requires a further explicit owner decision.
+
+### Recorded Preflight — 2026-08-12
+
+Executed in an isolated virtual environment created for this run.
+
+| Check | Result |
+|---|---|
+| Pinned requirements installed in isolated env; `python -m pip check` | 9/9 pins matched, no broken requirements |
+| `huggingface-hub` | `1.26.0`, matching the audited pinned-archive download API |
+| Runtime | Python 3.12.10, `torch==2.6.0+cu124`, `torchvision==0.21.0+cu124`, `datasets==5.0.1` |
+| CUDA device | RTX 3070 Ti, 8 GiB, capability 8.6, CUDA 12.4, driver 591.86, 52 °C |
+| Dataset archive | 3,053,594,823 bytes, SHA-256 `a34c57ba3354f94d4cc04c4b83939bd6a3105d3708b9a0cd57145b6fc127254e`, revision `2077850adc575aa1e8d6029e6cd6cefe9e403a1c` |
+| Config, split, and CV LF-normalized SHA-256 | All three matched the frozen values above |
+| Development pool and folds | 17,188; 11458/5730, 11459/5729, 11459/5729 |
+| Output directories | Both absent before the run |
+| Leakage | development ∩ locked test = 0; per fold train ∩ val = 0 and train/val ∩ locked test = 0; validation union covered all 17,188 development examples exactly once |
+| Repository suite | 260 tests passed; `compileall` clean |

@@ -1,4 +1,4 @@
-"""Offline contract for the prepared but unexecuted baseline runbook."""
+"""Offline contract for the owner-approved, executing baseline runbook."""
 
 import hashlib
 from pathlib import Path
@@ -18,15 +18,15 @@ def _lf_normalized_sha256(path: Path) -> str:
 
 
 class PostHoldoutBaselineRunbookContractTest(unittest.TestCase):
-    def test_runbook_documents_a_prepared_but_unauthorized_execution(self):
+    def test_runbook_documents_an_owner_authorized_execution(self):
         document = RUNBOOK.read_text(encoding="utf-8")
 
         for token in (
-            "RUNBOOK_STATUS:\nPREPARED",
-            "BASELINE_EXECUTION_STATUS:\nNOT_YET_RUN",
-            "PHASE_9_4:\nRUNBOOK_PREPARED",
-            "PHASE_9_4_TRAINING_AUTHORIZATION:\nNOT GRANTED",
-            "APPROVED_BASELINE_EXECUTION_ACTION:\n<RUN_BASELINE | DEFER>",
+            "RUNBOOK_STATUS:\nAPPROVED_FOR_EXECUTION",
+            "PHASE_9_4:\nBASELINE_EXECUTION_AUTHORIZED",
+            "PHASE_9_4_TRAINING_AUTHORIZATION:\nGRANTED",
+            "PHASE_9_4_TRAINING_AUTHORIZATION_DATE:\n2026-08-12",
+            "APPROVED_BASELINE_EXECUTION_ACTION:\nRUN_BASELINE",
             "APPROVED_LOCKED_TEST_EVALUATION:\nNO",
             "APPROVED_CANONICAL_HOLDOUT_REEVALUATION:\nNO",
             "APPROVED_WEIGHT_PUBLICATION:\nNO",
@@ -63,7 +63,26 @@ class PostHoldoutBaselineRunbookContractTest(unittest.TestCase):
         self.assertIn("17,188", document)
         self.assertIn("4,298", document)
         self.assertIn("5,372", document)
-        self.assertNotIn("APPROVED_BASELINE_EXECUTION_ACTION:\nRUN_BASELINE", document)
+
+        # Training approval must never widen into evaluation or publication approval.
+        for forbidden in (
+            "APPROVED_LOCKED_TEST_EVALUATION:\nYES",
+            "APPROVED_CANONICAL_HOLDOUT_REEVALUATION:\nYES",
+            "APPROVED_WEIGHT_PUBLICATION:\nYES",
+            "APPROVED_DATASET_PUBLICATION:\nYES",
+            "APPROVED_RELEASE_CREATION:\nYES",
+        ):
+            self.assertNotIn(forbidden, document)
+
+    def test_execution_status_is_a_known_state(self):
+        document = RUNBOOK.read_text(encoding="utf-8")
+
+        states = [
+            state
+            for state in ("NOT_YET_RUN", "IN_PROGRESS", "COMPLETED", "STOPPED")
+            if f"BASELINE_EXECUTION_STATUS:\n{state}" in document
+        ]
+        self.assertEqual(len(states), 1, f"expected exactly one execution status, got {states}")
 
 
 if __name__ == "__main__":
