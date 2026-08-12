@@ -14,8 +14,10 @@ POST_HOLDOUT_DEVELOPMENT_BASELINE
 BASELINE_EXECUTION_STATUS:
 NOT_YET_RUN
 PHASE_9_4:
-NOT STARTED
+RUNBOOK_PREPARED
 ```
+
+The execution procedure is documented in [postholdout-baseline-runbook.md](postholdout-baseline-runbook.md). Preparing that runbook does not authorize execution; the owner approval block inside it remains unresolved.
 
 This record defines the first controlled retraining baseline for Phase 9. It is not a new canonical reference, final model, locked-test result, external benchmark, or improvement claim.
 

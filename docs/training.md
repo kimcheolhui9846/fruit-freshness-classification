@@ -12,6 +12,14 @@ It does not enable resume-state saving automatically.
 
 The Phase 8.2 derived canonical candidate uses `configs/deep3_canonical.toml`. It differs from the original config only by batch size 64 instead of 192; all learning rates remain unscaled under `KEEP_EXISTING_UNSCALED`. This is a different optimization trajectory and needs separate owner approval before full execution. See [canonical-training-runbook.md](canonical-training-runbook.md).
 
+## Post-Holdout Development Route
+
+`configs/deep3_postholdout_baseline.toml` selects the Phase 9 development route instead of the historical canonical training pool. When a config carries a `[post_holdout]` table, `scripts.train` loads the frozen split manifest, restricts training to the 17,188-example development pool, and takes its cross-validation folds from the frozen CV manifest rather than regenerating them. The 4,298-example locked test and the 5,372-example historical canonical holdout never enter a model-visible loader.
+
+Development-only out-of-fold evaluation uses a separate entry point, `python -m scripts.evaluate_postholdout_baseline`, which requires one best checkpoint per frozen fold and writes to an empty local-only output directory.
+
+Both commands and their preflight, resume, and stop conditions are documented in [postholdout-baseline-runbook.md](postholdout-baseline-runbook.md). That runbook is prepared but does not authorize execution.
+
 ## Stateful Canonical Controls
 
 `scripts.train` provides four optional execution-level controls:

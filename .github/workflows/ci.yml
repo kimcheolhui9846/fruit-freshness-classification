@@ -122,6 +122,7 @@ jobs:
         run: |
           python -m scripts.train --help
           python -m scripts.evaluate --help
+          python -m scripts.evaluate_postholdout_baseline --help
 
       - name: Verify repository cleanliness
         shell: pwsh
