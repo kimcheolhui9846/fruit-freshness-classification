@@ -98,7 +98,34 @@ LOCAL_ONLY
 BASELINE_EXECUTION_STATUS:
 NOT_YET_RUN
 PHASE_9_4:
-NOT STARTED
+RUNBOOK_PREPARED
 ```
 
 The deterministic development-CV identity is materialized once as a tracked index record; it is not a dataset or prediction artifact. No hyperparameter tuning, loss/augmentation/sampler/optimization/architecture experiment, external data acquisition, binary publication, Release, or tag is approved by this decision.
+
+## Phase 9.4 — Baseline Execution Runbook Preparation
+
+Phase 9.4 documents how the approved baseline would be executed and does not execute it. [postholdout-baseline-runbook.md](postholdout-baseline-runbook.md) records the frozen inputs, the fresh and resume commands, the development-only OOF evaluation command, preflight and stop conditions, a resource expectation, and an unresolved owner approval block.
+
+```text
+PHASE_9_4_SCOPE:
+DOCUMENTATION_ONLY
+BASELINE_EXECUTION_STATUS:
+NOT_YET_RUN
+MODEL_TRAINING:
+NO
+MODEL_EVALUATION:
+NO
+PHASE_9_5:
+NOT STARTED
+```
+
+Phase numbering is resolved as follows: Phase 9.4 covers baseline execution, and the first loss/class-imbalance experiment is Phase 9.5. An earlier external handoff draft numbered the loss experiment as 9.4; the repository documents and their contract tests are the authoritative numbering.
+
+### Recorded integration deviation — PR #5
+
+PR #5 was integrated into `main` with GitHub "Rebase and merge" rather than the fast-forward-only integration this project prefers. The rebase rewrote commit identifiers: PR head `48a61eb63d57604351088ea72bbe69d22fe50a39` became merge commit `15eb552e7ae1f698e99c5d3bac3e9516180f7053`.
+
+Verified consequences: the resulting tree hash `4275acce956419989dfcb6a3bb1158538eafe9d1` is byte-identical to the PR head tree, linear history is preserved, the `Protect main` ruleset accepted the integration, final-main CI passed on both required jobs with zero Actions artifacts, and the source branch `experiment/phase-9.3-development-baseline` is retained at its original SHA. No content was lost or altered.
+
+This deviation is recorded rather than reverted, because reverting would require a force push to protected `main` and a ruleset bypass, which carries more risk than the deviation itself. Future phases use fast-forward-only integration.

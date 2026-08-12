@@ -43,10 +43,11 @@ class PostHoldoutBaselineContractTest(unittest.TestCase):
             "CANONICAL_HOLDOUT_MODEL_ACCESS:\nNO",
             "BASELINE_ARTIFACT_PUBLICATION:\nLOCAL_ONLY",
             "BASELINE_EXECUTION_STATUS:\nNOT_YET_RUN",
-            "PHASE_9_4:\nNOT STARTED",
+            "PHASE_9_4:\nRUNBOOK_PREPARED",
         ):
             self.assertIn(token, combined)
         self.assertNotIn("COMPLETED_DEVELOPMENT_BASELINE", combined)
+        self.assertNotIn("PHASE_9_4:\nNOT STARTED", combined)
 
 
     def test_materialized_cv_identity_matches_the_frozen_baseline_contract(self):

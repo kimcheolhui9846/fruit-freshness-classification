@@ -36,4 +36,19 @@ CANONICAL_HOLDOUT_MODEL_ACCESS:
 NO
 ```
 
-The baseline is a controlled parent for later Phase 9 candidates, not a result-selected run. Any baseline artifacts are local-only. Phase 9 research remains active and Phase 9.4 is not started.
+The baseline is a controlled parent for later Phase 9 candidates, not a result-selected run. Any baseline artifacts are local-only. Phase 9 research remains active.
+
+## Phase 9.4 runbook preparation
+
+The baseline execution procedure is documented in [postholdout-baseline-runbook.md](postholdout-baseline-runbook.md). The runbook does not authorize execution.
+
+```text
+PHASE_9_4:
+RUNBOOK_PREPARED
+BASELINE_EXECUTION_STATUS:
+NOT_YET_RUN
+PHASE_9_5:
+NOT STARTED
+```
+
+Phase 9.5 is the first loss/class-imbalance experiment. It remains unstarted and unauthorized.

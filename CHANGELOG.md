@@ -3,6 +3,8 @@
 ## [Unreleased]
 
 ### Added
+- Prepared the post-holdout baseline execution runbook, including frozen inputs, fresh and resume commands, development-only OOF evaluation, preflight and stop conditions, and an unresolved owner approval block. No training was started.
+- Extended CI to verify the `scripts.evaluate_postholdout_baseline` command-line interface.
 - Materialized the deterministic Phase 9.3 development-CV identity without training, model construction, or model inference.
 - Authorized the Phase 9.3 post-holdout development baseline without starting training or publishing artifacts.
 - Froze the Phase 9 post-holdout development and locked-test protocol.
