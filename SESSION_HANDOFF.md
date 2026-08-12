@@ -967,3 +967,124 @@ NOT YET GRANTED
 ```
 
 The tracked manifest contains only source-relative indices, label-count metadata, and hashes. The frozen locked test remains unevaluated by a model; Phase 9.3 requires a separate explicit authorization. This handoff does not authorize a merge.
+
+## Phase 9.3 — Post-Holdout Development Baseline Authorization and CV Identity Freeze
+
+```text
+PHASE:
+9.3 — Post-Holdout Development Baseline Authorization and CV Identity Freeze
+PHASE_9_2_FINAL_MAIN:
+dcbb038d20fe09b15256381550f60258a277f9c4
+PHASE_BRANCH:
+experiment/phase-9.3-development-baseline
+IMPLEMENTATION_SHA:
+8372566364edf3adaba045e780bd4ccbe68b2cc1
+PR:
+#5
+PR_STATE:
+DRAFT
+OWNER_PHASE_9_3_APPROVAL:
+APPROVED
+EXPERIMENT_ID:
+deep3-postholdout-research-01-baseline
+PARENT_EXPERIMENT_ID:
+deep3-postholdout-research-01
+ROLE:
+POST_HOLDOUT_DEVELOPMENT_BASELINE
+EXPERIMENT_STATUS:
+PRE_TRAINING_CV_FROZEN
+BASELINE_CONFIG:
+configs/deep3_postholdout_baseline.toml
+BASELINE_CONFIG_SHA256:
+7cb01e8fe251fd1648ba3a53601e471d9b3693e5d50090f7e7d9c9c5586b11c7
+BASELINE_RECIPE_EQUIVALENCE:
+PASS
+ALLOWED_CONFIG_DIFFERENCES:
+experiment identity, parent identity, split manifest path, CV manifest path, artifact namespace
+CV_IDENTITY_STATUS:
+MATERIALIZED
+CV_MANIFEST:
+configs/splits/deep3-postholdout-research-01-baseline-cv.json
+CV_MANIFEST_LF_NORMALIZED_SHA256:
+494bbc47a75aa35ab436d48899d531febc079301c15cdcf659df18e0fac2352f
+CV_DEVELOPMENT_MANIFEST_LF_NORMALIZED_SHA256:
+cd7182c18d81cfac877fb2dab8573695b6bdd8116aeb23b19c3e4457e36be169
+CV:
+3_FOLD_STRATIFIED
+CV_RANDOM_STATE:
+42
+FOLD_1:
+train=11458, validation=5730
+FOLD_2:
+train=11459, validation=5729
+FOLD_3:
+train=11459, validation=5729
+CV_VALIDATION_COVERAGE:
+17188_OF_17188_EXACTLY_ONCE
+DEVELOPMENT_COUNT:
+17188
+LOCKED_TEST_COUNT:
+4298
+CANONICAL_HOLDOUT_COUNT:
+5372
+POST_HOLDOUT_LOCKED_TEST_STATUS:
+FROZEN_UNOBSERVED_BY_MODEL
+LOCKED_TEST_MODEL_ACCESS:
+NO
+CANONICAL_HOLDOUT_MODEL_ACCESS:
+NO
+POST_HOLDOUT_LOCKED_TEST_MODEL_FORWARD_PASSES:
+0
+CANONICAL_HOLDOUT_MODEL_FORWARD_PASSES:
+0
+BASELINE_EXECUTION_STATUS:
+NOT_YET_RUN
+BASELINE_ARTIFACT_PUBLICATION:
+LOCAL_ONLY
+MODEL_TRAINING:
+NO
+MODEL_EVALUATION:
+NO
+MODEL_CONSTRUCTION:
+NO
+CHECKPOINT_CREATION:
+NO
+DATASET_DOWNLOAD:
+NO
+EXTERNAL_DATA_ACQUISITION:
+NO
+BINARY_PUBLICATION:
+NO
+RELEASE_OR_TAG_CREATION:
+NO
+Repository contracts:
+88 passed
+Full suite:
+256 passed
+compileall:
+passed
+train CLI help:
+passed
+evaluate CLI help:
+passed
+evaluate_postholdout_baseline CLI help:
+passed
+IMPLEMENTATION_PUSH_CI:
+31389028947
+IMPLEMENTATION_PR_CI:
+31389032854
+CI_UBUNTU:
+success
+CI_WINDOWS:
+success
+ACTIONS_ARTIFACTS:
+0
+PHASE_9_4:
+NOT STARTED
+READY_FOR_OWNER_PR_REVIEW:
+PENDING_HANDOFF_CI
+OWNER_PR_MERGE_APPROVAL:
+NOT YET GRANTED
+```
+
+Phase 9.3 delivered the approved baseline configuration, the deterministic development-CV identity record, the post-holdout training route, and the development-only OOF evaluation entry point. No model was constructed, no training or evaluation ran, no checkpoint was created, and no dataset row was reconstructed into a model-visible pipeline. An earlier implementation commit failed CI because tracked JSON identity hashes were computed without LF normalization; `8372566` fixed that and both Ubuntu and Windows jobs then passed. The baseline run itself remains unexecuted and Phase 9.4 requires a separate explicit authorization.
