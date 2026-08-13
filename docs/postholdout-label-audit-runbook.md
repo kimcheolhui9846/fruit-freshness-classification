@@ -758,11 +758,17 @@ from scripts.analyze_label_audit import load_judgments
 
 
 class AnalyzeLabelAuditCliTest(unittest.TestCase):
-    def test_parser_requires_two_reviewer_files(self):
-        parser = analyze_parser()
-
-        with self.assertRaises(SystemExit):
-            parser.parse_args(["--key", "k.json", "--reviewer", "a.csv"])
+    def test_main_refuses_any_count_other_than_two_reviewers(self):
+        # Drive the guard in main(), not the parser. A parser-level test here
+        # exits for the missing required --output-dir instead, which would pass
+        # even with the two-reviewer guard deleted.
+        for reviewer_files in (["a.csv"], ["a.csv", "b.csv", "c.csv"]):
+            argv = ["--key", "k.json", "--output-dir", "out"]
+            for path in reviewer_files:
+                argv += ["--reviewer", path]
+            with self.subTest(count=len(reviewer_files)):
+                with self.assertRaises(SystemExit):
+                    main(argv)
 
     def test_parser_accepts_exactly_two_reviewers(self):
         parser = analyze_parser()
@@ -808,6 +814,23 @@ class AnalyzeLabelAuditCliTest(unittest.TestCase):
         # Only position 0 is a FRESH/ROTTEN subject call.
         self.assertEqual(result["compared"], 1)
         self.assertAlmostEqual(result["agreement"], 1.0)
+```
+
+Add one end-to-end test over synthetic fixtures in a temporary directory: a key JSON mixing `SUBJECT` and `CONTROL` entries, two reviewer CSVs, a `.npz` holding a `predictions` array, a `label_names.json` with the fourteen class names, and a split manifest carrying `development_indices`. Run `main()` against them and assert both artifacts are written with the expected content.
+
+Then make that test prove the isolation claim directly. Run `main()` twice with **different** `predictions` arrays and everything else identical, and assert the `decision` block is identical across both runs while `baseline_model_comparison` differs:
+
+```python
+    def test_decision_is_unaffected_by_the_stored_predictions(self):
+        # The audit's credibility rests on nothing learned at unblinding time
+        # changing the outcome. Assert that mechanically rather than by reading.
+        first = self._run_main_with_predictions([12] * 4)
+        second = self._run_main_with_predictions([0] * 4)
+
+        self.assertEqual(first["decision"], second["decision"])
+        self.assertNotEqual(
+            first["baseline_model_comparison"], second["baseline_model_comparison"]
+        )
 ```
 
 - [ ] **Step 2: Run the test to verify it fails**
