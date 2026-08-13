@@ -12,6 +12,13 @@ import numpy as np
 SUBJECT_CLASS = "freshpotato"
 CONTROL_CLASS = "rottenpotato"
 
+# Frozen review-set sizing from the protocol. This is the single source that
+# both the build and analysis CLIs check group sizes against, so a change to
+# one cannot silently drift from the other.
+SUBJECT_COUNT = 347
+CONTROL_COUNT = 150
+REVIEW_SET_COUNT = SUBJECT_COUNT + CONTROL_COUNT
+
 JUDGMENT_CATEGORIES = ("FRESH", "ROTTEN", "NOT_A_POTATO", "UNDECIDABLE")
 SUBJECT_ERROR_CATEGORIES = ("ROTTEN", "NOT_A_POTATO")
 CONTROL_ERROR_CATEGORIES = ("FRESH", "NOT_A_POTATO")
@@ -65,10 +72,9 @@ def select_review_set(
 DECISION_THRESHOLD = 0.15
 
 
-def _rate(judgments: dict[int, str], indices: np.ndarray, error_categories) -> tuple[float, float]:
-    total = len(indices)
-    errors = 0
-    undecidable = 0
+def _tally(judgments: dict[int, str], indices: np.ndarray) -> dict[str, int]:
+    """Count each judgment category over one group. Single point of validation."""
+    counts = {category: 0 for category in JUDGMENT_CATEGORIES}
     for index in indices.tolist():
         try:
             call = judgments[int(index)]
@@ -76,10 +82,13 @@ def _rate(judgments: dict[int, str], indices: np.ndarray, error_categories) -> t
             raise ValueError(f"Missing judgment for review index {index}.") from None
         if call not in JUDGMENT_CATEGORIES:
             raise ValueError(f"Unknown judgment category {call!r} for index {index}.")
-        if call in error_categories:
-            errors += 1
-        elif call == "UNDECIDABLE":
-            undecidable += 1
+        counts[call] += 1
+    return counts
+
+
+def _rate(counts: dict[str, int], total: int, error_categories) -> tuple[float, float]:
+    errors = sum(counts[category] for category in error_categories)
+    undecidable = counts["UNDECIDABLE"]
     return errors / total, undecidable / total
 
 
@@ -89,11 +98,15 @@ def score_reviewer(
     control_indices: np.ndarray,
 ) -> dict:
     """Score one reviewer. UNDECIDABLE stays in the denominator, never an error."""
+    subject_indices = np.asarray(subject_indices)
+    control_indices = np.asarray(control_indices)
+    subject_counts = _tally(judgments, subject_indices)
+    control_counts = _tally(judgments, control_indices)
     subject_error, subject_undecidable = _rate(
-        judgments, np.asarray(subject_indices), SUBJECT_ERROR_CATEGORIES
+        subject_counts, len(subject_indices), SUBJECT_ERROR_CATEGORIES
     )
     control_error, control_undecidable = _rate(
-        judgments, np.asarray(control_indices), CONTROL_ERROR_CATEGORIES
+        control_counts, len(control_indices), CONTROL_ERROR_CATEGORIES
     )
     return {
         "subject_error_rate": subject_error,
@@ -101,6 +114,8 @@ def score_reviewer(
         "difference": subject_error - control_error,
         "subject_undecidable_rate": subject_undecidable,
         "control_undecidable_rate": control_undecidable,
+        "subject_counts": subject_counts,
+        "control_counts": control_counts,
     }
 
 
