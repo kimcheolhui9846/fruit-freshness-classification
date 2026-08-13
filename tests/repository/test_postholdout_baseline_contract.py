@@ -45,7 +45,7 @@ class PostHoldoutBaselineContractTest(unittest.TestCase):
             "EXPERIMENT_STATUS:\nCOMPLETED_DEVELOPMENT_BASELINE",
             "BASELINE_EXECUTION_STATUS:\nCOMPLETED",
             "PHASE_9_4:\nBASELINE_EXECUTED",
-            "PHASE_9_6:\nNOT STARTED",
+            "PHASE_9_6:\nH1_LOSS_AND_CLASS_IMBALANCE",
         ):
             self.assertIn(token, combined)
         self.assertNotIn("PHASE_9_4:\nNOT STARTED", combined)

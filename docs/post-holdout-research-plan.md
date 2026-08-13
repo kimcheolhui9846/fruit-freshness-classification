@@ -81,6 +81,10 @@ The reordering rests on development evidence only. Class frequency does not expl
 
 The audit's decision rule returns to this pre-registered order automatically if the evidence does not hold: comparable subject and control error rates make H1 the next phase as originally planned. The locked test was not consulted for this decision and remains `FROZEN_UNOBSERVED_BY_MODEL`.
 
+**Outcome (2026-08-13): the reordering was wrong and the pre-registered order stands.** The audit returned `DEFECT_NOT_CONFIRMED`. Neither reviewer's subject error rate reached the 15-point margin over their own control — 0.0259 against 0.0800 across all 497 images for one reviewer, 0.1324 against 0.1250 across a 100-image subsample for the other. Two reviewers read the `freshpotato` images as fresh, so the labels are sound and the model is wrong about them.
+
+H1 is therefore Phase 9.6 after all. The class is the smallest at 347 examples and visually adjacent to `rottenpotato` at 514; a minority class collapsing into a visually similar majority is a characteristic imbalance failure, and the argument that a 7.8:1 ratio was too mild to matter did not weigh that adjacency. Deviations that limit how much the audit carries are recorded in [postholdout-label-audit-protocol.md](postholdout-label-audit-protocol.md).
+
 ## Baseline, resources, and reproducibility
 
 ```text

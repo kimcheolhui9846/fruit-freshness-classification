@@ -17,7 +17,8 @@ class LabelAuditProtocolContractTest(unittest.TestCase):
 
         for token in (
             "AUDIT_PROTOCOL_STATUS:\nFROZEN",
-            "AUDIT_EXECUTION_STATUS:\nNOT_YET_RUN",
+            "AUDIT_EXECUTION_STATUS:\nCOMPLETED",
+            "AUDIT_OUTCOME:\nDEFECT_NOT_CONFIRMED",
             "EXPERIMENT_ID:\ndeep3-postholdout-research-01-label-audit",
             "ROLE:\nDEVELOPMENT_LABEL_QUALITY_AUDIT",
         ):
@@ -50,6 +51,29 @@ class LabelAuditProtocolContractTest(unittest.TestCase):
         self.assertIn("15 percentage points", document)
         self.assertIn("## Frozen decision rule", document)
 
+    def test_execution_did_not_rewrite_the_frozen_method(self):
+        document = PROTOCOL.read_text(encoding="utf-8")
+
+        # Recording an outcome must not become an opportunity to restate the
+        # method that produced it. Every value the rule depends on stands.
+        for token in (
+            "count(ROTTEN or NOT_A_POTATO) / 347",
+            "count(FRESH or NOT_A_POTATO) / 150",
+            "MATERIAL_DIFFERENCE_THRESHOLD:\n15 percentage points",
+            "CONTROL_SAMPLE_SEED:\n20260813",
+            "PRESENTATION_ORDER_SEED:\n20260813",
+        ):
+            self.assertIn(token, document)
+        self.assertNotIn("AUDIT_EXECUTION_STATUS:\nNOT_YET_RUN", document)
+
+    def test_execution_record_carries_its_deviations(self):
+        document = PROTOCOL.read_text(encoding="utf-8")
+
+        # The two-reviewer standard was not met. A record that reported the
+        # outcome without that caveat would overstate what the audit shows.
+        self.assertIn("Recorded deviations", document)
+        self.assertIn("two-reviewer standard written into this protocol was\nnot met", document)
+
     def test_audit_never_touches_the_locked_test_or_relabels_anything(self):
         document = PROTOCOL.read_text(encoding="utf-8")
 
@@ -81,11 +105,20 @@ class LabelAuditProtocolContractTest(unittest.TestCase):
         # Deviating from the pre-registered hypothesis order must leave a trace.
         for token in (
             "PHASE_9_5:\nLABEL_AUDIT_PROTOCOL_FROZEN",
-            "PHASE_9_6:\nNOT STARTED",
+            "PHASE_9_6:\nH1_LOSS_AND_CLASS_IMBALANCE",
             "postholdout-label-audit-protocol.md",
         ):
             self.assertIn(token, combined)
         self.assertNotIn("PHASE_9_5:\nNOT STARTED", combined)
+        # The audit selected H1; it did not authorize running it, and it never
+        # authorized touching a label.
+        for forbidden in (
+            "APPROVED_RELABELING:\nYES",
+            "LOCKED_TEST_INSPECTION:\nYES",
+            "PHASE_9_6_EXECUTION:\nAUTHORIZED",
+        ):
+            self.assertNotIn(forbidden, combined)
+        self.assertIn("LABELS_MODIFIED:\n0", combined)
 
 
 if __name__ == "__main__":
