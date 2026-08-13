@@ -33,9 +33,9 @@ Every task inherits these. Values are copied verbatim from [postholdout-label-au
 | `scripts/build_label_audit_set.py` | CLI. Reconstructs the source pool, materializes blinded images and contact sheets, writes the sealed key. |
 | `scripts/analyze_label_audit.py` | CLI. The only reader of the sealed key. Unblinds, computes rates and agreement, applies the rule, writes findings. |
 | `tests/datasets/test_label_audit.py` | Unit tests for selection, scoring, and the decision rule. |
-| `tests/scripts/test_label_audit_cli.py` | CLI contract tests: argument surface, leakage guards, refusal to overwrite. |
+| `tests/scripts/test_label_audit_cli.py` | CLI contract tests: argument surface, group-size and hash checks against the sealed key, refusal to overwrite, rejection of a duplicated reviewer path. |
 
-Blinding is enforced by file layout, not by discipline. The review directory contains only position-named images; the answer key is written outside it.
+Blinding is a layout property, not a secret. The reviewers' working directory (`review/`, holding the images, the contact sheets, the judgment template, and both filled-in judgment CSVs) and the sealed key's directory (`sealed/`) are disjoint, so a reviewer who opens, copies, or browses `review/` cannot reach `review_set_key.json` by accident. It is not secrecy in principle: `CONTROL_SAMPLE_SEED` and `PRESENTATION_ORDER_SEED` are published in the frozen protocol, the split manifest is tracked, and the source archive is local, so anyone with repository access can recompute group membership from the seeds alone. What the layout actually buys is protection against the accidental case -- a reviewer stumbling onto the key or the other reviewer's file while doing their review -- not protection against someone deliberately trying to unblind themselves. The remaining protection there is procedural: don't open `sealed/`, and don't compute the seeded selection yourself, until both judgment files are complete.
 
 ---
 
@@ -1047,7 +1047,7 @@ if __name__ == "__main__":
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `.venv/Scripts/python.exe -m unittest tests.scripts.test_label_audit_cli -v`
-Expected: PASS, 7 tests (3 from Task 3, 4 added here)
+Expected: PASS, 21 tests. The count has grown past this task's original 7 as later fixes added coverage (group-size and hash checks against the sealed key, refusal to overwrite, duplicate-reviewer rejection, off-class model predictions, and more) -- treat this number as a snapshot, not a target, and recount from the file itself if it drifts again.
 
 - [ ] **Step 5: Run the full suite and compileall**
 
@@ -1085,15 +1085,15 @@ Confirm 497 files in `review/`, 32 contact sheets, and that `review_set_key.json
 
 - [ ] **Step 3: Both reviewers judge independently**
 
-Each reviewer copies `judgment_template.csv` to `judgment_owner.csv` or `judgment_assistant.csv` and fills every row with one of `FRESH`, `ROTTEN`, `NOT_A_POTATO`, `UNDECIDABLE`, working only from `review/` or `review/contact_sheets/`. Neither reviewer opens the key, the other's file, the split manifest, or the baseline predictions until both files are complete. Unsure means `UNDECIDABLE`.
+Each reviewer copies `review/judgment_template.csv` to `review/judgment_owner.csv` or `review/judgment_assistant.csv` and fills every row with one of `FRESH`, `ROTTEN`, `NOT_A_POTATO`, `UNDECIDABLE`, working only from `review/` or `review/contact_sheets/`. Neither reviewer opens `sealed/`, the other's file, the split manifest, or the baseline predictions until both files are complete. Unsure means `UNDECIDABLE`.
 
 - [ ] **Step 4: Unblind and score**
 
 ```powershell
 .venv\Scripts\python.exe -m scripts.analyze_label_audit `
-  --key results/deep3-postholdout-research-01-label-audit/review_set_key.json `
-  --reviewer results/deep3-postholdout-research-01-label-audit/judgment_owner.csv `
-  --reviewer results/deep3-postholdout-research-01-label-audit/judgment_assistant.csv `
+  --key results/deep3-postholdout-research-01-label-audit/sealed/review_set_key.json `
+  --reviewer results/deep3-postholdout-research-01-label-audit/review/judgment_owner.csv `
+  --reviewer results/deep3-postholdout-research-01-label-audit/review/judgment_assistant.csv `
   --output-dir results/deep3-postholdout-research-01-label-audit
 ```
 

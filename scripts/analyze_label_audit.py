@@ -7,13 +7,22 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
+import math
 from pathlib import Path
 
 import numpy as np
 from sklearn.metrics import cohen_kappa_score
 
-from src.datasets.label_audit import JUDGMENT_CATEGORIES, apply_decision_rule, score_reviewer
+from src.datasets.label_audit import (
+    CONTROL_COUNT,
+    JUDGMENT_CATEGORIES,
+    REVIEW_SET_COUNT,
+    SUBJECT_COUNT,
+    apply_decision_rule,
+    score_reviewer,
+)
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 
@@ -63,11 +72,17 @@ def model_agreement(
     entries: list[dict],
     judgments: dict[int, str],
     rotten_label_index: int,
+    fresh_label_index: int,
 ) -> dict:
     """Compare reviewer calls against stored predictions. Reads a file; runs nothing.
 
     Diagnostic only: this never feeds the decision rule, which depends on
     reviewer judgments alone.
+
+    Restricted to the two potato classes: a prediction of some other produce
+    entirely (e.g. `freshbanana`) is not model/reviewer agreement or
+    disagreement about potato freshness, so it is counted separately as
+    `off_class` rather than folded into `agreement` as a mismatch would be.
     """
     stored = np.load(predictions_path)
     predicted = stored["predictions"]
@@ -77,6 +92,7 @@ def model_agreement(
 
     agree = 0
     compared = 0
+    off_class = 0
     for entry in entries:
         if entry["group"] != "SUBJECT":
             continue
@@ -84,13 +100,18 @@ def model_agreement(
         if call not in ("FRESH", "ROTTEN"):
             continue
         row = position_in_development[int(entry["source_index"])]
-        model_says_rotten = bool(predicted[row] == rotten_label_index)
+        predicted_label = int(predicted[row])
+        if predicted_label not in (rotten_label_index, fresh_label_index):
+            off_class += 1
+            continue
+        model_says_rotten = predicted_label == rotten_label_index
         compared += 1
         agree += int(model_says_rotten == (call == "ROTTEN"))
 
     return {
         "compared": compared,
         "agreement": (agree / compared) if compared else None,
+        "off_class": off_class,
     }
 
 
@@ -104,6 +125,8 @@ def load_judgments(handle) -> dict[int, str]:
             raise ValueError(f"Position {position:03d} has no judgment.")
         if call not in JUDGMENT_CATEGORIES:
             raise ValueError(f"Position {position:03d} has unknown category {call!r}.")
+        if position in judgments:
+            raise ValueError(f"Position {position:03d} is duplicated in this file.")
         judgments[position] = call
     return judgments
 
@@ -113,6 +136,23 @@ def main(argv: list[str] | None = None) -> int:
     if len(args.reviewer) != 2:
         raise SystemExit("The protocol fixes two independent reviewers.")
 
+    reviewer_paths = [Path(path) for path in args.reviewer]
+    if reviewer_paths[0].resolve() == reviewer_paths[1].resolve():
+        raise SystemExit(
+            "The two --reviewer paths resolve to the same file; the protocol "
+            "requires two independent reviewers, not one file counted twice."
+        )
+
+    output_dir = Path(args.output_dir)
+    findings_path = output_dir / "label_audit_findings.json"
+    disagreements_path = output_dir / "label_audit_disagreements.csv"
+    if findings_path.exists() or disagreements_path.exists():
+        raise SystemExit(
+            f"Findings already exist in {output_dir}; refusing to overwrite them. "
+            "Re-running would silently replace one recorded outcome with another. "
+            "Use a fresh --output-dir."
+        )
+
     key = json.loads(Path(args.key).read_text(encoding="utf-8"))
     entries = key["entries"]
     subject_positions = np.array(
@@ -121,10 +161,37 @@ def main(argv: list[str] | None = None) -> int:
     control_positions = np.array(
         [e["position"] for e in entries if e["group"] == "CONTROL"], dtype=np.int64
     )
+    if len(subject_positions) != SUBJECT_COUNT or len(control_positions) != CONTROL_COUNT:
+        raise SystemExit(
+            "Sealed key group sizes do not match the frozen protocol: "
+            f"subject {len(subject_positions)} (expected {SUBJECT_COUNT}), "
+            f"control {len(control_positions)} (expected {CONTROL_COUNT})."
+        )
+    if len(entries) != REVIEW_SET_COUNT:
+        raise SystemExit(
+            f"Sealed key has {len(entries)} entries, expected {REVIEW_SET_COUNT}."
+        )
+    if key.get("review_set_count") != len(entries):
+        raise SystemExit(
+            f"Sealed key review_set_count ({key.get('review_set_count')!r}) does "
+            f"not match its own entry count ({len(entries)})."
+        )
+
+    ordered_source_indices = [
+        entry["source_index"] for entry in sorted(entries, key=lambda e: e["position"])
+    ]
+    recomputed_hash = hashlib.sha256(
+        np.asarray(ordered_source_indices, dtype="<i8").tobytes()
+    ).hexdigest()
+    if recomputed_hash != key.get("presentation_indices_sha256"):
+        raise SystemExit(
+            "Sealed key presentation_indices_sha256 does not match the hash "
+            "recomputed from its entries; the key may be corrupted or tampered with."
+        )
 
     reviewers = []
-    for path in args.reviewer:
-        with Path(path).open(encoding="utf-8") as handle:
+    for path in reviewer_paths:
+        with path.open(encoding="utf-8") as handle:
             reviewers.append(load_judgments(handle))
 
     scores = [score_reviewer(j, subject_positions, control_positions) for j in reviewers]
@@ -134,13 +201,17 @@ def main(argv: list[str] | None = None) -> int:
     first = [reviewers[0][p] for p in positions]
     second = [reviewers[1][p] for p in positions]
     agreement = float(np.mean([a == b for a, b in zip(first, second)]))
-    kappa = float(cohen_kappa_score(first, second))
+    kappa_raw = cohen_kappa_score(first, second)
+    # A degenerate agreement matrix (e.g. only one category ever used) makes
+    # sklearn return NaN. json.dumps would emit a bare NaN token, which
+    # strict JSON parsers reject, so store None (-> JSON null) instead.
+    kappa = float(kappa_raw) if math.isfinite(kappa_raw) else None
 
-    output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     label_names = load_label_names(REPOSITORY_ROOT / args.label_names)
     rotten_label_index = label_names.index("rottenpotato")
+    fresh_label_index = label_names.index("freshpotato")
     development_indices = np.asarray(
         json.loads((REPOSITORY_ROOT / args.split_manifest).read_text(encoding="utf-8"))[
             "development_indices"
@@ -154,6 +225,7 @@ def main(argv: list[str] | None = None) -> int:
             entries,
             judgments,
             rotten_label_index,
+            fresh_label_index,
         )
         for judgments in reviewers
     ]
@@ -173,13 +245,11 @@ def main(argv: list[str] | None = None) -> int:
             "labels_modified": 0,
         },
     }
-    (output_dir / "label_audit_findings.json").write_text(
+    findings_path.write_text(
         json.dumps(findings, indent=2, sort_keys=True), encoding="utf-8"
     )
 
-    with (output_dir / "label_audit_disagreements.csv").open(
-        "w", newline="", encoding="utf-8"
-    ) as handle:
+    with disagreements_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.writer(handle)
         writer.writerow(["position", "source_index", "group", "reviewer_1", "reviewer_2"])
         for entry in entries:
@@ -192,7 +262,8 @@ def main(argv: list[str] | None = None) -> int:
 
     print(f"Outcome: {decision['outcome']}")
     print(f"Next: {decision['next_phase']}")
-    print(f"Raw agreement {agreement:.4f}, Cohen's kappa {kappa:.4f}")
+    kappa_display = f"{kappa:.4f}" if kappa is not None else "NaN (degenerate agreement matrix)"
+    print(f"Raw agreement {agreement:.4f}, Cohen's kappa {kappa_display}")
     return 0
 
 

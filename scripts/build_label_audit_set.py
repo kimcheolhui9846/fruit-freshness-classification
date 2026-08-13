@@ -44,14 +44,22 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def partition_outputs(output_dir: str | Path) -> dict[str, Path]:
-    """Place the key outside review/ so blinding survives a careless reviewer."""
+    """Disjoint layout: reviewers work only in review/, the key lives in sealed/.
+
+    review/ holds the images, the contact sheets, the judgment template, and
+    the reviewers' filled-in judgment CSVs -- everything a reviewer touches.
+    sealed/ holds only the answer key, so opening review/ (or copying it, or
+    reading someone else's judgment file next to your own) cannot reach it.
+    """
     root = Path(output_dir)
+    review_dir = root / "review"
     return {
         "root": root,
-        "review_dir": root / "review",
-        "sheet_dir": root / "review" / "contact_sheets",
-        "key_path": root / "review_set_key.json",
-        "template_path": root / "judgment_template.csv",
+        "review_dir": review_dir,
+        "sheet_dir": review_dir / "contact_sheets",
+        "sealed_dir": root / "sealed",
+        "key_path": root / "sealed" / "review_set_key.json",
+        "template_path": review_dir / "judgment_template.csv",
     }
 
 
@@ -141,6 +149,7 @@ def main(argv: list[str] | None = None) -> int:
             for position, source_index in enumerate(presentation.tolist())
         ],
     }
+    outputs["sealed_dir"].mkdir(parents=True, exist_ok=True)
     outputs["key_path"].write_text(json.dumps(key, indent=2, sort_keys=True), encoding="utf-8")
 
     with outputs["template_path"].open("w", newline="", encoding="utf-8") as handle:
