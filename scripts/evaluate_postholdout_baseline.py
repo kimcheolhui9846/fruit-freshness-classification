@@ -15,6 +15,7 @@ from src.datasets.postholdout import sha256_json_identity_file
 
 from src.utils.config import (
     load_experiment_config,
+    resolve_experiment_validation,
     validate_postholdout_baseline_config,
 )
 from src.utils.paths import build_fold_checkpoint_path
@@ -381,14 +382,21 @@ def run_evaluation(args: argparse.Namespace) -> dict:
     config_path = _resolve_repository_path(args.config)
     checkpoint_directory = _resolve_repository_path(args.checkpoint_dir)
     output_directory = _resolve_repository_path(args.output_dir)
-    validation = validate_postholdout_baseline_config(
-        CANONICAL_CONFIG_PATH,
-        config_path,
-    )
-    if not validation["recipe_equivalent"]:
-        raise RuntimeError("Baseline recipe equivalence validation failed before OOF evaluation.")
-
     config = load_experiment_config(config_path)
+    # Evaluation must not accept a config training would have rejected. A
+    # baseline-parented experiment is checked against the baseline; anything
+    # parented to the research identity keeps the canonical comparison
+    # untouched, so the existing guard is added beside rather than relaxed.
+    experiment_validation = resolve_experiment_validation(config, config_path)
+    if experiment_validation is None:
+        validation = validate_postholdout_baseline_config(
+            CANONICAL_CONFIG_PATH,
+            config_path,
+        )
+        if not validation["recipe_equivalent"]:
+            raise RuntimeError(
+                "Baseline recipe equivalence validation failed before OOF evaluation."
+            )
     torch.backends.cudnn.benchmark = config["runtime"]["cudnn_benchmark"]
     device = resolve_device()
     dependencies = _load_evaluation_dependencies()

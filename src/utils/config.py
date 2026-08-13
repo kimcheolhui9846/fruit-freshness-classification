@@ -259,3 +259,43 @@ def validate_loss_experiment_config(
             for key in sorted(differing)
         },
     }
+
+
+BASELINE_EXPERIMENT_ID = "deep3-postholdout-research-01-baseline"
+RESEARCH_PARENT_ID = "deep3-postholdout-research-01"
+BASELINE_CONFIG_PATH = (
+    Path(__file__).resolve().parents[2] / "configs" / "deep3_postholdout_baseline.toml"
+)
+LOSS001_EXPECTED_VALUES = {"loss.class_balanced_beta": 0.9999}
+
+
+def resolve_experiment_validation(config: dict, config_path: str | Path) -> dict | None:
+    """Validate a post-holdout config against the right ancestor, by lineage.
+
+    Returns None for configs parented to the research identity, which keep the
+    existing canonical comparison at their call sites. An unrecognized parent
+    raises rather than falling through unchecked: a config that names no known
+    ancestor has no registered factor to be held to, and silently skipping the
+    check is how an unregistered experiment would get to run.
+
+    `config_path` is separate because `load_experiment_config` returns the
+    parsed mapping without recording where it read from, and the validator
+    needs the file itself to hash it.
+    """
+    post_holdout = config.get("post_holdout")
+    if post_holdout is None:
+        return None
+    parent = post_holdout.get("parent_experiment_id")
+    if parent == RESEARCH_PARENT_ID:
+        return None
+    if parent == BASELINE_EXPERIMENT_ID:
+        return validate_loss_experiment_config(
+            BASELINE_CONFIG_PATH,
+            config_path,
+            allowed_differences=LOSS001_ALLOWED_DIFFERENCES,
+            expected_values=LOSS001_EXPECTED_VALUES,
+        )
+    raise ValueError(
+        f"Config declares an unregistered parent experiment {parent!r}; "
+        "every experiment must name the ancestor its single factor is measured against."
+    )
