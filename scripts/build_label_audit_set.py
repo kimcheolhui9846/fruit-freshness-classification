@@ -14,13 +14,15 @@ from pathlib import Path
 
 import numpy as np
 
-from src.datasets.label_audit import select_review_set
+from src.datasets.label_audit import (
+    CONTROL_COUNT,
+    CONTROL_SAMPLE_SEED,
+    PRESENTATION_ORDER_SEED,
+    SUBJECT_COUNT,
+    select_review_set,
+)
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
-CONTROL_SAMPLE_SEED = 20260813
-PRESENTATION_ORDER_SEED = 20260813
-SUBJECT_COUNT = 347
-CONTROL_COUNT = 150
 SHEET_COLUMNS = 4
 SHEET_ROWS = 4
 CELL_PIXELS = 256

@@ -17,11 +17,14 @@ from sklearn.metrics import cohen_kappa_score
 
 from src.datasets.label_audit import (
     CONTROL_COUNT,
+    CONTROL_SAMPLE_SEED,
+    PRESENTATION_ORDER_SEED,
     JUDGMENT_CATEGORIES,
     REVIEW_SET_COUNT,
     SUBJECT_COUNT,
     apply_decision_rule,
     score_reviewer,
+    select_review_set,
 )
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
@@ -231,7 +234,7 @@ def main(argv: list[str] | None = None) -> int:
     ]
 
     findings = {
-        "schema_version": 1,
+        "schema_version": 2,
         "review_set_count": key["review_set_count"],
         "reviewer_files": list(args.reviewer),
         "reviewer_scores": scores,

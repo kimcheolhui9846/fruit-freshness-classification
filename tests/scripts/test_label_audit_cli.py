@@ -273,7 +273,16 @@ class AnalyzeLabelAuditCliTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             csv_path = Path(tmp) / "a.csv"
             csv_path.write_text("position,judgment\n000,FRESH\n", encoding="utf-8")
-            alias = Path(tmp) / "." / "a.csv"
+            (Path(tmp) / "sub").mkdir()
+            alias = Path(tmp) / "sub" / ".." / "a.csv"
+
+            # `Path(tmp) / "." / "a.csv"` normalizes away at construction time
+            # and is byte-identical to csv_path, which would make this test an
+            # exact duplicate of test_duplicate_reviewer_path_is_rejected and
+            # never exercise the resolve()-based aliasing guard. Assert the
+            # two spellings genuinely differ as strings before resolve().
+            self.assertNotEqual(str(csv_path), str(alias))
+            self.assertEqual(csv_path.resolve(), alias.resolve())
 
             with self.assertRaises(SystemExit):
                 main([
