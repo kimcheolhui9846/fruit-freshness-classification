@@ -25,7 +25,7 @@ from src.engine.training_state import (
     save_training_state_atomic,
     validate_training_state,
 )
-from src.utils.config import load_experiment_config
+from src.utils.config import load_experiment_config, resolve_experiment_validation
 from src.utils.runtime import resolve_device
 
 
@@ -539,6 +539,14 @@ def run_training(args: argparse.Namespace) -> dict:
     device = resolve_device()
     print("device:", device)
     config = load_experiment_config(config_path)
+    # Before any dataset preparation or model construction: a config whose
+    # lineage names a registered ancestor must change exactly its one factor.
+    experiment_validation = resolve_experiment_validation(config, config_path)
+    if experiment_validation is not None:
+        print(
+            "Single-factor validation passed: "
+            f"{sorted(experiment_validation['differences'])}"
+        )
     if options["enabled"]:
         _prepare_stateful_output_directory(output_directory, options)
 
