@@ -420,7 +420,7 @@ git commit -m "feat: add label audit scoring and frozen decision rule"
 
 **Interfaces:**
 - Consumes: `select_review_set` from Task 1.
-- Produces: a CLI writing `review/000.jpg` … `review/496.jpg`, `review/contact_sheets/sheet_00.jpg` …, `review_set_key.json`, and `judgment_template.csv`.
+- Produces: a CLI writing `review/000.jpg` … `review/496.jpg`, `review/contact_sheets/sheet_00.jpg` …, `review/judgment_template.csv`, and `sealed/review_set_key.json`.
 
 The answer key is written to the parent directory, never inside `review/`. Images are named by review position only, so no filename carries class information.
 
@@ -458,6 +458,12 @@ class BuildLabelAuditSetCliTest(unittest.TestCase):
         self.assertNotIn(str(outputs["review_dir"]), str(outputs["key_path"].parent))
         self.assertEqual(outputs["key_path"].name, "review_set_key.json")
         self.assertEqual(outputs["review_dir"].name, "review")
+        # Disjoint, not merely non-nested: the reviewers' directory and the
+        # key's directory must share no path, so browsing one cannot reach
+        # the other.
+        self.assertFalse(
+            outputs["key_path"].is_relative_to(outputs["review_dir"])
+        )
 
 
 if __name__ == "__main__":
@@ -525,8 +531,11 @@ def partition_outputs(output_dir: str | Path) -> dict[str, Path]:
         "root": root,
         "review_dir": root / "review",
         "sheet_dir": root / "review" / "contact_sheets",
-        "key_path": root / "review_set_key.json",
-        "template_path": root / "judgment_template.csv",
+        # sealed/ holds only the key. review/ holds everything a reviewer
+        # touches, including the template and both filled-in judgment CSVs, so
+        # the two directories stay disjoint.
+        "key_path": root / "sealed" / "review_set_key.json",
+        "template_path": root / "review" / "judgment_template.csv",
     }
 
 
@@ -1081,7 +1090,7 @@ Expected: `Review set: 497 images`. The command aborts if the output directory i
 
 - [ ] **Step 2: Verify the review set before anyone looks at it**
 
-Confirm 497 files in `review/`, 32 contact sheets, and that `review_set_key.json` sits outside `review/`. Record `presentation_indices_sha256` in the phase handoff. Do not open the key.
+Confirm 497 files in `review/`, 32 contact sheets, and that the key is at `sealed/review_set_key.json`, outside the reviewers' directory. Record `presentation_indices_sha256` in the phase handoff — Step 4 passes it back as `--expected-hash`, which is the only thing that ties the analyzed key to the one the review actually started from. Do not open the key.
 
 - [ ] **Step 3: Both reviewers judge independently**
 
@@ -1094,8 +1103,13 @@ Each reviewer copies `review/judgment_template.csv` to `review/judgment_owner.cs
   --key results/deep3-postholdout-research-01-label-audit/sealed/review_set_key.json `
   --reviewer results/deep3-postholdout-research-01-label-audit/review/judgment_owner.csv `
   --reviewer results/deep3-postholdout-research-01-label-audit/review/judgment_assistant.csv `
-  --output-dir results/deep3-postholdout-research-01-label-audit
+  --output-dir results/deep3-postholdout-research-01-label-audit `
+  --expected-hash <presentation_indices_sha256 recorded in Step 2>
 ```
+
+Substitute the recorded hash; do not pass the angle-bracket placeholder. The analyzer also recomputes group membership from the frozen seeds and refuses to run if the sealed key disagrees, so the key's `group` fields are checked rather than trusted.
+
+The command refuses a non-empty output directory. If it stops for that reason, do not delete the earlier findings — one recorded outcome per audit is the point. Report the collision instead.
 
 - [ ] **Step 5: Record the finding**
 

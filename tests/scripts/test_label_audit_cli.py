@@ -83,6 +83,25 @@ def _sealed_key_payload(entries):
     }
 
 
+def _labels_for(entries):
+    """Ground-truth labels aligned to [e["source_index"] for e in entries].
+
+    analyze_label_audit recomputes group membership from the frozen seeds rather
+    than trusting the key, so a fixture's labels have to reproduce the key's own
+    grouping. With the development pool equal to the review set, the 347
+    freshpotato rows are the subject group and the control sample of 150 is
+    drawn from exactly 150 rottenpotato rows, so the recomputation is exact.
+    """
+    import numpy as np_module
+
+    fresh = LABEL_NAMES.index("freshpotato")
+    rotten = LABEL_NAMES.index("rottenpotato")
+    return np_module.array(
+        [fresh if e["group"] == "SUBJECT" else rotten for e in entries],
+        dtype=np_module.int64,
+    )
+
+
 def _write_judgment_csv(path, entries, judgment_for):
     """judgment_for(entry) -> category string, one row per entry."""
     import csv as csv_module
@@ -361,6 +380,106 @@ class AnalyzeLabelAuditCliTest(unittest.TestCase):
                     "--output-dir", str(Path(tmp) / "out"),
                 ])
 
+    def _run_main_over_key(self, tmp, entries, key_payload, expected_hash=None):
+        """Drive main() far enough to exercise the sealed-key checks."""
+        import json
+
+        import numpy as np
+
+        key_path = Path(tmp) / "k.json"
+        key_path.write_text(json.dumps(key_payload), encoding="utf-8")
+
+        reviewer_1 = Path(tmp) / "r1.csv"
+        reviewer_2 = Path(tmp) / "r2.csv"
+        _write_judgment_csv(reviewer_1, entries, lambda e: "FRESH")
+        _write_judgment_csv(reviewer_2, entries, lambda e: "FRESH")
+
+        label_names_path = Path(tmp) / "label_names.json"
+        label_names_path.write_text(json.dumps(LABEL_NAMES), encoding="utf-8")
+
+        split_manifest_path = Path(tmp) / "split.json"
+        split_manifest_path.write_text(
+            json.dumps({"development_indices": [e["source_index"] for e in entries]}),
+            encoding="utf-8",
+        )
+
+        predictions_path = Path(tmp) / "p.npz"
+        np.savez(
+            predictions_path,
+            predictions=np.array([ROTTEN_POTATO_INDEX] * len(entries), dtype=np.int64),
+            labels=_labels_for(entries),
+        )
+
+        argv = [
+            "--key", str(key_path),
+            "--reviewer", str(reviewer_1),
+            "--reviewer", str(reviewer_2),
+            "--output-dir", str(Path(tmp) / "out"),
+            "--baseline-predictions", str(predictions_path),
+            "--label-names", str(label_names_path),
+            "--split-manifest", str(split_manifest_path),
+        ]
+        if expected_hash is not None:
+            argv += ["--expected-hash", expected_hash]
+        return main(argv)
+
+    def test_balanced_group_swap_in_the_sealed_key_is_rejected(self):
+        # The group sizes and the presentation hash both survive a balanced
+        # SUBJECT<->CONTROL swap, yet it moves one example across the denominator
+        # boundary in each direction and so changes both error rates. Group
+        # membership is derivable from the published seeds, so the key is
+        # cross-checked against a recomputation rather than trusted.
+        import tempfile
+
+        entries = _full_scale_entries()
+        subject = next(e for e in entries if e["group"] == "SUBJECT")
+        control = next(e for e in entries if e["group"] == "CONTROL")
+        swapped = [dict(e) for e in entries]
+        swapped[entries.index(subject)]["group"] = "CONTROL"
+        swapped[entries.index(control)]["group"] = "SUBJECT"
+
+        key_payload = _sealed_key_payload(swapped)
+        # The swap is invisible to every earlier guard.
+        self.assertEqual(
+            sum(1 for e in swapped if e["group"] == "SUBJECT"),
+            build_label_audit_set.SUBJECT_COUNT,
+        )
+        self.assertEqual(
+            key_payload["presentation_indices_sha256"],
+            _sealed_key_payload(entries)["presentation_indices_sha256"],
+        )
+
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaises(SystemExit) as caught:
+                self._run_main_over_key(tmp, entries, key_payload)
+
+        self.assertIn("recomputation", str(caught.exception))
+
+    def test_expected_hash_mismatch_is_rejected(self):
+        # Without this the recompute only proves the key is self-consistent,
+        # never that it is the key whose hash the operator recorded before the
+        # review began.
+        import tempfile
+
+        entries = _full_scale_entries()
+        key_payload = _sealed_key_payload(entries)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaises(SystemExit) as caught:
+                self._run_main_over_key(tmp, entries, key_payload, expected_hash="0" * 64)
+        self.assertIn("recorded before the review began", str(caught.exception))
+
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(
+                self._run_main_over_key(
+                    tmp,
+                    entries,
+                    key_payload,
+                    expected_hash=key_payload["presentation_indices_sha256"],
+                ),
+                0,
+            )
+
     def test_tampered_presentation_hash_is_rejected(self):
         # entries carry source_index in position order, so the hash the build
         # script recorded is exactly recomputable. A key whose entries don't
@@ -436,7 +555,11 @@ class AnalyzeLabelAuditCliTest(unittest.TestCase):
             )
 
             predictions_path = Path(tmp) / "predictions.npz"
-            np.savez(predictions_path, predictions=np.array(predictions, dtype=np.int64))
+            np.savez(
+                predictions_path,
+                predictions=np.array(predictions, dtype=np.int64),
+                labels=_labels_for(entries),
+            )
 
             output_dir = Path(tmp) / "output"
 
@@ -540,6 +663,7 @@ class AnalyzeLabelAuditCliTest(unittest.TestCase):
             np.savez(
                 predictions_path,
                 predictions=np.array([FRESH_POTATO_INDEX] * len(entries), dtype=np.int64),
+                labels=_labels_for(entries),
             )
 
             output_dir = Path(tmp) / "output"
