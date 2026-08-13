@@ -131,14 +131,45 @@ NO
 RELEASE_OR_TAG_CREATION:
 NO
 PHASE_9_5:
-NOT STARTED
+LABEL_AUDIT_PROTOCOL_FROZEN
 ```
 
 The run was interrupted once at 2026-08-13 05:34:53 during fold 3 epoch 30 by an automatic Windows Update restart, not by a training fault or a stop condition. The approved epoch-boundary resume policy recovered it from completed epoch 29 without repeating folds 1 and 2 and without altering the recipe. The integrity block written by the evaluator records zero locked-test and zero canonical-holdout forward passes.
 
 A second baseline run, locked-test evaluation, canonical-holdout re-evaluation, weight or dataset publication, and Release or tag creation each still require a further explicit owner decision.
 
-Phase numbering is resolved as follows: Phase 9.4 covers baseline execution, and the first loss/class-imbalance experiment is Phase 9.5. An earlier external handoff draft numbered the loss experiment as 9.4; the repository documents and their contract tests are the authoritative numbering.
+Phase numbering is resolved as follows: Phase 9.4 covers baseline execution. An earlier external handoff draft numbered the loss experiment as 9.4; the repository documents and their contract tests are the authoritative numbering. The loss/class-imbalance experiment was Phase 9.5 until the Phase 9.5 decision below reordered it to Phase 9.6.
+
+## Phase 9.5 — Development Label Quality Audit
+
+The owner approved a development label quality audit on 2026-08-13 and deferred the loss/class-imbalance experiment to Phase 9.6. The audit method is frozen in [postholdout-label-audit-protocol.md](postholdout-label-audit-protocol.md) before any image is reviewed.
+
+```text
+PHASE_9_5_SCOPE:
+DEVELOPMENT_LABEL_QUALITY_AUDIT
+AUDIT_PROTOCOL_STATUS:
+FROZEN
+AUDIT_EXECUTION_STATUS:
+NOT_YET_RUN
+MODEL_TRAINING:
+NO
+MODEL_INFERENCE:
+NO
+LOCKED_TEST_INSPECTION:
+NO
+APPROVED_RELABELING:
+NO
+IMAGE_PUBLICATION:
+NO
+PHASE_9_6:
+NOT STARTED
+```
+
+This reorders the pre-registered hypothesis queue, so the evidence for doing so is recorded rather than applied silently. The Phase 9.4 baseline showed that the dominant error is not explained by class frequency: the development imbalance ratio is 7.8:1, the support-to-F1 correlation is 0.500, and `rottenpotato` at 514 examples scores 0.7741 while `rottencapsicum` at 570 scores 0.9965. On `freshpotato` the model is more confident when wrong (0.745) than when right (0.608), the confusion with `rottenpotato` runs 164 to 5 in one direction, and all three folds reproduce the asymmetry. A frequency-based reweighting experiment would target something other than the binding constraint.
+
+The audit is falsifiable by construction. A `rottenpotato` control group measures reviewer error on a class the model already learns well, two reviewers judge blind and independently, and a decision rule fixed in advance selects Phase 9.6 from the outcome. Confirming a defect leads to a remediation decision, which is not authorized here; comparable error rates return to the pre-registered H1 loss experiment.
+
+The locked test is not inspected. Its 86 `freshpotato` images carry the same suspected defect, so the frozen criteria are applied to them only at final-evaluation time under the authorization that final evaluation already requires. Fixing the criteria now, from development evidence alone, prevents them from being shaped to flatter the final result.
 
 ### Recorded integration deviation — PR #5
 

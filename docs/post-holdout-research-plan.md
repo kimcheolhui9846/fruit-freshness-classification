@@ -73,6 +73,14 @@ Before model experiments, create a newly locked test subset from the source pool
 
 Change one major factor at a time, then evaluate controlled combinations. Stop when a primary family is exhausted, improvements repeatedly fail on development Macro F1, the Top-1 guardrail repeatedly fails, cost is disproportionate, evidence points to data quality, or external evaluation becomes necessary.
 
+### Recorded reordering — H6 before H1 (2026-08-13)
+
+The completed Phase 9.4 baseline triggered the plan's own "evidence points to data quality" condition, so H6 error-focused analysis was moved ahead of H1 loss / imbalance. Phase 9.5 is the label quality audit frozen in [postholdout-label-audit-protocol.md](postholdout-label-audit-protocol.md); H1 becomes Phase 9.6.
+
+The reordering rests on development evidence only. Class frequency does not explain the dominant error: the imbalance ratio is 7.8:1, the support-to-F1 correlation is 0.500, and `rottenpotato` (514 examples, F1 0.7741) sits beside `rottencapsicum` (570 examples, F1 0.9965). On `freshpotato` the model is more confident when wrong than when right, the confusion with `rottenpotato` runs 164 to 5 in one direction, and all three folds reproduce it. H1 targets frequency, which is not the binding constraint here.
+
+The audit's decision rule returns to this pre-registered order automatically if the evidence does not hold: comparable subject and control error rates make H1 the next phase as originally planned. The locked test was not consulted for this decision and remains `FROZEN_UNOBSERVED_BY_MODEL`.
+
 ## Baseline, resources, and reproducibility
 
 ```text

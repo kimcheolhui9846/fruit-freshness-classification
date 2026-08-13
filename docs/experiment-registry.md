@@ -5,6 +5,7 @@
 | `deep3-canonical-reference-01` | 8 | `CLOSED_REFERENCE` | None | `OBSERVED`; historical evidence only |
 | `deep3-postholdout-research-01` | 9.2 | `PROTOCOL_FROZEN` | `deep3-canonical-reference-01` | Historical canonical holdout excluded; new locked test is frozen and unobserved by a model |
 | `deep3-postholdout-research-01-baseline` | 9.3 | `COMPLETED_DEVELOPMENT_BASELINE` | `deep3-postholdout-research-01` | Development CV only; locked test and canonical holdout are model-inaccessible |
+| `deep3-postholdout-research-01-label-audit` | 9.5 | `AUDIT_PROTOCOL_FROZEN` | `deep3-postholdout-research-01-baseline` | Development images only; locked test is not inspected |
 
 Future child runs use: `deep3-postholdout-research-01-baseline`, `deep3-postholdout-research-01-loss-001`, `deep3-postholdout-research-01-aug-001`, `deep3-postholdout-research-01-sampler-001`, `deep3-postholdout-research-01-opt-001`, and `deep3-postholdout-research-01-arch-001`.
 
@@ -56,9 +57,32 @@ NO
 BASELINE_ARTIFACT_PUBLICATION:
 LOCAL_ONLY
 PHASE_9_5:
-NOT STARTED
+LABEL_AUDIT_PROTOCOL_FROZEN
 ```
 
 The baseline result is a development measurement, not a final claim. It selects nothing on the locked test, which stays `FROZEN_UNOBSERVED_BY_MODEL` with zero model forward passes.
 
-Phase 9.5 is the first loss/class-imbalance experiment. It remains unstarted and unauthorized. The completed baseline gives it a concrete target: aggregate `freshpotato` F1 of 0.3682 against 0.929 to 0.999 for ten of the fourteen classes.
+## Phase 9.5 label quality audit
+
+The baseline diagnostic reordered the hypothesis queue. Phase 9.5 is a development label quality audit, and the loss/class-imbalance experiment moves to Phase 9.6. The method is frozen in [postholdout-label-audit-protocol.md](postholdout-label-audit-protocol.md) before any image is reviewed.
+
+```text
+EXPERIMENT_ID:
+deep3-postholdout-research-01-label-audit
+ROLE:
+DEVELOPMENT_LABEL_QUALITY_AUDIT
+AUDIT_PROTOCOL_STATUS:
+FROZEN
+AUDIT_EXECUTION_STATUS:
+NOT_YET_RUN
+MODEL_TRAINING:
+NO
+MODEL_INFERENCE:
+NO
+LOCKED_TEST_INSPECTION:
+NO
+PHASE_9_6:
+NOT STARTED
+```
+
+The audit reviews 347 development `freshpotato` images against a 150-image `rottenpotato` control, blind and independently by two reviewers. A frozen decision rule selects Phase 9.6 from the outcome: a confirmed defect leads to a remediation decision, and comparable error rates return to the pre-registered H1 loss experiment. Remediation itself is not authorized by the audit.
