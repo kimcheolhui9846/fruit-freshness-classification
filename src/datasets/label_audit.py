@@ -60,3 +60,63 @@ def select_review_set(
         "control_indices": control_indices,
         "presentation": presentation,
     }
+
+
+DECISION_THRESHOLD = 0.15
+
+
+def _rate(judgments: dict[int, str], indices: np.ndarray, error_categories) -> tuple[float, float]:
+    total = len(indices)
+    errors = 0
+    undecidable = 0
+    for index in indices.tolist():
+        try:
+            call = judgments[int(index)]
+        except KeyError:
+            raise ValueError(f"Missing judgment for review index {index}.") from None
+        if call not in JUDGMENT_CATEGORIES:
+            raise ValueError(f"Unknown judgment category {call!r} for index {index}.")
+        if call in error_categories:
+            errors += 1
+        elif call == "UNDECIDABLE":
+            undecidable += 1
+    return errors / total, undecidable / total
+
+
+def score_reviewer(
+    judgments: dict[int, str],
+    subject_indices: np.ndarray,
+    control_indices: np.ndarray,
+) -> dict:
+    """Score one reviewer. UNDECIDABLE stays in the denominator, never an error."""
+    subject_error, subject_undecidable = _rate(
+        judgments, np.asarray(subject_indices), SUBJECT_ERROR_CATEGORIES
+    )
+    control_error, control_undecidable = _rate(
+        judgments, np.asarray(control_indices), CONTROL_ERROR_CATEGORIES
+    )
+    return {
+        "subject_error_rate": subject_error,
+        "control_error_rate": control_error,
+        "difference": subject_error - control_error,
+        "subject_undecidable_rate": subject_undecidable,
+        "control_undecidable_rate": control_undecidable,
+    }
+
+
+def apply_decision_rule(reviewer_scores: list[dict], *, threshold: float = DECISION_THRESHOLD) -> dict:
+    """Apply the pre-committed rule. Each reviewer is judged against their own control."""
+    clears = [
+        (s["subject_error_rate"] - s["control_error_rate"]) >= threshold
+        for s in reviewer_scores
+    ]
+    if all(clears):
+        outcome = "DEFECT_CONFIRMED"
+        next_phase = "Phase 9.6 remediation decision: relabel, exclude, or retain (separate authorization)"
+    elif not any(clears):
+        outcome = "DEFECT_NOT_CONFIRMED"
+        next_phase = "Phase 9.6 is H1 loss and class imbalance, as pre-registered"
+    else:
+        outcome = "SPLIT_OUTCOME"
+        next_phase = "No phase selected automatically; owner decides after reviewing disagreements"
+    return {"outcome": outcome, "next_phase": next_phase, "clears_threshold": clears}
