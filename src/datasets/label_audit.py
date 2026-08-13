@@ -19,6 +19,13 @@ SUBJECT_COUNT = 347
 CONTROL_COUNT = 150
 REVIEW_SET_COUNT = SUBJECT_COUNT + CONTROL_COUNT
 
+# Frozen in the protocol. They live here, in a normally importable package, so
+# both CLIs share one definition: `tests/` has no __init__.py, so a script
+# importing `scripts.<other script>` resolves to `tests/scripts` under
+# `unittest discover`.
+CONTROL_SAMPLE_SEED = 20260813
+PRESENTATION_ORDER_SEED = 20260813
+
 JUDGMENT_CATEGORIES = ("FRESH", "ROTTEN", "NOT_A_POTATO", "UNDECIDABLE")
 SUBJECT_ERROR_CATEGORIES = ("ROTTEN", "NOT_A_POTATO")
 CONTROL_ERROR_CATEGORIES = ("FRESH", "NOT_A_POTATO")
