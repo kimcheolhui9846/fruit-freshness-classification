@@ -2,7 +2,12 @@ import unittest
 
 import numpy as np
 
-from src.datasets.label_audit import apply_decision_rule, score_reviewer, select_review_set
+from src.datasets.label_audit import (
+    DECISION_THRESHOLD,
+    apply_decision_rule,
+    score_reviewer,
+    select_review_set,
+)
 
 
 CLASS_NAMES = ["freshpotato", "rottenpotato", "freshapples"]
@@ -116,6 +121,26 @@ class ScoringTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             score_reviewer(judgments, self.subject, self.control)
 
+    def test_per_group_category_counts_are_reported(self):
+        # The protocol's Outputs section commits to per-reviewer category
+        # counts for subject and control groups, including a breakdown of
+        # ROTTEN vs NOT_A_POTATO within the subject group's pooled error rate.
+        judgments = self._judgments(
+            ["ROTTEN"] * 3 + ["UNDECIDABLE"] * 2 + ["FRESH"] * 5,
+            ["ROTTEN"] * 10,
+        )
+
+        scores = score_reviewer(judgments, self.subject, self.control)
+
+        self.assertEqual(
+            scores["subject_counts"],
+            {"FRESH": 5, "ROTTEN": 3, "NOT_A_POTATO": 0, "UNDECIDABLE": 2},
+        )
+        self.assertEqual(
+            scores["control_counts"],
+            {"FRESH": 0, "ROTTEN": 10, "NOT_A_POTATO": 0, "UNDECIDABLE": 0},
+        )
+
 
 class DecisionRuleTest(unittest.TestCase):
     def test_both_reviewers_clearing_confirms_the_defect(self):
@@ -158,6 +183,23 @@ class DecisionRuleTest(unittest.TestCase):
         ]
 
         self.assertEqual(apply_decision_rule(scores)["outcome"], "DEFECT_CONFIRMED")
+
+    def test_just_under_fifteen_points_does_not_clear(self):
+        # 0.14 - 0.0 is exactly 0.14 in IEEE-754. Any threshold strictly below
+        # 0.15 (e.g. 0.09, 0.10, 0.12) would wrongly clear this, so this case
+        # brackets DECISION_THRESHOLD from below where no prior case did.
+        scores = [
+            {"subject_error_rate": 0.14, "control_error_rate": 0.0},
+            {"subject_error_rate": 0.14, "control_error_rate": 0.0},
+        ]
+
+        result = apply_decision_rule(scores)
+
+        self.assertEqual(result["outcome"], "DEFECT_NOT_CONFIRMED")
+        self.assertEqual(result["clears_threshold"], [False, False])
+
+    def test_decision_threshold_is_pinned_at_fifteen_points(self):
+        self.assertEqual(DECISION_THRESHOLD, 0.15)
 
 
 if __name__ == "__main__":
