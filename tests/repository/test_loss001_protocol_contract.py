@@ -71,9 +71,33 @@ class Loss001ProtocolContractTest(unittest.TestCase):
 
         for token in (
             "PROTOCOL_STATUS:\nFROZEN",
-            "EXECUTION_STATUS:\nNOT_YET_RUN",
             "EXPERIMENT_ID:\ndeep3-postholdout-research-01-loss-001",
-            "APPROVED_EXECUTION:\nNOT_YET_GRANTED",
+            "APPROVED_EXECUTION:\nGRANTED",
+            "APPROVED_EXECUTION_DATE:\n2026-08-14",
+            "APPROVED_CANDIDATE_COUNT:\n1",
+        ):
+            self.assertIn(token, document)
+
+    def test_execution_status_is_exactly_one_known_state(self):
+        document = PROTOCOL.read_text(encoding="utf-8")
+
+        # Lets the status advance to COMPLETED without loosening the contract,
+        # while a typo or a second status line still fails.
+        states = [
+            state
+            for state in ("NOT_YET_RUN", "IN_PROGRESS", "COMPLETED", "STOPPED")
+            if f"EXECUTION_STATUS:\n{state}" in document
+        ]
+        self.assertEqual(len(states), 1, f"expected exactly one execution status, got {states}")
+
+    def test_granting_execution_did_not_widen_any_other_approval(self):
+        document = PROTOCOL.read_text(encoding="utf-8")
+
+        # Training approval is not evaluation or publication approval.
+        for token in (
+            "APPROVED_LOCKED_TEST_EVALUATION:\nNO",
+            "APPROVED_WEIGHT_PUBLICATION:\nNO",
+            "APPROVED_RELEASE_CREATION:\nNO",
             "APPROVED_CANDIDATE_COUNT:\n1",
         ):
             self.assertIn(token, document)
@@ -111,8 +135,9 @@ class Loss001ProtocolContractTest(unittest.TestCase):
         ):
             self.assertIn(token, document)
 
+        # Execution is now granted; the guard narrows to the approvals that must
+        # never widen rather than being dropped.
         for forbidden in (
-            "APPROVED_EXECUTION:\nGRANTED",
             "APPROVED_LOCKED_TEST_EVALUATION:\nYES",
             "APPROVED_WEIGHT_PUBLICATION:\nYES",
             "APPROVED_RELEASE_CREATION:\nYES",

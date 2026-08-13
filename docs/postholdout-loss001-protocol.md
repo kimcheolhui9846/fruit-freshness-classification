@@ -16,7 +16,7 @@ H1
 PROTOCOL_STATUS:
 FROZEN
 EXECUTION_STATUS:
-NOT_YET_RUN
+IN_PROGRESS
 LOCKED_TEST_MODEL_ACCESS:
 NO
 CANONICAL_HOLDOUT_MODEL_ACCESS:
@@ -180,7 +180,9 @@ A final claim of any kind still requires the untouched locked test under its own
 APPROVED_PROTOCOL_FREEZE:
 YES
 APPROVED_EXECUTION:
-NOT_YET_GRANTED
+GRANTED
+APPROVED_EXECUTION_DATE:
+2026-08-14
 APPROVED_CANDIDATE_COUNT:
 1
 APPROVED_LOCKED_TEST_EVALUATION:
@@ -191,4 +193,6 @@ APPROVED_RELEASE_CREATION:
 NO
 ```
 
-The owner approved the single changed factor, the acceptance threshold, the candidate count, and the failure branch on 2026-08-14, before any training. Executing the run is a separate decision that has not been made.
+The owner approved the single changed factor, the acceptance threshold, the candidate count, and the failure branch on 2026-08-14, before any training.
+
+The owner then granted execution on 2026-08-14, after the runtime single-factor validator this protocol named as a prerequisite was implemented and exercised: a config with a second changed factor, one with an unfrozen value for the allowed factor, and one naming an unregistered parent were each rejected. Authorization covers exactly one training run against `weights/deep3-postholdout-research-01-loss-001` and the development-only OOF evaluation that follows it, plus applying the frozen decision rule to the result. It does not authorize a second run, locked-test evaluation, canonical-holdout re-evaluation, weight or dataset publication, release creation, or any change to the frozen parameter or thresholds.
