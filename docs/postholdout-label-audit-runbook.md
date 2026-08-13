@@ -563,9 +563,9 @@ def main(argv: list[str] | None = None) -> int:
     if outputs["root"].exists() and any(outputs["root"].iterdir()):
         raise SystemExit(f"Output directory is not empty: {outputs['root']}")
 
-    from scripts.freeze_postholdout_split import _reconstruct_canonical_source_pool_dataset
+    from scripts.freeze_postholdout_split import _reconstruct_canonical_pool_with_images
 
-    dataset, labels, class_names = _reconstruct_canonical_source_pool_dataset()
+    dataset, labels, class_names, _ = _reconstruct_canonical_pool_with_images()
     development_indices, locked_test_indices = _load_development(
         REPOSITORY_ROOT / args.split_manifest
     )
@@ -630,33 +630,95 @@ if __name__ == "__main__":
     raise SystemExit(main())
 ```
 
-- [ ] **Step 4: Add the image-bearing pool reconstruction**
+- [ ] **Step 4: Refactor the pool reconstruction so both callers share one definition**
 
-`_reconstruct_canonical_source_pool` deliberately returns labels only. Add a sibling that returns the dataset object, leaving the original untouched so the split contract keeps its no-image guarantee.
+The audit needs images; the split freeze needs labels only. Do not copy the filter and split logic — a duplicated `remove_labels` or seed that later diverges would silently audit different images than the split describes. Extract one implementation and make the existing entry point delegate to it.
+
+Rename the body of `_reconstruct_canonical_source_pool` into a new function that additionally returns the split object, then reduce the original to a wrapper. Its no-image guarantee is preserved: `datasets` decodes an image only when a row is indexed, and returning the split object decodes nothing.
 
 ```python
-# append to scripts/freeze_postholdout_split.py
+# in scripts/freeze_postholdout_split.py, replacing _reconstruct_canonical_source_pool
 
-def _reconstruct_canonical_source_pool_dataset():
-    """Return the canonical training split itself, for tasks that need images.
+def _reconstruct_canonical_pool_with_images():
+    """Reconstruct the canonical training split, its labels, and its class names.
 
-    `_reconstruct_canonical_source_pool` avoids requesting image samples on
-    purpose. The label audit must open images, so it uses this entry point
-    instead of loosening that one.
+    Single definition of the filter, the 0.2/seed-42 canonical split, and every
+    identity check. Returning the split object decodes no image; `datasets`
+    decodes a row only when it is indexed.
     """
     from datasets import load_dataset
 
-    from src.datasets.fruit_freshness import _resolve_imagefolder_data_dir
+    from src.datasets.fruit_freshness import (
+        DATASET_ARCHIVE_FILENAME,
+        DATASET_REPOSITORY_ID,
+        DATASET_REVISION,
+        _resolve_imagefolder_data_dir,
+    )
+
+    if (
+        DATASET_REPOSITORY_ID != EXPECTED_DATASET_NAME
+        or DATASET_REVISION != EXPECTED_DATASET_REVISION
+        or DATASET_ARCHIVE_FILENAME != "freshness_fruit.zip"
+    ):
+        raise DatasetIdentityMismatchError("Pinned canonical dataset identity does not match Phase 9.2")
 
     dataset = load_dataset("imagefolder", data_dir=str(_resolve_imagefolder_data_dir()))
     raw_labels = np.asarray(dataset["train"]["label"], dtype=np.int64)
     remove_labels = np.asarray([18, 20, 16, 13, 2, 5, 7, 9], dtype=np.int64)
     clean = dataset["train"].select(np.flatnonzero(~np.isin(raw_labels, remove_labels)))
-    canonical_train = clean.train_test_split(test_size=0.2, seed=42)["train"]
+    if len(clean) != EXPECTED_FILTERED_SIZE:
+        raise DatasetIdentityMismatchError(
+            f"Filtered canonical dataset size mismatch: {len(clean)} != {EXPECTED_FILTERED_SIZE}"
+        )
 
-    labels, class_names, _ = _reconstruct_canonical_source_pool()
-    return canonical_train, labels, class_names
+    canonical_split = clean.train_test_split(test_size=0.2, seed=42)
+    canonical_train = canonical_split["train"]
+    canonical_holdout = canonical_split["test"]
+    if len(canonical_train) != EXPECTED_SOURCE_POOL_SIZE:
+        raise DatasetIdentityMismatchError(
+            "Canonical training size mismatch: "
+            f"{len(canonical_train)} != {EXPECTED_SOURCE_POOL_SIZE}"
+        )
+    if len(canonical_holdout) != EXPECTED_CANONICAL_HOLDOUT_SIZE:
+        raise DatasetIdentityMismatchError(
+            "Canonical holdout size mismatch: "
+            f"{len(canonical_holdout)} != {EXPECTED_CANONICAL_HOLDOUT_SIZE}"
+        )
+
+    source_raw_labels = np.asarray(canonical_train["label"], dtype=np.int64)
+    holdout_raw_labels = np.asarray(canonical_holdout["label"], dtype=np.int64)
+    raw_label_ids = sorted(set(source_raw_labels) | set(holdout_raw_labels))
+    class_names = class_names_from_raw_label_ids(
+        canonical_train.features["label"],
+        raw_label_ids,
+    )
+    if len(class_names) != EXPECTED_CLASS_COUNT:
+        raise DatasetIdentityMismatchError(
+            f"Canonical class count mismatch: {len(class_names)} != {EXPECTED_CLASS_COUNT}"
+        )
+    remap = {raw_label_id: index for index, raw_label_id in enumerate(raw_label_ids)}
+    source_labels = np.asarray(
+        [remap[raw_label_id] for raw_label_id in source_raw_labels],
+        dtype=np.int64,
+    )
+    return canonical_train, source_labels, class_names, len(canonical_holdout)
+
+
+def _reconstruct_canonical_source_pool() -> tuple[np.ndarray, list[str], int]:
+    """Reconstruct canonical split labels without requesting image samples."""
+    _, source_labels, class_names, holdout_size = _reconstruct_canonical_pool_with_images()
+    return source_labels, class_names, holdout_size
 ```
+
+In `scripts/build_label_audit_set.py`, import `_reconstruct_canonical_pool_with_images` and unpack four values:
+
+```python
+from scripts.freeze_postholdout_split import _reconstruct_canonical_pool_with_images
+
+dataset, labels, class_names, _ = _reconstruct_canonical_pool_with_images()
+```
+
+The existing split-freeze tests cover the wrapper's contract, so a regression in the extraction fails them.
 
 - [ ] **Step 5: Run the tests to verify they pass**
 
