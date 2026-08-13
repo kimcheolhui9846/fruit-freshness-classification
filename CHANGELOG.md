@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- Froze the Phase 9.5 development label quality audit protocol before reviewing any image: judgment criteria, a 347-image `freshpotato` subject group against a 150-image `rottenpotato` control, seeded review-set construction, blind independent dual review, and a decision rule with a pre-committed 15-percentage-point threshold that selects Phase 9.6 from the outcome. No image was reviewed, no label was changed, and the locked test was not inspected.
 - Executed the owner-authorized post-holdout development baseline `deep3-postholdout-research-01-baseline` and its development-only out-of-fold evaluation. Aggregate development OOF Macro F1 is 0.9012 (balanced accuracy 0.9007, Top-1 0.9566) over all 17,188 development examples, each predicted exactly once. Per-fold Macro F1 is reported separately as 0.8907, 0.9098, and 0.9022; their mean is a different quantity from the aggregate and is not substituted for it.
 - Recorded that aggregate `freshpotato` F1 is 0.3682 at recall 0.2738, with 164 of 347 examples predicted `rottenpotato`, identifying the fresh/rotten confusion that Phase 9.5 targets.
 - Prepared the post-holdout baseline execution runbook, including frozen inputs, fresh and resume commands, development-only OOF evaluation, preflight and stop conditions, and an unresolved owner approval block. No training was started.
@@ -28,6 +29,7 @@
 
 ### Changed
 
+- Reordered the pre-registered hypothesis queue: H6 error-focused analysis becomes Phase 9.5 and H1 loss / class imbalance moves to Phase 9.6. The baseline evidence for the change is recorded in the research plan, governance decisions, and registry rather than applied silently — class frequency does not explain the dominant error, since the imbalance ratio is 7.8:1, the support-to-F1 correlation is 0.500, and `rottenpotato` (514 examples, F1 0.7741) sits beside `rottencapsicum` (570 examples, F1 0.9965).
 - Phase 9.4 moved from runbook preparation to recorded baseline execution across the runbook, experiment registry, governance decisions, research plan, and baseline record. The `deep3-postholdout-research-01-baseline` registry status is now `COMPLETED_DEVELOPMENT_BASELINE`.
 - Narrowed the post-holdout baseline contract test rather than dropping it: it now asserts the executed state and additionally fails if the spent training approval ever widens into locked-test access, canonical-holdout re-evaluation, binary publication, or release creation.
 - README and reproducibility status now distinguish the completed local canonical run and locked internal holdout from the historical untrained compatibility evidence.
