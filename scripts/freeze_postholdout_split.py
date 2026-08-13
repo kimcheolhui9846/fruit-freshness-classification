@@ -173,8 +173,13 @@ def _repository_sha() -> str:
     return completed.stdout.strip()
 
 
-def _reconstruct_canonical_source_pool() -> tuple[np.ndarray, list[str], int]:
-    """Reconstruct canonical split labels without requesting image samples."""
+def _reconstruct_canonical_pool_with_images():
+    """Reconstruct the canonical training split, its labels, and its class names.
+
+    Single definition of the filter, the 0.2/seed-42 canonical split, and every
+    identity check. Returning the split object decodes no image; `datasets`
+    decodes a row only when it is indexed.
+    """
     from datasets import load_dataset
 
     from src.datasets.fruit_freshness import (
@@ -230,7 +235,13 @@ def _reconstruct_canonical_source_pool() -> tuple[np.ndarray, list[str], int]:
         [remap[raw_label_id] for raw_label_id in source_raw_labels],
         dtype=np.int64,
     )
-    return source_labels, class_names, len(canonical_holdout)
+    return canonical_train, source_labels, class_names, len(canonical_holdout)
+
+
+def _reconstruct_canonical_source_pool() -> tuple[np.ndarray, list[str], int]:
+    """Reconstruct canonical split labels without requesting image samples."""
+    _, source_labels, class_names, holdout_size = _reconstruct_canonical_pool_with_images()
+    return source_labels, class_names, holdout_size
 
 
 def freeze_postholdout_split(output_path: Path) -> dict:
