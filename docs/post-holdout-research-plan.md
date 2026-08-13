@@ -144,3 +144,8 @@ The source is restricted to the historical canonical training pool. The frozen s
 ## Phase 9.3 approved baseline
 
 The owner approved exactly one child run, `deep3-postholdout-research-01-baseline`, to reproduce the canonical recipe on the frozen development pool using deterministic 3-fold stratified CV (`random_state=42`). The locked test remains `FROZEN_UNOBSERVED_BY_MODEL`, and the historical canonical holdout remains `HISTORICAL_EVALUATION_ONLY`. The tracked CV identity is materialized with LF-normalized SHA-256 494bbc47a75aa35ab436d48899d531febc079301c15cdcf659df18e0fac2352f. The baseline may not tune the recipe or make a final-test claim. Its execution status is COMPLETED as of 2026-08-13, with aggregate development OOF Macro F1 0.9012 over all 17,188 development examples; Phase 9.5 remains NOT_STARTED.
+### Phase 9.6 — first H1 candidate, frozen 2026-08-14
+
+`deep3-postholdout-research-01-loss-001` changes one parameter: `loss.class_balanced_beta` from 0.999 to 0.9999. The baseline already uses class-balanced focal loss, so H1 here is a question of strength, not of introducing the mechanism. `freshpotato` already carries the largest alpha and still collapses; at the same time only about 40 percent of full inverse-frequency reweighting is applied. This run settles which of those facts governs.
+
+Acceptance is fixed before the run at development Macro F1 at least 0.9112 with Top-1 at least 0.9466. Below that, H1 is recorded as exhausted and Phase 9.7 is H2 augmentation — no second loss variant. Details and the unmeasured-noise-floor caveat are in [postholdout-loss001-protocol.md](postholdout-loss001-protocol.md).
