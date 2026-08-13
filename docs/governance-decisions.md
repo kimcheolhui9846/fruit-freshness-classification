@@ -96,29 +96,47 @@ APPROVED
 BASELINE_ARTIFACT_PUBLICATION:
 LOCAL_ONLY
 BASELINE_EXECUTION_STATUS:
-NOT_YET_RUN
+COMPLETED
 PHASE_9_4:
-RUNBOOK_PREPARED
+BASELINE_EXECUTED
 ```
 
 The deterministic development-CV identity is materialized once as a tracked index record; it is not a dataset or prediction artifact. No hyperparameter tuning, loss/augmentation/sampler/optimization/architecture experiment, external data acquisition, binary publication, Release, or tag is approved by this decision.
 
-## Phase 9.4 — Baseline Execution Runbook Preparation
+## Phase 9.4 — Baseline Execution
 
-Phase 9.4 documents how the approved baseline would be executed and does not execute it. [postholdout-baseline-runbook.md](postholdout-baseline-runbook.md) records the frozen inputs, the fresh and resume commands, the development-only OOF evaluation command, preflight and stop conditions, a resource expectation, and an unresolved owner approval block.
+Phase 9.4 began as runbook preparation only. [postholdout-baseline-runbook.md](postholdout-baseline-runbook.md) recorded the frozen inputs, the fresh and resume commands, the development-only OOF evaluation command, preflight and stop conditions, a resource expectation, and an initially unresolved owner approval block.
+
+The owner resolved that block on 2026-08-12 after the recorded preflight, authorizing exactly one baseline training run and the development-only OOF evaluation that follows it. The run executed 2026-08-12 to 2026-08-13 and completed. Training and evaluation are therefore `YES` for this phase; every other boundary stayed closed.
 
 ```text
 PHASE_9_4_SCOPE:
-DOCUMENTATION_ONLY
+BASELINE_EXECUTION
 BASELINE_EXECUTION_STATUS:
-NOT_YET_RUN
+COMPLETED
 MODEL_TRAINING:
-NO
+YES
 MODEL_EVALUATION:
+DEVELOPMENT_OOF_ONLY
+LOCKED_TEST_EVALUATION:
+NO
+CANONICAL_HOLDOUT_REEVALUATION:
+NO
+POST_HOLDOUT_LOCKED_TEST_MODEL_FORWARD_PASSES:
+0
+CANONICAL_HOLDOUT_MODEL_FORWARD_PASSES:
+0
+BINARY_PUBLICATION:
+NO
+RELEASE_OR_TAG_CREATION:
 NO
 PHASE_9_5:
 NOT STARTED
 ```
+
+The run was interrupted once at 2026-08-13 05:34:53 during fold 3 epoch 30 by an automatic Windows Update restart, not by a training fault or a stop condition. The approved epoch-boundary resume policy recovered it from completed epoch 29 without repeating folds 1 and 2 and without altering the recipe. The integrity block written by the evaluator records zero locked-test and zero canonical-holdout forward passes.
+
+A second baseline run, locked-test evaluation, canonical-holdout re-evaluation, weight or dataset publication, and Release or tag creation each still require a further explicit owner decision.
 
 Phase numbering is resolved as follows: Phase 9.4 covers baseline execution, and the first loss/class-imbalance experiment is Phase 9.5. An earlier external handoff draft numbered the loss experiment as 9.4; the repository documents and their contract tests are the authoritative numbering.
 

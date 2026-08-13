@@ -11,15 +11,33 @@ PARENT_EXPERIMENT_ID:
 deep3-postholdout-research-01
 ROLE:
 POST_HOLDOUT_DEVELOPMENT_BASELINE
+EXPERIMENT_STATUS:
+COMPLETED_DEVELOPMENT_BASELINE
 BASELINE_EXECUTION_STATUS:
-NOT_YET_RUN
+COMPLETED
 PHASE_9_4:
-RUNBOOK_PREPARED
+BASELINE_EXECUTED
 ```
 
-The execution procedure is documented in [postholdout-baseline-runbook.md](postholdout-baseline-runbook.md). Preparing that runbook does not authorize execution; the owner approval block inside it remains unresolved.
+The execution procedure is documented in [postholdout-baseline-runbook.md](postholdout-baseline-runbook.md). The owner resolved that runbook's approval block on 2026-08-12, the run executed on 2026-08-12 to 2026-08-13, and the runbook now carries the recorded execution.
 
 This record defines the first controlled retraining baseline for Phase 9. It is not a new canonical reference, final model, locked-test result, external benchmark, or improvement claim.
+
+## Development-only result
+
+Aggregate out-of-fold metrics over all 17,188 development examples, each predicted exactly once by the fold checkpoint that did not train on it:
+
+| Aggregate OOF metric | Value |
+|---|---|
+| Macro F1 (primary selection metric) | 0.9012 |
+| Balanced accuracy | 0.9007 |
+| Top-1 | 0.9566 |
+
+Per-fold Macro F1 is a different quantity and is reported separately: 0.8907, 0.9098, 0.9022. Their mean, 0.900945, is not the aggregate OOF value of 0.901167.
+
+Aggregate `freshpotato` F1 is 0.3682 at recall 0.2738, and 164 of its 347 examples are predicted `rottenpotato`. Because that confusion crosses the fresh/rotten distinction, it is the leading candidate for the Phase 9.5 class-imbalance work rather than a tuning detail.
+
+These are development measurements. A final claim requires the untouched locked test under a separate owner authorization.
 
 ## Frozen data boundary
 

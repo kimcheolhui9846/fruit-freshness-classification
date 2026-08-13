@@ -1088,3 +1088,100 @@ NOT YET GRANTED
 ```
 
 Phase 9.3 delivered the approved baseline configuration, the deterministic development-CV identity record, the post-holdout training route, and the development-only OOF evaluation entry point. No model was constructed, no training or evaluation ran, no checkpoint was created, and no dataset row was reconstructed into a model-visible pipeline. An earlier implementation commit failed CI because tracked JSON identity hashes were computed without LF normalization; `8372566` fixed that and both Ubuntu and Windows jobs then passed. The baseline run itself remains unexecuted and Phase 9.4 requires a separate explicit authorization.
+
+## Phase 9.4 — Post-Holdout Baseline Execution and Development-Only OOF Evaluation
+
+```text
+PHASE:
+9.4 — Post-Holdout Baseline Execution and Development-Only OOF Evaluation
+PHASE_9_3_FINAL_MAIN:
+15eb552e7ae1f698e99c5d3bac3e9516180f7053
+PHASE_BRANCH:
+experiment/phase-9.4-baseline-execution
+AUTHORIZATION_COMMIT:
+5757d0efb3fe0f4b5f6399e52eb745c4d59cd008
+PR:
+#7
+PR_STATE:
+DRAFT
+EXPERIMENT_ID:
+deep3-postholdout-research-01-baseline
+PARENT_EXPERIMENT_ID:
+deep3-postholdout-research-01
+ROLE:
+POST_HOLDOUT_DEVELOPMENT_BASELINE
+EXPERIMENT_STATUS:
+COMPLETED_DEVELOPMENT_BASELINE
+OWNER_PHASE_9_4_APPROVAL:
+GRANTED 2026-08-12
+BASELINE_EXECUTION_STATUS:
+COMPLETED
+RUN_START:
+2026-08-12T19:10 local
+RUN_INTERRUPTION:
+2026-08-13T05:34:53 local, Windows Update restart, System event 1074
+RUN_INTERRUPTION_CAUSE:
+EXTERNAL_TO_TRAINING
+RESUME_POINT:
+fold 3, completed epoch 29
+RESUME_WINDOW:
+2026-08-13T10:31 to 2026-08-13T12:43 local
+FOLD_3_DURATION:
+131.5 minutes
+TRAINING_STATE_FINAL:
+status=COMPLETED, completed_epoch=120
+FOLD_BEST_EMA_VAL_ACC:
+fold1=0.9529 (epoch 103), fold2=0.9592 (epoch 74), fold3=0.9578 (epoch 110)
+TRAINING_ARTIFACTS:
+all 7 expected files present
+OOF_EVALUATION_RUN:
+2026-08-13T13:24 local
+OOF_SAMPLE_COUNT:
+17188_OF_17188_EXACTLY_ONCE
+AGGREGATE_OOF_MACRO_F1:
+0.901167
+AGGREGATE_OOF_BALANCED_ACCURACY:
+0.900711
+AGGREGATE_OOF_TOP1:
+0.956598
+PER_FOLD_MACRO_F1:
+0.8907, 0.9098, 0.9022
+PER_FOLD_MACRO_F1_MEAN:
+0.900945 (a different quantity from the aggregate; never substituted for it)
+WEAKEST_CLASS:
+freshpotato f1=0.3682 recall=0.2738; 164 of 347 predicted rottenpotato
+POST_HOLDOUT_LOCKED_TEST_STATUS:
+FROZEN_UNOBSERVED_BY_MODEL
+LOCKED_TEST_MODEL_ACCESS:
+NO
+CANONICAL_HOLDOUT_MODEL_ACCESS:
+NO
+POST_HOLDOUT_LOCKED_TEST_MODEL_FORWARD_PASSES:
+0
+CANONICAL_HOLDOUT_MODEL_FORWARD_PASSES:
+0
+BASELINE_ARTIFACT_PUBLICATION:
+LOCAL_ONLY
+BINARY_PUBLICATION:
+NO
+RELEASE_OR_TAG_CREATION:
+NO
+DATASET_DOWNLOAD:
+NO
+Repository contracts:
+94 passed
+Full suite:
+262 passed
+compileall:
+passed
+PHASE_9_5:
+NOT STARTED
+OWNER_PR_MERGE_APPROVAL:
+NOT YET GRANTED
+```
+
+Phase 9.4 executed the baseline the owner authorized in `5757d0e` and evaluated it on the development cross-validation only. The run was interrupted once, at fold 3 epoch 30, by an automatic Windows Update restart rather than by a training fault or a stop condition; the machine's active hours are 09:00-03:00, so the reboot window is 03:00-09:00 and a run started in the evening crosses it. The epoch-boundary state written 20 seconds earlier held completed epoch 29, and the approved resume policy recovered the run without repeating folds 1 and 2 and without altering the recipe.
+
+The `repository_commit` recorded in `run_manifest.json` and `training_state.pt` is the authorization commit itself, and `scripts/train.py` `_load_and_validate_manifest` aborts a resume when the current `git rev-parse HEAD` does not match it. That coupling is why `5757d0e` was left unamended when its `Co-Authored-By` trailer was reviewed on 2026-08-13; amending would have orphaned the recorded SHA and broken resume mid-run. Sole authorship is instead enforced going forward through untracked local settings.
+
+Aggregate development OOF Macro F1 is 0.9012. The gap between that and Top-1 0.9566 is concentrated in one class: `freshpotato` scores F1 0.3682 at recall 0.2738, and its dominant error crosses the fresh/rotten distinction. Ten of the fourteen classes score between 0.929 and 0.999. This gives Phase 9.5, the first loss/class-imbalance experiment, a concrete target. The 4,298-example locked test remains `FROZEN_UNOBSERVED_BY_MODEL` with zero model forward passes, and a final claim still requires a separate explicit owner authorization.
