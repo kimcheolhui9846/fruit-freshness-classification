@@ -8,7 +8,7 @@ This runbook describes how the owner-approved Phase 9.3 baseline is executed. Th
 RUNBOOK_STATUS:
 APPROVED_FOR_EXECUTION
 BASELINE_EXECUTION_STATUS:
-IN_PROGRESS
+COMPLETED
 PHASE_9_4:
 BASELINE_EXECUTION_AUTHORIZED
 PHASE_9_4_TRAINING_AUTHORIZATION:
@@ -202,3 +202,55 @@ Executed in an isolated virtual environment created for this run.
 | Output directories | Both absent before the run |
 | Leakage | development ∩ locked test = 0; per fold train ∩ val = 0 and train/val ∩ locked test = 0; validation union covered all 17,188 development examples exactly once |
 | Repository suite | 260 tests passed; `compileall` clean |
+
+### Recorded Execution — 2026-08-12 to 2026-08-13
+
+The run started 2026-08-12 19:10 local under repository commit
+`5757d0efb3fe0f4b5f6399e52eb745c4d59cd008`. It was interrupted at 2026-08-13
+05:34:53 during fold 3 epoch 30 by an automatic Windows Update restart (System
+event 1074, `MoUsoCoreWorker.exe`), not by a training fault. The epoch-boundary
+state written 20 seconds earlier held fold 3 through completed epoch 29, and the
+approved resume policy recovered the run without repeating folds 1 and 2. The
+resume ran 2026-08-13 10:31 to 12:43 and completed fold 3 in 131.5 minutes.
+
+Folds 1 and 2 were unaffected. Every documented artifact was produced, and the
+recorded `repository_commit` still resolves in history.
+
+| Field | Value |
+|---|---|
+| Interruption cause | Windows Update restart, external to training |
+| Resume point | fold 3, completed epoch 29, next epoch 30 |
+| Final training state | `status = COMPLETED`, `completed_epoch = 120` |
+| Fold best EMA validation accuracy | 0.9529 (fold 1, epoch 103); 0.9592 (fold 2, epoch 74); 0.9578 (fold 3, epoch 110) |
+| Artifacts | all seven expected files present |
+
+Development-only OOF evaluation ran 2026-08-13 13:24. Aggregate metrics cover all
+17,188 development examples exactly once.
+
+| Aggregate OOF metric | Value |
+|---|---|
+| Macro F1 (primary) | 0.9012 |
+| Balanced accuracy | 0.9007 |
+| Top-1 | 0.9566 |
+| Top-2 / Top-3 | 0.9769 / 0.9885 |
+
+Per-fold Macro F1 is a separate quantity and is reported separately: 0.8907
+(fold 1), 0.9098 (fold 2), 0.9022 (fold 3). Their mean is 0.900945, which is not
+the aggregate OOF value of 0.901167 and must not be substituted for it.
+
+The integrity block in `development_oof_metrics.json` records zero locked-test
+forward passes, zero locked-test predictions, zero locked-test metrics, zero
+canonical-holdout forward passes, and zero new canonical-holdout metrics. Both
+evaluation boundaries stayed closed.
+
+Macro F1 is held down by one class. Aggregate `freshpotato` F1 is 0.3682 with
+recall 0.2738: of 347 examples only 95 are correct, while 164 are predicted
+`rottenpotato`, 43 `rottenbanana`, and 30 `freshbanana`. The reciprocal error
+appears as low `rottenpotato` precision (0.6809). `rottencucumber` (0.7932) and
+`rottentomato` (0.8765) are the next weakest; the remaining ten classes score
+0.929 to 0.999. Because the dominant confusion crosses the fresh/rotten
+distinction, this is a substantive finding for the research plan rather than a
+tuning detail.
+
+These are development measurements only. A final claim still requires the
+untouched 4,298-example locked test under a separate owner authorization.

@@ -3,6 +3,8 @@
 ## [Unreleased]
 
 ### Added
+- Executed the owner-authorized post-holdout development baseline `deep3-postholdout-research-01-baseline` and its development-only out-of-fold evaluation. Aggregate development OOF Macro F1 is 0.9012 (balanced accuracy 0.9007, Top-1 0.9566) over all 17,188 development examples, each predicted exactly once. Per-fold Macro F1 is reported separately as 0.8907, 0.9098, and 0.9022; their mean is a different quantity from the aggregate and is not substituted for it.
+- Recorded that aggregate `freshpotato` F1 is 0.3682 at recall 0.2738, with 164 of 347 examples predicted `rottenpotato`, identifying the fresh/rotten confusion that Phase 9.5 targets.
 - Prepared the post-holdout baseline execution runbook, including frozen inputs, fresh and resume commands, development-only OOF evaluation, preflight and stop conditions, and an unresolved owner approval block. No training was started.
 - Extended CI to verify the `scripts.evaluate_postholdout_baseline` command-line interface.
 - Materialized the deterministic Phase 9.3 development-CV identity without training, model construction, or model inference.
@@ -26,6 +28,8 @@
 
 ### Changed
 
+- Phase 9.4 moved from runbook preparation to recorded baseline execution across the runbook, experiment registry, governance decisions, research plan, and baseline record. The `deep3-postholdout-research-01-baseline` registry status is now `COMPLETED_DEVELOPMENT_BASELINE`.
+- Narrowed the post-holdout baseline contract test rather than dropping it: it now asserts the executed state and additionally fails if the spent training approval ever widens into locked-test access, canonical-holdout re-evaluation, binary publication, or release creation.
 - README and reproducibility status now distinguish the completed local canonical run and locked internal holdout from the historical untrained compatibility evidence.
 
 ### Artifact policy

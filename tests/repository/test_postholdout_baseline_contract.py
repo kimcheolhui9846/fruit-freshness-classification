@@ -1,4 +1,4 @@
-"""Offline contract for the approved but not-yet-executed Phase 9.3 baseline."""
+"""Offline contract for the executed Phase 9.3 baseline and its closed boundaries."""
 
 import hashlib
 import json
@@ -28,7 +28,7 @@ class PostHoldoutBaselineContractTest(unittest.TestCase):
             "deep3-postholdout-research-01-baseline",
         )
 
-    def test_documents_authorize_only_development_cv_before_training(self):
+    def test_documents_record_a_development_only_baseline_execution(self):
         combined = "\n".join(
             path.read_text(encoding="utf-8")
             for path in (BASELINE_DOCUMENT, REGISTRY, PLAN, GOVERNANCE)
@@ -42,12 +42,38 @@ class PostHoldoutBaselineContractTest(unittest.TestCase):
             "LOCKED_TEST_MODEL_ACCESS:\nNO",
             "CANONICAL_HOLDOUT_MODEL_ACCESS:\nNO",
             "BASELINE_ARTIFACT_PUBLICATION:\nLOCAL_ONLY",
-            "BASELINE_EXECUTION_STATUS:\nNOT_YET_RUN",
-            "PHASE_9_4:\nRUNBOOK_PREPARED",
+            "EXPERIMENT_STATUS:\nCOMPLETED_DEVELOPMENT_BASELINE",
+            "BASELINE_EXECUTION_STATUS:\nCOMPLETED",
+            "PHASE_9_4:\nBASELINE_EXECUTED",
+            "PHASE_9_5:\nNOT STARTED",
         ):
             self.assertIn(token, combined)
-        self.assertNotIn("COMPLETED_DEVELOPMENT_BASELINE", combined)
         self.assertNotIn("PHASE_9_4:\nNOT STARTED", combined)
+        # The execution status advanced exactly once and never reverts.
+        self.assertNotIn("BASELINE_EXECUTION_STATUS:\nNOT_YET_RUN", combined)
+
+    def test_completed_baseline_never_widens_into_evaluation_or_publication(self):
+        combined = "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in (BASELINE_DOCUMENT, REGISTRY, PLAN, GOVERNANCE)
+        )
+        # Training approval is spent. It must not become locked-test access,
+        # canonical-holdout reuse, or any publication of binary artifacts.
+        for forbidden in (
+            "LOCKED_TEST_MODEL_ACCESS:\nYES",
+            "CANONICAL_HOLDOUT_MODEL_ACCESS:\nYES",
+            "LOCKED_TEST_EVALUATION:\nYES",
+            "CANONICAL_HOLDOUT_REEVALUATION:\nYES",
+            "BASELINE_ARTIFACT_PUBLICATION:\nPUBLISHED",
+            "BINARY_PUBLICATION:\nYES",
+            "RELEASE_OR_TAG_CREATION:\nYES",
+        ):
+            self.assertNotIn(forbidden, combined)
+        for token in (
+            "POST_HOLDOUT_LOCKED_TEST_MODEL_FORWARD_PASSES:\n0",
+            "CANONICAL_HOLDOUT_MODEL_FORWARD_PASSES:\n0",
+        ):
+            self.assertIn(token, combined)
 
 
     def test_materialized_cv_identity_matches_the_frozen_baseline_contract(self):
