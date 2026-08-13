@@ -193,3 +193,38 @@ This is the mechanism working as designed. The threshold, the control group, and
 Three deviations are recorded in the protocol and bear on how much the result carries. The owner reviewed a seeded 100-image subsample rather than all 497, leaving their control group at 32 examples. The assistant's judgments were visible in the session transcript before the owner judged, so the two reviews are not fully independent and the reported agreement of 0.80 raw, kappa 0.6259, is an upper bound. And `scripts.analyze_label_audit` was not run, because it requires two complete 497-row judgment files by design and that guard was not weakened to accept a partial second review.
 
 The two-reviewer standard was therefore not met. Phase 9.6 was selected by the owner on the strength of the evidence rather than by a mechanically satisfied rule. Executing H1 remains a separate authorization, as does any locked-test evaluation.
+
+## Phase 9.6 — H1 Loss Experiment Protocol Freeze
+
+The owner approved the single changed factor, the acceptance threshold, the candidate count, and the failure branch on 2026-08-14, before any training. The method is frozen in [postholdout-loss001-protocol.md](postholdout-loss001-protocol.md).
+
+```text
+PHASE_9_6_SCOPE:
+H1_LOSS_AND_CLASS_IMBALANCE
+EXPERIMENT_ID:
+deep3-postholdout-research-01-loss-001
+PROTOCOL_STATUS:
+FROZEN
+EXECUTION_STATUS:
+NOT_YET_RUN
+APPROVED_EXECUTION:
+NOT_YET_GRANTED
+CANDIDATE_COUNT:
+1
+LOCKED_TEST_MODEL_ACCESS:
+NO
+ARTIFACT_PUBLICATION:
+LOCAL_ONLY
+PHASE_9_7:
+H2_AUGMENTATION_IF_NOT_ADVANCED
+```
+
+Freezing this protocol does not authorize the run. Training requires a separate explicit decision, as Phase 9.4 did for the baseline.
+
+The experiment changes one parameter, `loss.class_balanced_beta`, from 0.999 to 0.9999. The baseline already trains with class-balanced focal loss, so this is a question about strength rather than about introducing the mechanism: `freshpotato` already carries the largest alpha of the fourteen classes and still collapses to recall 0.274, yet the correction is only partly applied — the weight ratio against `rottenapples` is 3.18 where the frequency ratio is 7.82. At 0.9999 that ratio becomes 6.97, essentially inverse frequency. The permitted config differences are enforced by a validator before dataset preparation, so "one factor at a time" is checked mechanically rather than trusted.
+
+The acceptance threshold is fixed at Macro F1 at least 0.9112 with Top-1 at least 0.9466, being the pre-registered +0.010 improvement and −0.010 guardrail against the baseline's 0.9012 and 0.9566. The protocol records that this project has no repeat-seed measurement, so the run-to-run noise floor is unmeasured and the threshold is a reasoned rather than a measured choice; establishing it would have cost another nine to twelve GPU hours and was declined.
+
+The failure branch is fixed in advance: a result below the threshold retires H1 as exhausted and makes Phase 9.7 H2 augmentation. Leaving it open would invite trying gamma, then label smoothing, then a combination, searching the H1 family without pre-registration until something cleared the bar by chance. The research plan's own stop condition, "stop when a primary family is exhausted", is what this encodes.
+
+The 4,298-example locked test remains `FROZEN_UNOBSERVED_BY_MODEL`. No weight, checkpoint, dataset copy, Release, or tag is authorized.
