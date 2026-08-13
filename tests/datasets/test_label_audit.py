@@ -153,8 +153,8 @@ class DecisionRuleTest(unittest.TestCase):
 
     def test_exactly_fifteen_points_clears(self):
         scores = [
-            {"subject_error_rate": 0.20, "control_error_rate": 0.05},
-            {"subject_error_rate": 0.20, "control_error_rate": 0.05},
+            {"subject_error_rate": 0.15, "control_error_rate": 0.0},
+            {"subject_error_rate": 0.15, "control_error_rate": 0.0},
         ]
 
         self.assertEqual(apply_decision_rule(scores)["outcome"], "DEFECT_CONFIRMED")
