@@ -184,3 +184,78 @@ def validate_postholdout_baseline_config(
         "baseline_config_sha256": _sha256_file(baseline_resolved),
         "allowed_differences": differences,
     }
+
+LOSS001_ALLOWED_DIFFERENCES = frozenset(
+    {
+        "loss.class_balanced_beta",
+        "post_holdout.experiment_id",
+        "post_holdout.parent_experiment_id",
+        "post_holdout.artifact_namespace",
+    }
+)
+
+
+def flatten_experiment_config(config: dict, prefix: str = "") -> dict[str, object]:
+    """Flatten a config to dotted keys so a single key can be compared exactly.
+
+    `baseline_recipe_differences` compares whole sections, which suffices when
+    the only permitted change is the presence of a `post_holdout` section. A
+    loss experiment changes one key *inside* `[loss]`, and a section-level
+    check would accept any other change in that same section.
+    """
+    flat: dict[str, object] = {}
+    for key, value in config.items():
+        path = f"{prefix}.{key}" if prefix else key
+        if isinstance(value, dict):
+            flat.update(flatten_experiment_config(value, path))
+        else:
+            flat[path] = value
+    return flat
+
+
+def validate_loss_experiment_config(
+    baseline_path: str | Path,
+    experiment_path: str | Path,
+    *,
+    allowed_differences: frozenset[str],
+    expected_values: dict[str, object],
+) -> dict[str, object]:
+    """Verify an experiment config changes exactly its registered factor."""
+    baseline_resolved = Path(baseline_path)
+    experiment_resolved = Path(experiment_path)
+    baseline = flatten_experiment_config(load_experiment_config(baseline_resolved))
+    experiment = flatten_experiment_config(load_experiment_config(experiment_resolved))
+
+    differing = {
+        key
+        for key in set(baseline) | set(experiment)
+        if baseline.get(key) != experiment.get(key)
+    }
+    unexpected = sorted(differing - allowed_differences)
+    if unexpected:
+        raise ValueError(
+            "Experiment config changes fields outside its registered factor: "
+            f"{', '.join(unexpected)}."
+        )
+    missing = sorted(allowed_differences - differing)
+    if missing:
+        raise ValueError(
+            "Experiment config does not differ from the baseline where it must: "
+            f"{', '.join(missing)}."
+        )
+    for key, expected in expected_values.items():
+        if experiment.get(key) != expected:
+            raise ValueError(
+                f"Experiment config {key} is {experiment.get(key)!r}, "
+                f"but the frozen protocol pins it to {expected!r}."
+            )
+
+    return {
+        "single_factor_verified": True,
+        "baseline_config_sha256": _sha256_file(baseline_resolved),
+        "experiment_config_sha256": _sha256_file(experiment_resolved),
+        "differences": {
+            key: {"baseline": baseline.get(key), "experiment": experiment.get(key)}
+            for key in sorted(differing)
+        },
+    }
