@@ -317,9 +317,12 @@ class DecisionRuleTest(unittest.TestCase):
         self.assertEqual(result["clears_threshold"], [True, False])
 
     def test_exactly_fifteen_points_clears(self):
+        # 0.15 - 0.0 is exactly 0.15 in IEEE-754, so this distinguishes >= from >.
+        # Do not use 0.20 - 0.05: that is 0.15000000000000002, which passes under
+        # both comparisons and would leave the frozen threshold unprotected.
         scores = [
-            {"subject_error_rate": 0.20, "control_error_rate": 0.05},
-            {"subject_error_rate": 0.20, "control_error_rate": 0.05},
+            {"subject_error_rate": 0.15, "control_error_rate": 0.0},
+            {"subject_error_rate": 0.15, "control_error_rate": 0.0},
         ]
 
         self.assertEqual(apply_decision_rule(scores)["outcome"], "DEFECT_CONFIRMED")
