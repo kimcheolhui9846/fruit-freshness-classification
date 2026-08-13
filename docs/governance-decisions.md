@@ -150,7 +150,9 @@ DEVELOPMENT_LABEL_QUALITY_AUDIT
 AUDIT_PROTOCOL_STATUS:
 FROZEN
 AUDIT_EXECUTION_STATUS:
-NOT_YET_RUN
+COMPLETED
+AUDIT_OUTCOME:
+DEFECT_NOT_CONFIRMED
 MODEL_TRAINING:
 NO
 MODEL_INFERENCE:
@@ -159,10 +161,12 @@ LOCKED_TEST_INSPECTION:
 NO
 APPROVED_RELABELING:
 NO
+LABELS_MODIFIED:
+0
 IMAGE_PUBLICATION:
 NO
 PHASE_9_6:
-NOT STARTED
+H1_LOSS_AND_CLASS_IMBALANCE
 ```
 
 This reorders the pre-registered hypothesis queue, so the evidence for doing so is recorded rather than applied silently. The Phase 9.4 baseline showed that the dominant error is not explained by class frequency: the development imbalance ratio is 7.8:1, the support-to-F1 correlation is 0.500, and `rottenpotato` at 514 examples scores 0.7741 while `rottencapsicum` at 570 scores 0.9965. On `freshpotato` the model is more confident when wrong (0.745) than when right (0.608), the confusion with `rottenpotato` runs 164 to 5 in one direction, and all three folds reproduce the asymmetry. A frequency-based reweighting experiment would target something other than the binding constraint.
@@ -178,3 +182,14 @@ PR #5 was integrated into `main` with GitHub "Rebase and merge" rather than the 
 Verified consequences: the resulting tree hash `4275acce956419989dfcb6a3bb1158538eafe9d1` is byte-identical to the PR head tree, linear history is preserved, the `Protect main` ruleset accepted the integration, final-main CI passed on both required jobs with zero Actions artifacts, and the source branch `experiment/phase-9.3-development-baseline` is retained at its original SHA. No content was lost or altered.
 
 This deviation is recorded rather than reverted, because reverting would require a force push to protected `main` and a ruleset bypass, which carries more risk than the deviation itself. Future phases use fast-forward-only integration.
+### Phase 9.5 outcome — hypothesis refuted, pre-registered order restored
+
+The audit ran on 2026-08-13 and returned `DEFECT_NOT_CONFIRMED`. Neither reviewer's subject error rate reached the pre-committed 15-point margin over their own control: the assistant scored 0.0259 against 0.0800 across all 497 images, the owner 0.1324 against 0.1250 across a 100-image subsample. The assistant's subject error rate is *lower* than its control rate.
+
+The labels are sound and the reordering recorded above was wrong. The three signals that motivated it all hold — inverted confidence, one-way confusion, cross-fold reproduction — but they indicate a model failure, not a data failure: two reviewers read the `freshpotato` images as fresh, agreeing 65 of 68 and 55 of 68 over the shared subsample. The binding constraint returns to H1, where the pre-registered plan put it. `freshpotato` is the smallest class at 347 and visually adjacent to `rottenpotato` at 514, and a minority class collapsing into a visually similar majority is a characteristic imbalance failure; the argument that a 7.8:1 ratio was too mild did not weigh that adjacency.
+
+This is the mechanism working as designed. The threshold, the control group, and the decision rule were fixed before any image was opened, so the audit could falsify the hypothesis that produced it, and it did.
+
+Three deviations are recorded in the protocol and bear on how much the result carries. The owner reviewed a seeded 100-image subsample rather than all 497, leaving their control group at 32 examples. The assistant's judgments were visible in the session transcript before the owner judged, so the two reviews are not fully independent and the reported agreement of 0.80 raw, kappa 0.6259, is an upper bound. And `scripts.analyze_label_audit` was not run, because it requires two complete 497-row judgment files by design and that guard was not weakened to accept a partial second review.
+
+The two-reviewer standard was therefore not met. Phase 9.6 was selected by the owner on the strength of the evidence rather than by a mechanically satisfied rule. Executing H1 remains a separate authorization, as does any locked-test evaluation.

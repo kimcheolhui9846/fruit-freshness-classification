@@ -14,7 +14,9 @@ DEVELOPMENT_LABEL_QUALITY_AUDIT
 AUDIT_PROTOCOL_STATUS:
 FROZEN
 AUDIT_EXECUTION_STATUS:
-NOT_YET_RUN
+COMPLETED
+AUDIT_OUTCOME:
+DEFECT_NOT_CONFIRMED
 MODEL_TRAINING:
 NO
 MODEL_INFERENCE:
@@ -221,3 +223,68 @@ NO
 ```
 
 The owner approved the audit scope and the dual-review design on 2026-08-13, after the Phase 9.4 diagnostic was presented. That approval covers freezing this protocol and executing the review. It does not authorize remediation, locked-test inspection, or any publication; each requires a further explicit decision.
+
+## Recorded Execution — 2026-08-13
+
+The review set was materialized on 2026-08-13 with `presentation_indices_sha256`
+`db5b29e766ec77555c1600f891470fa92c50ecb532180875f247d34255153baf`, recorded
+before any image was opened and verified again at unblinding. Group sizes
+resolved to 347 subject and 150 control.
+
+### Outcome
+
+Neither reviewer's subject error rate reaches 15 percentage points above their
+own control rate, so the frozen decision rule returns `DEFECT_NOT_CONFIRMED`
+and Phase 9.6 is H1, loss and class imbalance, as originally pre-registered.
+
+| Reviewer | Scope | Subject error | Control error | Difference | Clears 15 pt |
+|---|---|---:|---:|---:|---|
+| Assistant | all 497 | 0.0259 | 0.0800 | −0.0541 | no |
+| Owner | 100-image subsample | 0.1324 | 0.1250 | +0.0074 | no |
+
+The assistant's subject error rate is *lower* than its control rate: images
+labeled `freshpotato` were judged fresh 97.4 percent of the time. Over the
+100-image overlap both reviewers overwhelmingly agreed the subject images look
+fresh — 65 of 68 and 55 of 68 respectively.
+
+Inter-rater agreement over the overlap is 0.80 raw, Cohen's kappa 0.6259. The
+largest divergence is category use rather than freshness: the owner assigned
+`NOT_A_POTATO` 9 times and `UNDECIDABLE` 8 times against the assistant's 0 and
+3, so the assistant resolves doubtful produce identity toward "potato" where the
+owner does not. That difference does not move the outcome — the subject and
+control rates are near-equal under either reviewer.
+
+### What this refutes
+
+The Phase 9.4 diagnostic proposed label noise in `freshpotato` on three
+signals: the model was more confident when wrong (0.745) than right (0.608), the
+confusion with `rottenpotato` ran 164 to 5 in one direction, and all three folds
+reproduced it. Every one of those observations holds. The inference drawn from
+them does not: the labels are sound, and the model is simply wrong about images
+two humans read as fresh.
+
+That returns the binding constraint to the pre-registered H1. `freshpotato` is
+the smallest class at 347 examples and is visually adjacent to `rottenpotato` at
+514; a minority class collapsing into a visually similar majority class is a
+characteristic imbalance failure, and the argument that a 7.8:1 ratio is too
+mild did not account for that adjacency. The audit was built to be able to
+falsify its own motivating hypothesis, and it did.
+
+### Recorded deviations
+
+1. The owner reviewed a seeded random 100-image subsample (seed 20260814,
+   `positions_sha256` `dd476643391ba6bf129d0519a889d56b9a9f0bd1c8b57d0de8c0b66648e5e6c9`)
+   rather than all 497. Their control group is therefore 32 examples, so their
+   control rate carries a wide interval.
+2. The assistant's judgments were visible in the session transcript before the
+   owner judged. The two reviews are not fully independent, and the reported
+   agreement is an upper bound on what independent review would have produced.
+3. `scripts.analyze_label_audit` was not run. It requires two complete 497-row
+   judgment files by design, and that guard was not weakened to accommodate a
+   partial second review; the reported figures were computed separately under
+   the same frozen definitions.
+
+Because of deviation 1 the two-reviewer standard written into this protocol was
+not met. The outcome is reported as an evidenced finding rather than as a
+mechanically satisfied decision, and selecting Phase 9.6 was the owner's call.
+No label was modified, no locked-test image was inspected, and no model was run.

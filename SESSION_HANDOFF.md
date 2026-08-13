@@ -1185,3 +1185,76 @@ Phase 9.4 executed the baseline the owner authorized in `5757d0e` and evaluated 
 The `repository_commit` recorded in `run_manifest.json` and `training_state.pt` is the authorization commit itself, and `scripts/train.py` `_load_and_validate_manifest` aborts a resume when the current `git rev-parse HEAD` does not match it. That coupling is why `5757d0e` was left unamended when its `Co-Authored-By` trailer was reviewed on 2026-08-13; amending would have orphaned the recorded SHA and broken resume mid-run. Sole authorship is instead enforced going forward through untracked local settings.
 
 Aggregate development OOF Macro F1 is 0.9012. The gap between that and Top-1 0.9566 is concentrated in one class: `freshpotato` scores F1 0.3682 at recall 0.2738, and its dominant error crosses the fresh/rotten distinction. Ten of the fourteen classes score between 0.929 and 0.999. This gives Phase 9.5, the first loss/class-imbalance experiment, a concrete target. The 4,298-example locked test remains `FROZEN_UNOBSERVED_BY_MODEL` with zero model forward passes, and a final claim still requires a separate explicit owner authorization.
+
+## Phase 9.5 — Development Label Quality Audit
+
+```text
+PHASE:
+9.5 — Development Label Quality Audit
+PHASE_9_4_FINAL_MAIN:
+2f8a5ac2b90952ccd5256d7f420c164c95ed62a6
+PROTOCOL_FREEZE_COMMIT:
+53c7dd0
+PHASE_BRANCH:
+research/phase-9.5-label-audit-execution
+EXPERIMENT_ID:
+deep3-postholdout-research-01-label-audit
+EXPERIMENT_STATUS:
+COMPLETED_DEFECT_NOT_CONFIRMED
+AUDIT_PROTOCOL_STATUS:
+FROZEN
+AUDIT_EXECUTION_STATUS:
+COMPLETED
+AUDIT_OUTCOME:
+DEFECT_NOT_CONFIRMED
+REVIEW_SET_COUNT:
+497
+SUBJECT_COUNT:
+347
+CONTROL_COUNT:
+150
+PRESENTATION_INDICES_SHA256:
+db5b29e766ec77555c1600f891470fa92c50ecb532180875f247d34255153baf
+ASSISTANT_SUBJECT_ERROR_RATE:
+0.0259
+ASSISTANT_CONTROL_ERROR_RATE:
+0.0800
+OWNER_SUBJECT_ERROR_RATE:
+0.1324 (68 of a 100-image subsample)
+OWNER_CONTROL_ERROR_RATE:
+0.1250 (32 of a 100-image subsample)
+MATERIAL_DIFFERENCE_THRESHOLD:
+15 percentage points, neither reviewer clears it
+RAW_AGREEMENT:
+0.8000
+COHEN_KAPPA:
+0.6259
+PHASE_9_6:
+H1_LOSS_AND_CLASS_IMBALANCE
+MODEL_TRAINING:
+NO
+MODEL_INFERENCE:
+NO
+LOCKED_TEST_INSPECTION:
+NO
+LABELS_MODIFIED:
+0
+IMAGE_PUBLICATION:
+NO
+AUDIT_ARTIFACT_PUBLICATION:
+JUDGMENT_RECORD_ONLY
+DEVIATIONS:
+3 recorded
+OWNER_PR_MERGE_APPROVAL:
+NOT YET GRANTED
+```
+
+Phase 9.5 executed the audit frozen in `53c7dd0` and refuted the hypothesis that motivated it. The Phase 9.4 diagnostic read three signals — the model more confident when wrong (0.745) than right (0.608) on `freshpotato`, a 164-to-5 one-way confusion with `rottenpotato`, and cross-fold reproduction of both — as evidence of label noise. Every observation holds. The inference does not: two reviewers judged the `freshpotato` images fresh, agreeing 65 of 68 and 55 of 68 over the shared subsample, and the assistant's subject error rate came out *lower* than its control rate. The labels are sound and the model is wrong about images humans read as fresh.
+
+The binding constraint therefore returns to H1, where the pre-registered plan put it before Phase 9.5 reordered the queue. `freshpotato` is the smallest class at 347 and visually adjacent to `rottenpotato` at 514; a minority class collapsing into a visually similar majority is a characteristic imbalance failure, and the argument that a 7.8:1 ratio was too mild did not weigh that adjacency. Fixing the threshold, the control group, and the decision rule before any image was opened is what let the audit falsify its own premise.
+
+Three deviations bound how much the result carries and are recorded in the protocol. The owner reviewed a seeded random 100-image subsample (seed 20260814) rather than all 497, leaving their control group at 32 examples and their control rate with a wide interval. The assistant's judgments were visible in the session transcript before the owner judged, so the two reviews are not fully independent and the reported agreement is an upper bound. And `scripts.analyze_label_audit` was not run: it requires two complete 497-row judgment files by design, that guard was not weakened to accept a partial second review, and the reported figures were computed separately under the same frozen definitions. The protocol's two-reviewer standard was therefore not met, and Phase 9.6 was selected by the owner on the evidence rather than by a mechanically satisfied rule.
+
+The reviewers differ systematically in category use rather than in freshness: the owner assigned `NOT_A_POTATO` 9 times and `UNDECIDABLE` 8 times over the subsample against the assistant's 0 and 3. The assistant resolves doubtful produce identity toward "potato" where the owner does not. That bias would have been invisible with a single reviewer and does not move the outcome, since subject and control rates are near-equal under either.
+
+Executing H1 requires a separate authorization, as does any locked-test evaluation. The 4,298-example locked test remains `FROZEN_UNOBSERVED_BY_MODEL` with zero model forward passes.
