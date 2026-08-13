@@ -57,6 +57,15 @@ def build_parser() -> argparse.ArgumentParser:
         default="configs/splits/deep3-postholdout-research-01.json",
         help="Frozen split manifest, for mapping source indices to prediction rows.",
     )
+    parser.add_argument(
+        "--expected-hash",
+        default=None,
+        help=(
+            "Review-set presentation_indices_sha256 recorded before the review "
+            "began. Without it the recompute only proves the key is internally "
+            "consistent, never that it is the key the operator started from."
+        ),
+    )
     return parser
 
 
@@ -191,6 +200,59 @@ def main(argv: list[str] | None = None) -> int:
             "Sealed key presentation_indices_sha256 does not match the hash "
             "recomputed from its entries; the key may be corrupted or tampered with."
         )
+    if args.expected_hash is not None and args.expected_hash != recomputed_hash:
+        raise SystemExit(
+            f"Review set hash {recomputed_hash} does not match the expected value "
+            f"{args.expected_hash} recorded before the review began."
+        )
+
+    # The key's `group` field is not trusted. The checks above cover the group
+    # sizes and the presentation indices, but a balanced SUBJECT<->CONTROL swap
+    # keeps both intact while changing each error rate and therefore the
+    # decision. Group membership is derivable from the published seeds, so
+    # recompute it and refuse to proceed if the key disagrees. Tampering with
+    # the key alone fails this check; tampering with the labels alone fails it
+    # from the other side.
+    label_names = load_label_names(REPOSITORY_ROOT / args.label_names)
+    development_indices = np.asarray(
+        json.loads((REPOSITORY_ROOT / args.split_manifest).read_text(encoding="utf-8"))[
+            "development_indices"
+        ],
+        dtype=np.int64,
+    )
+    stored_predictions = np.load(REPOSITORY_ROOT / args.baseline_predictions)
+    if "labels" not in stored_predictions:
+        raise SystemExit(
+            "Stored predictions carry no `labels` array, so review-set group "
+            "membership cannot be recomputed and the sealed key cannot be checked."
+        )
+    derived_subject = set(
+        select_review_set(
+            development_indices,
+            np.asarray(stored_predictions["labels"], dtype=np.int64),
+            label_names,
+            control_seed=CONTROL_SAMPLE_SEED,
+            order_seed=PRESENTATION_ORDER_SEED,
+            subject_count=SUBJECT_COUNT,
+            control_count=CONTROL_COUNT,
+        )["subject_indices"].tolist()
+    )
+    for entry in entries:
+        derived = "SUBJECT" if int(entry["source_index"]) in derived_subject else "CONTROL"
+        if derived != entry["group"]:
+            raise SystemExit(
+                "Sealed key group disagrees with the seeded recomputation at "
+                f"position {entry['position']:03d}: key says {entry['group']}, "
+                f"recomputation says {derived}."
+            )
+    subject_positions = np.array(
+        [e["position"] for e in entries if int(e["source_index"]) in derived_subject],
+        dtype=np.int64,
+    )
+    control_positions = np.array(
+        [e["position"] for e in entries if int(e["source_index"]) not in derived_subject],
+        dtype=np.int64,
+    )
 
     reviewers = []
     for path in reviewer_paths:
@@ -212,15 +274,8 @@ def main(argv: list[str] | None = None) -> int:
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    label_names = load_label_names(REPOSITORY_ROOT / args.label_names)
     rotten_label_index = label_names.index("rottenpotato")
     fresh_label_index = label_names.index("freshpotato")
-    development_indices = np.asarray(
-        json.loads((REPOSITORY_ROOT / args.split_manifest).read_text(encoding="utf-8"))[
-            "development_indices"
-        ],
-        dtype=np.int64,
-    )
     model_comparison = [
         model_agreement(
             REPOSITORY_ROOT / args.baseline_predictions,
