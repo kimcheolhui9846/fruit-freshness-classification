@@ -16,7 +16,9 @@ H1
 PROTOCOL_STATUS:
 FROZEN
 EXECUTION_STATUS:
-IN_PROGRESS
+COMPLETED
+OUTCOME:
+NOT_ADVANCED
 LOCKED_TEST_MODEL_ACCESS:
 NO
 CANONICAL_HOLDOUT_MODEL_ACCESS:
@@ -196,3 +198,53 @@ NO
 The owner approved the single changed factor, the acceptance threshold, the candidate count, and the failure branch on 2026-08-14, before any training.
 
 The owner then granted execution on 2026-08-14, after the runtime single-factor validator this protocol named as a prerequisite was implemented and exercised: a config with a second changed factor, one with an unfrozen value for the allowed factor, and one naming an unregistered parent were each rejected. Authorization covers exactly one training run against `weights/deep3-postholdout-research-01-loss-001` and the development-only OOF evaluation that follows it, plus applying the frozen decision rule to the result. It does not authorize a second run, locked-test evaluation, canonical-holdout re-evaluation, weight or dataset publication, release creation, or any change to the frozen parameter or thresholds.
+
+
+## Recorded Execution — 2026-08-14
+
+The run started 02:55 and completed 11:44 local under repository commit `00bbdec`, 527.9 minutes across three folds with no interruption and no error. The single-factor validation printed before dataset preparation and reported exactly the four registered differences. Final state was `status = COMPLETED`, `completed_epoch = 120`, with all seven expected artifacts present.
+
+### Outcome
+
+`scripts.apply_loss001_decision` computed the verdict from the two OOF metric files:
+
+```text
+OUTCOME:
+NOT_ADVANCED
+MACRO_F1:
+0.9102 (delta +0.0090, threshold 0.9112)
+TOP1:
+0.9561 (delta -0.0005, guardrail 0.9466)
+```
+
+The Top-1 guardrail passed. Macro F1 fell short by 0.0010.
+
+| Aggregate metric | Baseline | loss-001 | Delta |
+|---|---:|---:|---:|
+| Macro F1 | 0.9012 | 0.9102 | +0.0090 |
+| Balanced accuracy | 0.9007 | 0.9047 | +0.0040 |
+| Top-1 | 0.9566 | 0.9561 | −0.0005 |
+
+Per-fold Macro F1 is a separate quantity and is reported separately: 0.8907 to 0.9003, 0.9098 to 0.9076, and 0.9023 to 0.9221. Fold 2 declined while fold 3 rose sharply; the spread across folds, 0.022, exceeds the aggregate improvement of 0.009.
+
+### The intervention worked where it was aimed
+
+| Class | Baseline F1 | loss-001 F1 | Delta | Recall delta |
+|---|---:|---:|---:|---:|
+| `freshpotato` | 0.3682 | 0.5140 | **+0.1457** | +0.1239 |
+| `rottenpotato` | 0.7741 | 0.7883 | +0.0142 | −0.0564 |
+| `rottencucumber` | 0.7932 | 0.8057 | +0.0125 | +0.0276 |
+| `freshcucumber` | 0.9358 | 0.9236 | −0.0122 | −0.0247 |
+| Nine well-learned classes | | | −0.009 to +0.001 | |
+
+Reweighting did what it was supposed to: `freshpotato` F1 rose 0.146 and its recall 0.124. It also cost the classes that were already working, and the sum of those small losses absorbed much of the gain. `rottenpotato` gained F1 while losing 0.056 of recall — the reciprocal of predictions moving toward `freshpotato`.
+
+This is the partial realisation of the outcome this protocol named in advance: `freshpotato` improving without Macro F1 clearing the bar.
+
+### Why the failure branch was not applied immediately
+
+This protocol recorded that the run-to-run noise floor was unmeasured and that results within roughly ±0.005 of the threshold should be read with that in mind. The observed +0.0090 sits inside that band, so whether this is a real shortfall or ordinary variation cannot be determined from this run alone.
+
+The threshold was not reinterpreted. The recorded verdict is `NOT_ADVANCED`, computed against the value frozen before the run. What was deferred is only the *next-phase selection* that would follow from it, pending the measurement frozen in [postholdout-noise-floor-protocol.md](postholdout-noise-floor-protocol.md). That measurement can determine whether "H1 exhausted" is a sound conclusion; it cannot re-score this result.
+
+Designing it surfaced a larger finding: the training pipeline sets no random seed anywhere, so every run is already an independent draw and the repository's training results are not reproducible. Details and the deferred remediation are in the noise floor protocol.
