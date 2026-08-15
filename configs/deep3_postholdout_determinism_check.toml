@@ -1,0 +1,47 @@
+[runtime]
+cudnn_benchmark = false
+seed = 20260815
+determinism_level = "A_STRICT"
+
+[loss]
+class_balanced_beta = 0.999
+use_ce_label_smoothing = true
+label_smoothing = 0.01
+focal_gamma = 2.0
+
+[training]
+epochs = 2
+batch_size = 64
+
+[fine_tuning]
+epochs = 1
+
+[cross_validation]
+n_splits = 3
+shuffle = true
+random_state = 42
+
+[mixup]
+alpha = 0.8
+probability = 0.5
+
+[optimization]
+lr_cnn = 5e-5
+lr_trans = 1e-4
+weight_decay = 1e-4
+
+[ema]
+decay = 0.999
+
+[checkpoint]
+final_model_filename = "last_model_weights.pt"
+
+[reporting]
+figure_size = [10, 4]
+
+[post_holdout]
+experiment_id = "deep3-postholdout-determinism-check-01"
+parent_experiment_id = "deep3-postholdout-determinism-check"
+split_manifest_path = "configs/splits/deep3-postholdout-research-01.json"
+cv_manifest_path = "configs/splits/deep3-postholdout-research-01-baseline-cv.json"
+artifact_namespace = "deep3-postholdout-determinism-check-01"

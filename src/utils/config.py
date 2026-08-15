@@ -79,6 +79,7 @@ def _validate_config(config: dict) -> None:
     _require_open_unit_interval(config["ema"]["decay"], "[ema].decay")
     _validate_filename(config["checkpoint"]["final_model_filename"])
     _validate_figure_size(config["reporting"]["figure_size"])
+    _validate_runtime_determinism(config["runtime"])
     if "post_holdout" in config:
         _validate_postholdout_section(config["post_holdout"])
 
@@ -124,6 +125,39 @@ def _validate_filename(value: str) -> None:
 def _validate_figure_size(value: list) -> None:
     if len(value) != 2 or any(type(dimension) is not int or dimension <= 0 for dimension in value):
         raise ValueError("[reporting].figure_size must be a two-item list of positive integers.")
+
+
+def _validate_runtime_determinism(runtime: dict) -> None:
+    """Validate the optional Phase 9.7 determinism keys.
+
+    Both keys are optional so that every configuration frozen before Phase 9.7
+    keeps its recorded SHA-256 and its original meaning. They must appear
+    together: a seed with no level, or a level with no seed, describes a
+    behaviour nobody can read off the file.
+    """
+    has_seed = "seed" in runtime
+    has_level = "determinism_level" in runtime
+    if has_seed != has_level:
+        raise ValueError(
+            "[runtime].seed and [runtime].determinism_level must be set together."
+        )
+    if not has_seed:
+        return
+
+    seed = runtime["seed"]
+    if type(seed) is not int or seed < 0:
+        raise ValueError("[runtime].seed must be a non-negative integer.")
+
+    level = runtime["determinism_level"]
+    if type(level) is not str or level not in DETERMINISM_LEVELS:
+        expected = ", ".join(DETERMINISM_LEVELS)
+        raise ValueError(f"[runtime].determinism_level must be one of {expected}.")
+
+    if level in _CUDNN_CONSTRAINED_LEVELS and runtime["cudnn_benchmark"]:
+        raise ValueError(
+            f"[runtime].determinism_level {level} requires cudnn_benchmark = false; "
+            "the cuDNN autotuner selects kernels nondeterministically."
+        )
 
 
 def _validate_postholdout_section(section: dict) -> None:
@@ -229,7 +263,13 @@ def validate_loss_experiment_config(
     allowed_differences: frozenset[str],
     expected_values: dict[str, object],
 ) -> dict[str, object]:
-    """Verify an experiment config changes exactly its registered factor."""
+    """Verify an experiment config changes exactly its registered factor.
+
+    The name records the first caller, the Phase 9.6 loss experiment. The
+    function is lineage-generic and is also used by the Phase 9.7 determinism
+    check. It is not renamed because docs/postholdout-loss001-runbook.md
+    records the Phase 9.6 implementation and names it throughout.
+    """
     baseline_resolved = Path(baseline_path)
     experiment_resolved = Path(experiment_path)
     baseline = flatten_experiment_config(load_experiment_config(baseline_resolved))
@@ -277,6 +317,34 @@ BASELINE_CONFIG_PATH = (
 )
 LOSS001_EXPECTED_VALUES = {"loss.class_balanced_beta": 0.9999}
 
+DETERMINISM_CHECK_PARENT_ID = "deep3-postholdout-determinism-check"
+DETERMINISM_CHECK_ALLOWED_DIFFERENCES = frozenset(
+    {
+        "runtime.cudnn_benchmark",
+        "runtime.seed",
+        "runtime.determinism_level",
+        "training.epochs",
+        "fine_tuning.epochs",
+        "post_holdout.experiment_id",
+        "post_holdout.parent_experiment_id",
+        "post_holdout.artifact_namespace",
+    }
+)
+# The level is deliberately absent: the frozen ladder descends from A_STRICT to
+# B_CUDNN, and pinning it here would make the registered descent unexecutable.
+DETERMINISM_CHECK_EXPECTED_VALUES = {
+    "runtime.seed": 20260815,
+    "runtime.cudnn_benchmark": False,
+    "training.epochs": 2,
+    "fine_tuning.epochs": 1,
+    "post_holdout.split_manifest_path": (
+        "configs/splits/deep3-postholdout-research-01.json"
+    ),
+    "post_holdout.cv_manifest_path": (
+        "configs/splits/deep3-postholdout-research-01-baseline-cv.json"
+    ),
+}
+
 
 def resolve_experiment_validation(config: dict, config_path: str | Path) -> dict | None:
     """Validate a post-holdout config against the right ancestor, by lineage.
@@ -303,6 +371,13 @@ def resolve_experiment_validation(config: dict, config_path: str | Path) -> dict
             config_path,
             allowed_differences=LOSS001_ALLOWED_DIFFERENCES,
             expected_values=LOSS001_EXPECTED_VALUES,
+        )
+    if parent == DETERMINISM_CHECK_PARENT_ID:
+        return validate_loss_experiment_config(
+            BASELINE_CONFIG_PATH,
+            config_path,
+            allowed_differences=DETERMINISM_CHECK_ALLOWED_DIFFERENCES,
+            expected_values=DETERMINISM_CHECK_EXPECTED_VALUES,
         )
     raise ValueError(
         f"Config declares an unregistered parent experiment {parent!r}; "
