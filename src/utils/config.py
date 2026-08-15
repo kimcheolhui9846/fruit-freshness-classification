@@ -346,6 +346,35 @@ DETERMINISM_CHECK_EXPECTED_VALUES = {
 }
 
 
+DETERMINISTIC_BASELINE_PARENT_ID = "deep3-postholdout-deterministic-baseline"
+DETERMINISTIC_BASELINE_ALLOWED_DIFFERENCES = frozenset(
+    {
+        "runtime.cudnn_benchmark",
+        "runtime.seed",
+        "runtime.determinism_level",
+        "post_holdout.experiment_id",
+        "post_holdout.parent_experiment_id",
+        "post_holdout.artifact_namespace",
+    }
+)
+# The level is pinned here, unlike the Phase 9.7 check lineage. That ladder
+# is finished and A_STRICT is the adopted level, so there is no registered
+# descent left to keep available.
+DETERMINISTIC_BASELINE_EXPECTED_VALUES = {
+    "runtime.seed": 20260815,
+    "runtime.determinism_level": "A_STRICT",
+    "runtime.cudnn_benchmark": False,
+    "training.epochs": 120,
+    "fine_tuning.epochs": 20,
+    "post_holdout.split_manifest_path": (
+        "configs/splits/deep3-postholdout-research-01.json"
+    ),
+    "post_holdout.cv_manifest_path": (
+        "configs/splits/deep3-postholdout-research-01-baseline-cv.json"
+    ),
+}
+
+
 def resolve_experiment_validation(config: dict, config_path: str | Path) -> dict | None:
     """Validate a post-holdout config against the right ancestor, by lineage.
 
@@ -378,6 +407,13 @@ def resolve_experiment_validation(config: dict, config_path: str | Path) -> dict
             config_path,
             allowed_differences=DETERMINISM_CHECK_ALLOWED_DIFFERENCES,
             expected_values=DETERMINISM_CHECK_EXPECTED_VALUES,
+        )
+    if parent == DETERMINISTIC_BASELINE_PARENT_ID:
+        return validate_loss_experiment_config(
+            BASELINE_CONFIG_PATH,
+            config_path,
+            allowed_differences=DETERMINISTIC_BASELINE_ALLOWED_DIFFERENCES,
+            expected_values=DETERMINISTIC_BASELINE_EXPECTED_VALUES,
         )
     raise ValueError(
         f"Config declares an unregistered parent experiment {parent!r}; "
