@@ -235,11 +235,14 @@ class TrainOrchestrationTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             summary = self.run_with_harness(harness, directory)
 
-            self.assertEqual(harness.events[0], "device")
+            # Phase 9.7 reversed these two: the config must be read before
+            # the device is resolved, so the determinism policy can set
+            # CUBLAS_WORKSPACE_CONFIG before any CUDA work reads it.
             self.assertEqual(
-                harness.events[1],
+                harness.events[0],
                 ("config", train.REPOSITORY_ROOT / "configs/deep3.toml"),
             )
+            self.assertEqual(harness.events[1], "device")
             self.assertIn(("iter_folds", 2, True, 42), harness.events)
             self.assertEqual(len([event for event in harness.events if event[0] == "model"]), 2)
             self.assertEqual(len([event for event in harness.events if event[0] == "ema"]), 2)
@@ -306,3 +309,118 @@ class TrainOrchestrationTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def _manifest_metadata() -> dict:
+    return {
+        "run_id": "determinism-check-a",
+        "repository_commit": "0" * 40,
+        "config_path": "configs/deep3_postholdout_determinism_check.toml",
+        "config_sha256": "1" * 64,
+        "dataset_repository": "Densu341/Fresh-rotten-fruit",
+        "dataset_revision": "2077850adc575aa1e8d6029e6cd6cefe9e403a1c",
+        "dataset_archive_sha256": "2" * 64,
+        "num_classes": 14,
+        "num_folds": 3,
+        "epochs": 2,
+        "fine_tuning_epochs": 1,
+        "batch_size": 64,
+    }
+
+
+def _manifest_config() -> dict:
+    return {
+        "optimization": {"lr_cnn": 5e-5, "lr_trans": 1e-4, "weight_decay": 1e-4},
+        "mixup": {"alpha": 0.8, "probability": 0.5},
+        "ema": {"decay": 0.999},
+    }
+
+
+class DeterminismManifestTest(unittest.TestCase):
+    def test_manifest_schema_version_is_two(self):
+        # Adding a field without bumping the version would let a manifest
+        # with a determinism block and one without both claim version 1.
+        self.assertEqual(train.RUN_MANIFEST_SCHEMA_VERSION, 2)
+
+    def test_manifest_records_an_unseeded_run_explicitly(self):
+        manifest = train._build_run_manifest(
+            metadata=_manifest_metadata(),
+            config=_manifest_config(),
+            device=torch.device("cpu"),
+            resume_enabled=True,
+            determinism={
+                "seed": None,
+                "level": None,
+                "cudnn_benchmark": True,
+                "cudnn_deterministic": False,
+                "use_deterministic_algorithms": False,
+                "cublas_workspace_config": None,
+            },
+        )
+
+        # "This run was unseeded" is the fact Phase 9.7 exists to make
+        # visible. It must be recorded, not omitted.
+        self.assertIn("determinism", manifest)
+        self.assertIsNone(manifest["determinism"]["seed"])
+        self.assertIsNone(manifest["determinism"]["level"])
+
+    def test_manifest_records_an_applied_policy(self):
+        manifest = train._build_run_manifest(
+            metadata=_manifest_metadata(),
+            config=_manifest_config(),
+            device=torch.device("cpu"),
+            resume_enabled=True,
+            determinism={
+                "seed": 20260815,
+                "level": "A_STRICT",
+                "cudnn_benchmark": False,
+                "cudnn_deterministic": True,
+                "use_deterministic_algorithms": True,
+                "cublas_workspace_config": ":4096:8",
+            },
+        )
+
+        self.assertEqual(manifest["determinism"]["seed"], 20260815)
+        self.assertEqual(manifest["determinism"]["level"], "A_STRICT")
+        self.assertEqual(manifest["schema_version"], 2)
+
+    def test_manifest_determinism_block_is_a_copy(self):
+        record = {
+            "seed": 20260815,
+            "level": "B_CUDNN",
+            "cudnn_benchmark": False,
+            "cudnn_deterministic": True,
+            "use_deterministic_algorithms": False,
+            "cublas_workspace_config": None,
+        }
+        manifest = train._build_run_manifest(
+            metadata=_manifest_metadata(),
+            config=_manifest_config(),
+            device=torch.device("cpu"),
+            resume_enabled=True,
+            determinism=record,
+        )
+        record["seed"] = 999
+
+        # A manifest records what happened; a later mutation of the caller's
+        # dict must not rewrite it.
+        self.assertEqual(manifest["determinism"]["seed"], 20260815)
+
+    def test_policy_is_applied_before_the_device_is_resolved(self):
+        source = TRAIN_PATH.read_text(encoding="utf-8")
+        policy_at = source.index("determinism = resolve_policy(config)")
+        device_at = source.index("device = resolve_device()")
+
+        # CUBLAS_WORKSPACE_CONFIG is read when the cuBLAS handle is created,
+        # so a policy applied after any CUDA work is ignored, not refused.
+        self.assertLess(policy_at, device_at)
+
+    def test_per_fold_cudnn_assignment_is_gone(self):
+        source = TRAIN_PATH.read_text(encoding="utf-8")
+
+        # The policy is applied once at start-up. Leaving the per-fold
+        # assignment would silently re-enable the autotuner mid-run.
+        self.assertNotIn(
+            'torch.backends.cudnn.benchmark = config["runtime"]["cudnn_benchmark"]',
+            source,
+        )

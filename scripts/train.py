@@ -26,11 +26,12 @@ from src.engine.training_state import (
     validate_training_state,
 )
 from src.utils.config import load_experiment_config, resolve_experiment_validation
+from src.utils.determinism import resolve_policy
 from src.utils.runtime import resolve_device
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
-RUN_MANIFEST_SCHEMA_VERSION = 1
+RUN_MANIFEST_SCHEMA_VERSION = 2
 TRAINING_STATE_FILENAME = "training_state.pt"
 RUN_MANIFEST_FILENAME = "run_manifest.json"
 DATASET_ARCHIVE_SHA256 = (
@@ -235,6 +236,7 @@ def _build_run_manifest(
     config: dict,
     device: torch.device,
     resume_enabled: bool,
+    determinism: dict[str, object],
 ) -> dict[str, object]:
     gpu_model = torch.cuda.get_device_name(device) if device.type == "cuda" else None
     manifest = {
@@ -262,6 +264,7 @@ def _build_run_manifest(
         "gpu_model": gpu_model,
         "pytorch_version": torch.__version__,
         "cuda_version": torch.version.cuda,
+        "determinism": copy.deepcopy(determinism),
         "start_time": _utc_timestamp(),
         "output_artifact_names": sorted(_EXPECTED_CANONICAL_ARTIFACTS),
         "resume_enabled": resume_enabled,
@@ -536,9 +539,15 @@ def run_training(args: argparse.Namespace) -> dict:
     output_directory = _resolve_repository_path(args.output_dir)
     options = _stateful_options(args)
 
+    config = load_experiment_config(config_path)
+    # Before resolve_device, because A_STRICT sets CUBLAS_WORKSPACE_CONFIG and
+    # that variable is read when the cuBLAS handle is created. Applying it
+    # after any CUDA work would be ignored rather than refused.
+    determinism = resolve_policy(config)
+    print("determinism:", determinism["level"], "seed:", determinism["seed"])
+
     device = resolve_device()
     print("device:", device)
-    config = load_experiment_config(config_path)
     # Before any dataset preparation or model construction: a config whose
     # lineage names a registered ancestor must change exactly its one factor.
     experiment_validation = resolve_experiment_validation(config, config_path)
@@ -583,6 +592,7 @@ def run_training(args: argparse.Namespace) -> dict:
                     config=config,
                     device=device,
                     resume_enabled=True,
+                    determinism=determinism,
                 ),
             )
         else:
@@ -677,7 +687,6 @@ def run_training(args: argparse.Namespace) -> dict:
             validation_dataset,
             batch_size,
         )
-        torch.backends.cudnn.benchmark = config["runtime"]["cudnn_benchmark"]
         model = dependencies.build_cmt_classifier(num_classes).to(device)
         ema = dependencies.ModelEma(model, decay=ema_decay, device=device)
         if config["loss"]["use_ce_label_smoothing"]:
