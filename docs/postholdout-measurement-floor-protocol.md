@@ -116,16 +116,18 @@ Two effect sizes can be read from the loss-001 result, and they differ enough to
 
 Taking the paired difference's standard deviation at its conservative bound of `0.006089 × √2 = 0.008611` — the zero-correlation case — the number of paired seeds needed for `2 × 0.008611 / √K < d` is:
 
-| Effect size | Paired seeds | Runs | GPU hours at 11 per run |
+| Effect size | Paired seeds | Runs | GPU hours at 8.85 per run |
 |---|---:|---:|---:|
-| d = 0.009015 | 4 | 8 | 88 |
-| d = 0.005160 | 12 | 24 | 264 |
+| d = 0.009015 | 4 | 8 | 71 |
+| d = 0.005160 | 12 | 24 | 212 |
+
+The per-run figure is measured, not estimated. `deep3-postholdout-research-01-baseline-rep003` is the only replicate that ran to completion without an interruption, and it took 530.98 minutes across three folds of 176.75, 177.07, and 177.15 minutes. The other two runs were stopped and resumed, so their recorded totals cover only the resumed portion and must not be used here.
 
 ```text
 H1_STATUS:
 CLOSED_BELOW_RESOLUTION
 H1_CLOSURE_BASIS:
-88 to 264 GPU hours required to resolve the observed effect
+71 to 212 GPU hours required to resolve the observed effect
 LOSS001_VERDICT:
 NOT_ADVANCED, unchanged and not re-scored
 ```
@@ -148,7 +150,7 @@ One run of `configs/deep3_postholdout_baseline_det.toml`, which differs from `co
 | CV manifest | `configs/splits/deep3-postholdout-research-01-baseline-cv.json` |
 | Seed | 20260815 |
 | Determinism level | `A_STRICT` |
-| Estimated duration | roughly 11 hours |
+| Expected duration | about 8.85 hours, the measured duration of the one uninterrupted replicate |
 
 ### Pre-registered validity check
 
