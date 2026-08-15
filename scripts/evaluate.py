@@ -9,6 +9,7 @@ from types import SimpleNamespace
 import torch
 
 from src.utils.config import load_experiment_config
+from src.utils.determinism import resolve_policy
 from src.utils.paths import build_fold_checkpoint_path
 from src.utils.runtime import resolve_device
 
@@ -90,10 +91,14 @@ def run_evaluation(args: argparse.Namespace) -> dict:
     config_path = _resolve_repository_path(args.config)
     checkpoint_directory = _resolve_repository_path(args.checkpoint_dir)
 
+    config = load_experiment_config(config_path)
+    # Before resolve_device: A_STRICT sets CUBLAS_WORKSPACE_CONFIG, which is
+    # read when the cuBLAS handle is created and ignored afterwards.
+    determinism = resolve_policy(config)
+    print("determinism:", determinism["level"], "seed:", determinism["seed"])
+
     device = resolve_device()
     print("device:", device)
-    config = load_experiment_config(config_path)
-    torch.backends.cudnn.benchmark = config["runtime"]["cudnn_benchmark"]
 
     num_folds = config["cross_validation"]["n_splits"]
     checkpoint_paths = resolve_fold_checkpoint_paths(checkpoint_directory, num_folds)

@@ -18,6 +18,7 @@ from src.utils.config import (
     resolve_experiment_validation,
     validate_postholdout_baseline_config,
 )
+from src.utils.determinism import resolve_policy
 from src.utils.paths import build_fold_checkpoint_path
 from src.utils.runtime import resolve_device
 
@@ -397,7 +398,10 @@ def run_evaluation(args: argparse.Namespace) -> dict:
             raise RuntimeError(
                 "Baseline recipe equivalence validation failed before OOF evaluation."
             )
-    torch.backends.cudnn.benchmark = config["runtime"]["cudnn_benchmark"]
+    # Before resolve_device: A_STRICT sets CUBLAS_WORKSPACE_CONFIG, which is
+    # read when the cuBLAS handle is created and ignored afterwards.
+    determinism = resolve_policy(config)
+    print("determinism:", determinism["level"], "seed:", determinism["seed"])
     device = resolve_device()
     dependencies = _load_evaluation_dependencies()
     development_dataset, folds, protocol = prepare_development_dataset_and_folds(
@@ -421,6 +425,7 @@ def run_evaluation(args: argparse.Namespace) -> dict:
             "post_holdout_locked_test_metrics": 0,
             "canonical_holdout_model_forward_passes": 0,
             "canonical_holdout_new_metrics": 0,
+            "determinism": determinism,
         },
         **results,
     }

@@ -129,11 +129,14 @@ class EvaluateOrchestrationTest(unittest.TestCase):
             finally:
                 torch.backends.cudnn.benchmark = previous_benchmark
 
-        self.assertEqual(harness.events[0], "device")
+        # Phase 9.7 reversed these two: the config must be read before the
+        # device is resolved, so the determinism policy can set
+        # CUBLAS_WORKSPACE_CONFIG before any CUDA work reads it.
         self.assertEqual(
-            harness.events[1],
+            harness.events[0],
             ("config", evaluate.REPOSITORY_ROOT / "configs/deep3.toml"),
         )
+        self.assertEqual(harness.events[1], "device")
         self.assertEqual(harness.events[2], "dependencies")
         self.assertEqual(harness.events[3], "load_dataset")
         self.assertEqual(
@@ -238,3 +241,32 @@ class EvaluateCheckpointIntegrationTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class EvaluationDeterminismTest(unittest.TestCase):
+    def _source(self, name: str) -> str:
+        return (
+            Path(__file__).resolve().parents[2] / "scripts" / name
+        ).read_text(encoding="utf-8")
+
+    def test_evaluation_module_applies_the_shared_policy(self):
+        source = self._source("evaluate.py")
+
+        # The bare assignment seeds nothing and leaves the autotuner in
+        # whatever state the config names.
+        self.assertIn("resolve_policy(config)", source)
+        self.assertNotIn(
+            'torch.backends.cudnn.benchmark = config["runtime"]["cudnn_benchmark"]',
+            source,
+        )
+
+    def test_postholdout_evaluation_records_the_policy(self):
+        source = self._source("evaluate_postholdout_baseline.py")
+
+        # Evaluation computes the Macro F1 every decision rests on. A
+        # nondeterministic evaluation would leave the phase half-served.
+        self.assertIn("resolve_policy(config)", source)
+        self.assertIn('"determinism": determinism', source)
+        self.assertNotIn(
+            'torch.backends.cudnn.benchmark = config["runtime"]["cudnn_benchmark"]',
+            source,
+        )
