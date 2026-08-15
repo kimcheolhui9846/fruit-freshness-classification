@@ -312,3 +312,13 @@ Runs affected, by the commit each recorded at launch:
 | `deep3-postholdout-research-01-baseline-rep003` | `5e1847f` | `635f0b0` |
 
 Merged pull request bodies quote pre-rewrite identifiers. Those are historical records of what was reviewed at the time and are left as written; this table resolves them.
+
+## Phase 9.7 — determinism introduced and the reproducibility record corrected, 2026-08-15
+
+Phase 9.6a measured a run-to-run noise floor of `2s = 0.012177` against a loss-001 improvement of `0.0090` and returned `INCONCLUSIVE`. The cause was that the training pipeline set no random seed. Phase 9.7 introduces explicit seeding under the frozen protocol in [postholdout-determinism-protocol.md](postholdout-determinism-protocol.md), which fixes the seed at 20260815 and a six-branch adoption ladder before any verification run executes.
+
+Every recorded result produced before this phase came from the unseeded pipeline: `deep3-canonical-reference-01`, `deep3-postholdout-research-01-baseline`, `deep3-postholdout-research-01-loss-001`, `deep3-postholdout-research-01-baseline-rep002`, and `deep3-postholdout-research-01-baseline-rep003`. Their recorded metrics are unchanged and remain accurate measurements of the runs that produced them. None is re-scored.
+
+The documentation failure was one of placement, not of truthfulness. `training.md`, `canonical-training-readiness.md`, `canonical-holdout-evaluation.md`, and `canonical-training-unblock.md` each stated that bit-for-bit reproducibility was not claimed and that global seeding was not introduced. The top-level documents a reader reaches first — the README opening sentence, the README reproducibility status table, and the "Remaining limitations" list in `reproducibility.md` — carried no such qualification, and the research plan required every run to record a seed that did not exist. Those four locations are corrected here. The individual result documents are not annotated; this entry carries the traceability.
+
+Two design findings are recorded because both could have been silently lost. The `DataLoader` generator proposed by the Phase 9.6a follow-up is rejected: at `num_workers = 0` the sampler draws from the global torch generator, which `training_state.pt` already persists, so a separate generator would have broken working epoch-boundary resume determinism. And determinism removes measurement noise but not seed-to-seed variation, so a deterministic baseline-candidate pair is a paired comparison under common random numbers that estimates the effect for one seed draw only. Phase 9.8 must argue its claim strength against that limit rather than inherit it unexamined.

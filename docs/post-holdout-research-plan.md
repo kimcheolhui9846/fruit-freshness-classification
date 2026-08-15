@@ -100,6 +100,8 @@ canonical batch 64 was previously verified safe
 
 New Phase 9 configs must be new files. Every future run must record repository/config SHA, experiment and parent IDs, dataset revision, split identity/hash, seeds, runtime/packages/GPU, duration, checkpoint hashes, result hashes, resource use, and advancement decision.
 
+The seed requirement went unmet from Phase 9.3 through Phase 9.6a: the pipeline set no seed, so runs in that range have no seed to record. Their manifests record the absence explicitly from Phase 9.7 onward, and [the determinism protocol](postholdout-determinism-protocol.md) supplies the seed the requirement always assumed.
+
 ## Comparison and artifact policy
 
 ```text

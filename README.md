@@ -2,7 +2,7 @@
 
 [![Repository CI](https://github.com/kimcheolhui9846/fruit-freshness-classification/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/kimcheolhui9846/fruit-freshness-classification/actions/workflows/ci.yml)
 
-A modular, reproducible PyTorch research pipeline for fresh/rotten fruit classification. The active experiment combines a CMT-based classifier, Hugging Face dataset integration, stratified K-Fold training, Mixup, configurable CE/Focal loss, EMA, checkpointed fold models, horizontal-flip TTA, and raw-logit ensemble evaluation. The active notebook and CLI entry points use the same committed TOML configuration and reusable `src/` APIs.
+A modular PyTorch research pipeline for fresh/rotten fruit classification, with a reproducible environment, dataset identity, and configuration. See [Reproducibility status](#reproducibility-status) for what training-run reproducibility does and does not cover. The active experiment combines a CMT-based classifier, Hugging Face dataset integration, stratified K-Fold training, Mixup, configurable CE/Focal loss, EMA, checkpointed fold models, horizontal-flip TTA, and raw-logit ensemble evaluation. The active notebook and CLI entry points use the same committed TOML configuration and reusable `src/` APIs.
 
 ## Overview
 
@@ -172,10 +172,13 @@ CI does not download the production dataset, run CUDA, train the model, perform 
 | Evaluation CLI on the full holdout | Verified with untrained compatibility checkpoints |
 | Full canonical three-fold training | Completed once with the derived batch-64 configuration; checkpoints remain local-only |
 | Trained-checkpoint evaluation | Completed once on the locked internal holdout |
+| Training-run reproducibility | Not verified before Phase 9.7; the pipeline set no random seed, so identical commands produced different weights and metrics |
 | Benchmark reproduction | Not verified |
 | Independent-machine reproduction | Not verified |
 
 The temporary compatibility-checkpoint holdout measurement remains an interoperability check, not model performance. The documented canonical result is a separate locked internal holdout assessment; it is not a benchmark or production claim. See [reproducibility documentation](docs/reproducibility.md) and the [canonical result interpretation](docs/canonical-results.md).
+
+Every result recorded before Phase 9.7 was produced by a pipeline that set no random seed. Three executions of one unchanged configuration gave development OOF Macro F1 of 0.901167, 0.912041, and 0.901858. The recorded metrics are accurate measurements of the runs that produced them, and any single one of them would land elsewhere on a rerun. See [the determinism protocol](docs/postholdout-determinism-protocol.md).
 ## Limitations
 
 - Full canonical three-fold training completed once. Its checkpoints remain local-only; no trained binary is committed or published.

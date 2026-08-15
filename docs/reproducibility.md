@@ -118,6 +118,7 @@ The temporary fold files are **untrained CMT compatibility fixtures**. Their hol
 
 ## Remaining limitations
 
+- **Training-run reproducibility:** not verified before Phase 9.7. The pipeline set no `torch`, NumPy, or Python seed, never called `torch.use_deterministic_algorithms`, and ran with `cudnn_benchmark = true`. The same command on the same commit produced different weights and different metrics. What this repository froze and verified is the environment, the dataset identity, and the configuration — not the training outcome. Phase 9.7 introduces explicit seeding; see [the determinism protocol](postholdout-determinism-protocol.md).
 - **Same-machine fresh environment:** verified on the stated Windows/CUDA host.
 - **Independent clean machine:** not verified.
 - **Cold-cache download:** verified in Phase 5.5A; this rerun was a warm-cache integration check.
