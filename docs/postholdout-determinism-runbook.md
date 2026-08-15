@@ -18,7 +18,7 @@
 - The verification configuration uses the post-holdout development route only. The canonical route trains on the 4,298 locked-test examples and would break `POST_HOLDOUT_LOCKED_TEST_MODEL_FORWARD_PASSES: 0`.
 - No task in this plan executes a training run. Execution is a separate owner decision recorded as `APPROVED_EXECUTION: NOT_YET_GRANTED`.
 - Tests run with `.venv/Scripts/python.exe -m unittest`. The full suite is currently **340 tests, 0 failures**.
-- Commit messages name no tool or assistant, and carry no `Co-Authored-By` trailer. The repository owner is sole author.
+- Commit messages carry no co-authorship trailer, under the repository's sole-authorship policy recorded in `docs/governance-decisions.md`.
 
 ## File Structure
 
