@@ -66,7 +66,7 @@ This decision may be reconsidered only through a new explicit owner-approved pre
 - Git bundle and archive creation remain prohibited.
 - Backup branch deletion, rename, reset, merge, cherry-pick, tag creation, and history rewrite remain prohibited.
 - Historical notebooks, outputs, paths, and blobs must not be copied into `main`.
-- The Phase 7.5 audit findings, the protected nested repository, and Codex-managed references remain untouched.
+- The Phase 7.5 audit findings, the protected nested repository, and externally managed references remain untouched.
 
 ## Governance Boundary
 

@@ -206,7 +206,7 @@ Executed in an isolated virtual environment created for this run.
 ### Recorded Execution — 2026-08-12 to 2026-08-13
 
 The run started 2026-08-12 19:10 local under repository commit
-`5757d0efb3fe0f4b5f6399e52eb745c4d59cd008`. It was interrupted at 2026-08-13
+`ec6eaea5aac8550d1deaee70f5023d07e2c73378`. It was interrupted at 2026-08-13
 05:34:53 during fold 3 epoch 30 by an automatic Windows Update restart (System
 event 1074, `MoUsoCoreWorker.exe`), not by a training fault. The epoch-boundary
 state written 20 seconds earlier held fold 3 through completed epoch 29, and the

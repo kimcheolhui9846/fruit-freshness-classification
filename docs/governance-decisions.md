@@ -243,3 +243,72 @@ Phase 9.6 is therefore recorded as `INCONCLUSIVE` rather than as H1 exhausted: t
 Three samples give `s` two degrees of freedom, so the estimate is imprecise. The rule was applied as written, because selecting a sample size after seeing the spread would restore the freedom the protocol removed.
 
 The owner chose determinism before re-testing over raising the effect-size bar or adopting a multi-seed protocol costing roughly 27 hours per candidate. Phase 9.7 introduces explicit seeding — `torch`, NumPy, and Python seeds, a `DataLoader` generator, and a documented decision on `cudnn_benchmark` against `torch.use_deterministic_algorithms` — and must also decide whether existing documentation overstates reproducibility. What this repository froze and verified is the data and the configuration; the training outcome was never reproducible. Whether loss-001 is re-run afterwards is a separate decision.
+
+## Recorded history rewrite — 2026-08-15
+
+A co-authorship trailer inconsistent with this repository's sole-authorship policy remained on the Phase 9.4 authorization commit. The history was rewritten to conform it to that policy.
+
+Only commit messages changed. The tree hash at the branch head is identical before and after the rewrite, so no tracked file content was altered, and `git diff` between the pre-rewrite backup and the rewritten head is empty.
+
+```text
+REWRITE_DATE:
+2026-08-15
+REASON:
+SOLE_AUTHORSHIP_POLICY_CONFORMANCE
+COMMITS_REWRITTEN:
+26
+FILE_CONTENT_CHANGED:
+NONE
+TREE_HASH_BEFORE_AND_AFTER:
+d4561b7b0c97df34f28ed1db3cb1ff7412f2e3ce
+```
+
+### Sequencing
+
+The rewrite waited until both noise-floor replicates finished. `run_manifest.json` and `training_state.pt` record the repository commit a run started from, and `scripts/train.py` aborts a resume when the current `git rev-parse HEAD` does not match it. Rewriting while a run was in flight would have orphaned that SHA and made epoch-boundary resume impossible. The same constraint had already deferred this work once, on 2026-08-13, while the baseline run was executing.
+
+### Run manifests are not edited
+
+The `run_manifest.json` files under `weights/` record the commit each run actually started from, and remain untouched. Editing them would replace a record of what happened with a record of what is convenient. The table below is what carries provenance across the rewrite.
+
+### Commit correspondence
+
+| Before | After | Subject |
+|---|---|---|
+| `5757d0e` | `ec6eaea` | feat: authorize phase 9.4 baseline execution |
+| `2f8a5ac` | `d13866a` | feat: record phase 9.4 baseline execution and development OOF result |
+| `53c7dd0` | `0a6fc67` | feat: freeze phase 9.5 label quality audit protocol |
+| `47a980f` | `28c0a61` | docs: add phase 9.5 label audit execution runbook |
+| `a4e7347` | `93eb555` | docs: share one canonical pool reconstruction in the audit runbook |
+| `8786cbb` | `0196879` | feat: add deterministic label audit review-set selection |
+| `504278c` | `f4bfeaf` | feat: add label audit scoring and frozen decision rule |
+| `04988d7` | `48f5e9b` | docs: make the audit runbook's threshold boundary test discriminating |
+| `eafc7bc` | `0213e67` | fix: strengthen boundary test to discriminate >= vs > |
+| `d4469d6` | `ba02e40` | feat: add blinded label audit review-set materialization |
+| `e386d27` | `a515f90` | feat: add label audit unblinding and findings analysis |
+| `21602b5` | `18d118c` | docs: cover the two-reviewer guard and main() in the audit runbook |
+| `0252e7f` | `d062244` | test: cover the two-reviewer guard and the decision/model isolation in analyze_label_audit |
+| `5016d3b` | `8b325a0` | test: pin the frozen decision threshold and surface per-group judgment counts |
+| `4df6376` | `b4b3f51` | fix: harden the label audit CLIs against tampering, duplicate reviewers, and overwrite |
+| `8c35126` | `d7c7189` | refactor: consolidate the frozen audit seeds and bump the findings schema |
+| `578c58c` | `92fd673` | fix: derive review-set groups from the seeds instead of trusting the sealed key |
+| `1ceb2ae` | `a214643` | feat: record phase 9.5 label audit outcome and restore the pre-registered order |
+| `3d1e809` | `131b9c0` | feat: freeze the phase 9.6 H1 loss experiment protocol |
+| `f6607aa` | `47bdaf3` | docs: add the phase 9.6 loss-001 execution runbook |
+| `0702afd` | `3e88fd9` | feat: add key-level single-factor validation for loss experiments |
+| `ed71060` | `7d7f5cb` | feat: enforce single-factor validation by experiment lineage |
+| `574f1d2` | `0a1e074` | feat: compute the frozen loss-001 decision rule |
+| `00bbdec` | `9c84a79` | feat: authorize phase 9.6 loss-001 execution |
+| `5e1847f` | `635f0b0` | feat: record loss-001 outcome and freeze the noise floor measurement |
+| `bf44372` | `c257838` | feat: record phase 9.6 outcome and the measured noise floor |
+
+Runs affected, by the commit each recorded at launch:
+
+| Run | Recorded in manifest | Equivalent after rewrite |
+|---|---|---|
+| `deep3-postholdout-research-01-baseline` | `5757d0e` | `ec6eaea` |
+| `deep3-postholdout-research-01-loss-001` | `00bbdec` | `9c84a79` |
+| `deep3-postholdout-research-01-baseline-rep002` | `5e1847f` | `635f0b0` |
+| `deep3-postholdout-research-01-baseline-rep003` | `5e1847f` | `635f0b0` |
+
+Merged pull request bodies quote pre-rewrite identifiers. Those are historical records of what was reviewed at the time and are left as written; this table resolves them.

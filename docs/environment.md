@@ -114,4 +114,4 @@ python -c "from datasets import ClassLabel, DatasetDict, load_dataset; print('da
 - The unit suite primarily validates modular behavior with synthetic data. Phase 5.5 rerun added real-data bounded CMT, temporary-checkpoint, and holdout-evaluation evidence; it did not run canonical training, trained-checkpoint evaluation, benchmark reproduction, or full notebook execution.
 - Checkpoints, model weights, datasets, caches, and generated results are intentionally not stored in Git.
 - A clean virtual-environment installation, production loader, bounded CMT runtime, checkpoint path, and real holdout evaluation passed in Phase 5.5. Full canonical training reproducibility remains unverified.
-- A known Codex-managed temporary Git reference may cause `git fetch origin` to fail. It is local tool metadata, not a project dependency or environment problem, and must not be modified.
+- A known externally managed temporary Git reference may cause `git fetch origin` to fail. It is local tool metadata, not a project dependency or environment problem, and must not be modified.

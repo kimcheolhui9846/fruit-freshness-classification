@@ -70,7 +70,7 @@ class BranchRetentionContractTests(unittest.TestCase):
         for fragment in (
             "Never rewrite `main`",
             "force push",
-            "Never modify Codex refs.",
+            "Never modify externally managed refs.",
             "Canonical training remains unverified",
             "trained weights remain undistributed",
             "model-performance claims remain unavailable",

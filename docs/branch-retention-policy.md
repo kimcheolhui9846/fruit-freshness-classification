@@ -43,7 +43,7 @@ A `SAFE_DELETE_CANDIDATE` requires every gate to be proven: it is not `main`, is
 
 ## History Policy
 
-Never rewrite `main`, squash or recreate published history for cleanup, or force push. Never remove historical notebooks for branch cleanup. Never modify Codex refs. Never use garbage collection as a branch-cleanup substitute.
+Never rewrite `main`, squash or recreate published history for cleanup, or force push. Never remove historical notebooks for branch cleanup. Never modify externally managed refs. Never use garbage collection as a branch-cleanup substitute.
 
 ## Recovery
 

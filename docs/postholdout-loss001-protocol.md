@@ -202,7 +202,7 @@ The owner then granted execution on 2026-08-14, after the runtime single-factor 
 
 ## Recorded Execution — 2026-08-14
 
-The run started 02:55 and completed 11:44 local under repository commit `00bbdec`, 527.9 minutes across three folds with no interruption and no error. The single-factor validation printed before dataset preparation and reported exactly the four registered differences. Final state was `status = COMPLETED`, `completed_epoch = 120`, with all seven expected artifacts present.
+The run started 02:55 and completed 11:44 local under repository commit `9c84a79`, 527.9 minutes across three folds with no interruption and no error. The single-factor validation printed before dataset preparation and reported exactly the four registered differences. Final state was `status = COMPLETED`, `completed_epoch = 120`, with all seven expected artifacts present.
 
 ### Outcome
 

@@ -10,7 +10,7 @@
 - Post-implementation CI recheck: 24 local branches, 22 origin-tracking branches, and 22 live GitHub branches. The only remote addition was this Phase branch. Every pre-existing remote branch retained its original SHA; `main` remained at the starting SHA.
 - Open pull requests: 0. No historical pull requests were returned by GitHub.
 - Active rulesets: `Protect main` (ID `20229405`) for the default branch and `Protect v0.1.0` (ID `20232130`) for the exact protected tag.
-- Known limitation: the externally managed Codex temporary ref can make `git fetch origin` fail. GitHub API and `git ls-remote` were used as remote sources of truth; no Codex ref was changed.
+- Known limitation: the externally managed temporary ref can make `git fetch origin` fail. GitHub API and `git ls-remote` were used as remote sources of truth; no such ref was changed.
 - Remote consistency: GitHub branch API and `git ls-remote --heads origin` both returned the same 21 remote branches and SHAs. No stale or remote-only branch was observed.
 - Workflow dependency: `.github/workflows/ci.yml` triggers on `main` and wildcard pushes, but names no Phase or release branch as a required deployment, environment, or reusable-workflow source.
 
@@ -95,7 +95,7 @@ No branch is a `SAFE_DELETE_CANDIDATE` in this snapshot. All fully merged Phase 
 
 - `REVIEW_REQUIRED`: NONE.
 - `BLOCKED_UNVERIFIED`: NONE.
-- The known Codex fetch limitation is documented, but independent GitHub API and `git ls-remote` evidence establishes the branch inventory; it does not block this classification.
+- The known externally managed ref fetch limitation is documented, but independent GitHub API and `git ls-remote` evidence establishes the branch inventory; it does not block this classification.
 
 ## Recommended Phase 7.5 Input
 
