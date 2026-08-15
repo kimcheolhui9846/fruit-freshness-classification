@@ -33,6 +33,15 @@ _REQUIRED_TYPES = {
     "reporting": {"figure_size": list},
 }
 
+# Phase 9.7 determinism level names. They live here, not in
+# src/utils/determinism.py, because this module is a standard-library-only
+# loader and must validate the name without importing torch or numpy.
+A_STRICT = "A_STRICT"
+B_CUDNN = "B_CUDNN"
+C_SEED_ONLY = "C_SEED_ONLY"
+DETERMINISM_LEVELS = (A_STRICT, B_CUDNN, C_SEED_ONLY)
+_CUDNN_CONSTRAINED_LEVELS = (A_STRICT, B_CUDNN)
+
 
 def load_experiment_config(path: str | Path) -> dict:
     """Load and validate an explicitly supplied TOML experiment configuration."""
