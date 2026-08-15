@@ -328,3 +328,40 @@ The two verification runs executed on 2026-08-15 and returned `A_ADOPTED`, the l
 The design had flagged `nn.MultiheadAttention`'s scaled-dot-product-attention backward and depthwise convolution backward as the operations most likely to force that descent. Neither raised. Because strict mode raises rather than degrading silently, completing the run is itself the evidence that no nondeterministic operation is reachable in this training path.
 
 The limitations are recorded in the protocol rather than dropped now that the result is clean: bit-exactness was measured over six epochs and not three hundred and sixty, it holds for this host and this pinned software stack only, the speed cost is not cleanly measured against the pre-9.7 baseline, and seed-to-seed variation is untouched.
+
+## Phase 9.8 — measurement floor frozen and H1 closed below resolution, 2026-08-16
+
+Phase 9.7 made the pipeline bit-exact, and Phase 9.8 records what that does and does not buy. Determinism removes measurement noise; it does not narrow the distribution a seed is drawn from. The three Phase 9.6a replicates therefore remain the right estimate of how far a result would move at a different seed, and they set a minimum detectable effect of 0.012177 on Macro F1, 0.001969 on Top-1, and 0.147833 on `freshpotato` F1.
+
+Decomposing that variance produced the finding that reorganized the phase: `freshpotato` alone accounts for 90.56% of Macro F1's run-to-run variance, against 5.43% for `rottenpotato` and 4.01% for the remaining twelve classes. The instrument's noise is the class the research was trying to improve, which is why the Phase 9.6 acceptance margin of 0.010 — set below the 0.012177 floor measured afterwards — could not have separated signal from noise.
+
+H1 is recorded `CLOSED_BELOW_RESOLUTION`. Resolving the observed effect needs between 71 and 212 GPU hours under a conservative zero-correlation bound on the paired difference, using the measured 8.85-hour run duration. That is neither "H1 is exhausted", which the evidence does not support, nor "inconclusive, keep trying", which the arithmetic prices out of reach. The loss-001 verdict of `NOT_ADVANCED` is unchanged and is not re-scored.
+
+The research question moves from raising `freshpotato` F1 to asking why it moves by roughly 0.15 between runs of an identical configuration. Phase 9.9 is registered and designed nowhere.
+
+### Diagnostic description, exploratory and non-advancing
+
+`scripts/diagnose_freshpotato_instability.py` compared the three recorded replicates over the 347 development `freshpotato` images. The record is written to `results/`, which is git-ignored, so the figures are repeated here to keep them durable.
+
+```text
+CLASS_SUPPORT:
+347
+ERRORS_PER_RUN:
+252, 214, 246
+WRONG_IN_ALL_THREE:
+183
+WRONG_IN_AT_LEAST_ONE:
+285
+CORRECT_IN_ALL_THREE:
+62
+ERROR_FREQUENCY_HISTOGRAM:
+one run 41, two runs 61, three runs 183
+JACCARD:
+0.6421
+DIAGNOSTIC_STATUS:
+EXPLORATORY_DESCRIPTIVE
+```
+
+Both candidate explanations the protocol anticipated are present rather than one of them. There is a hard core of 183 images the model gets wrong every time, and a band of 102 that flip between runs. Only 62 of 347 are classified correctly in all three runs.
+
+No rule about what these numbers mean was frozen before they were computed, so they support no claim and advance nothing. They are the material Phase 9.9 will be designed from, and any explanation Phase 9.9 pursues must be pre-registered there on its own terms.

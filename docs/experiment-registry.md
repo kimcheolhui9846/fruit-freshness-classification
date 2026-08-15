@@ -8,6 +8,7 @@
 | `deep3-postholdout-research-01-label-audit` | 9.5 | `COMPLETED_DEFECT_NOT_CONFIRMED` | `deep3-postholdout-research-01-baseline` | Development images only; locked test is not inspected |
 | `deep3-postholdout-research-01-loss-001` | 9.6 | `PROTOCOL_FROZEN` | `deep3-postholdout-research-01-baseline` | Development CV only; locked test and canonical holdout are model-inaccessible |
 | `deep3-postholdout-determinism-check-01` | 9.7 | `COMPLETED_A_ADOPTED` | `deep3-postholdout-determinism-check` | Development route only; locked test is never trained on |
+| `deep3-postholdout-research-01-baseline-det` | 9.8 | `REGISTERED_NOT_YET_RUN` | `deep3-postholdout-deterministic-baseline` | Development CV only; locked test and canonical holdout are model-inaccessible |
 
 Future child runs use: `deep3-postholdout-research-01-baseline`, `deep3-postholdout-research-01-loss-001`, `deep3-postholdout-research-01-aug-001`, `deep3-postholdout-research-01-sampler-001`, `deep3-postholdout-research-01-opt-001`, and `deep3-postholdout-research-01-arch-001`.
 
@@ -168,3 +169,28 @@ DETERMINISTIC_BASELINE_THEN_RETEST_DECISION
 This check advances no candidate and is not an experiment in the H-family sense; it is registered so the runs that consumed GPU time are accounted for. Because `torch.use_deterministic_algorithms(True)` raises rather than degrading silently, completing the run is itself the evidence that no nondeterministic operation is reachable in this model's training path.
 
 Phase 9.8 needs a new baseline under the adopted pipeline: the recorded 0.9012 came from the unseeded pipeline and is not a valid comparison basis for a deterministic run.
+
+## Phase 9.8 measurement floor
+
+The baseline is re-established under the pipeline Phase 9.7 adopted, because the recorded 0.901167 came from the unseeded pipeline and is not a valid comparison basis for a deterministic run. The frozen protocol is [postholdout-measurement-floor-protocol.md](postholdout-measurement-floor-protocol.md).
+
+```text
+DETERMINISTIC_BASELINE_ID:
+deep3-postholdout-research-01-baseline-det
+SEED:
+20260815
+DETERMINISM_LEVEL:
+A_STRICT
+MDE_MACRO_F1:
+0.012177
+VALIDITY_ENVELOPE:
+0.892845 to 0.917199
+H1_STATUS:
+CLOSED_BELOW_RESOLUTION
+LOCKED_TEST_MODEL_ACCESS:
+NO
+PHASE_9_9:
+FRESHPOTATO_STABILITY
+```
+
+The measurement floor is derived from the three Phase 9.6a replicates and binds regardless of determinism: fixing a seed pins one draw from the same distribution rather than narrowing it. `freshpotato` alone accounts for 90.56% of Macro F1's run-to-run variance, so the instrument's noise is the class the research was trying to improve.
