@@ -10,7 +10,7 @@ PIPELINE_CHANGE_NOT_HYPOTHESIS_TEST
 PROTOCOL_STATUS:
 FROZEN
 EXECUTION_STATUS:
-NOT_YET_RUN
+IN_PROGRESS
 SEED:
 20260815
 VERIFICATION_RUN_COUNT:
@@ -205,7 +205,9 @@ APPROVED_VERIFICATION_RUN_COUNT:
 APPROVED_DOCUMENTATION_CORRECTION_SCOPE:
 TOP_LEVEL_PLUS_GOVERNANCE_LEDGER
 APPROVED_EXECUTION:
-NOT_YET_GRANTED
+GRANTED
+APPROVED_EXECUTION_DATE:
+2026-08-15
 APPROVED_LOCKED_TEST_EVALUATION:
 NO
 APPROVED_LOSS001_RERUN:
@@ -214,4 +216,6 @@ APPROVED_WEIGHT_PUBLICATION:
 NO
 ```
 
-The owner approved the phase scope, the determinism ladder, and the documentation correction scope on 2026-08-15, before any implementation existed. Execution of the verification runs is a separate decision and is not yet granted.
+The owner approved the phase scope, the determinism ladder, and the documentation correction scope on 2026-08-15, before any implementation existed. Execution of the two verification runs was granted separately on 2026-08-15, after the implementation was merged and with the adoption ladder already frozen.
+
+Authorization covers exactly the two bounded runs of `configs/deep3_postholdout_determinism_check.toml` and their comparison. It does not authorize a third run, a full-length run, a change to the seed or the ladder, the Phase 9.8 deterministic baseline, locked-test evaluation, or publication. Windows Update was verified paused until 2026-08-22 before launch, so the 17:00-23:00 reboot window created by the current 23:00-17:00 active hours does not threaten the runs.
