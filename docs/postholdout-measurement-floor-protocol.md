@@ -10,7 +10,7 @@ BASELINE_REESTABLISHMENT_AND_MEASUREMENT_FRAMEWORK
 PROTOCOL_STATUS:
 FROZEN
 EXECUTION_STATUS:
-NOT_YET_RUN
+IN_PROGRESS
 TRAINING_RUN_COUNT:
 1
 SEED:
@@ -250,7 +250,9 @@ YES
 APPROVED_LOSS001_RERUN:
 NO
 APPROVED_EXECUTION:
-NOT_YET_GRANTED
+GRANTED
+APPROVED_EXECUTION_DATE:
+2026-08-16
 APPROVED_LOCKED_TEST_EVALUATION:
 NO
 APPROVED_WEIGHT_PUBLICATION:
@@ -259,4 +261,6 @@ APPROVED_PHASE_9_9_EXECUTION:
 NO
 ```
 
-The owner approved the phase scope, the MDE framework, the H1 closure basis, and the research question move on 2026-08-15, before the deterministic baseline ran. Execution of that run is a separate decision and is not yet granted.
+The owner approved the phase scope, the MDE framework, the H1 closure basis, and the research question move on 2026-08-15, before the deterministic baseline ran. Execution of that run was granted separately on 2026-08-16, after the implementation was merged and with the validity envelope already frozen.
+
+Authorization covers exactly one run of `configs/deep3_postholdout_baseline_det.toml` and its development-only OOF evaluation. It does not authorize a second run, a candidate experiment, a change to the seed or the envelope, locked-test evaluation, or publication. Windows Update was verified paused until 2026-08-22 before launch, against an expected finish around 10:12 on 2026-08-16.
