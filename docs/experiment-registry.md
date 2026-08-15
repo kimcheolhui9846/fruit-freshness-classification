@@ -7,6 +7,7 @@
 | `deep3-postholdout-research-01-baseline` | 9.3 | `COMPLETED_DEVELOPMENT_BASELINE` | `deep3-postholdout-research-01` | Development CV only; locked test and canonical holdout are model-inaccessible |
 | `deep3-postholdout-research-01-label-audit` | 9.5 | `COMPLETED_DEFECT_NOT_CONFIRMED` | `deep3-postholdout-research-01-baseline` | Development images only; locked test is not inspected |
 | `deep3-postholdout-research-01-loss-001` | 9.6 | `PROTOCOL_FROZEN` | `deep3-postholdout-research-01-baseline` | Development CV only; locked test and canonical holdout are model-inaccessible |
+| `deep3-postholdout-determinism-check-01` | 9.7 | `COMPLETED_A_ADOPTED` | `deep3-postholdout-determinism-check` | Development route only; locked test is never trained on |
 
 Future child runs use: `deep3-postholdout-research-01-baseline`, `deep3-postholdout-research-01-loss-001`, `deep3-postholdout-research-01-aug-001`, `deep3-postholdout-research-01-sampler-001`, `deep3-postholdout-research-01-opt-001`, and `deep3-postholdout-research-01-arch-001`.
 
@@ -140,3 +141,30 @@ DETERMINISM_THEN_RETEST
 ```
 
 Rerunning the baseline unchanged produced 0.912041, above the 0.9112 acceptance threshold loss-001 missed. A null intervention would have cleared the bar on that draw, so a single run cannot resolve an effect of that size under this pipeline. The cause is that training sets no random seed; Phase 9.7 introduces determinism before any further candidate is judged. The loss-001 verdict of `NOT_ADVANCED` is unchanged — the measurement bears only on the inference drawn from it.
+
+## Phase 9.7 training determinism
+
+The pipeline gained explicit seeding under [postholdout-determinism-protocol.md](postholdout-determinism-protocol.md), whose six-branch adoption ladder was frozen before either verification run executed. Two bounded runs of the same configuration produced identical weights, identical EMA weights, and identical fold histories, so the ladder's first branch was reached directly.
+
+```text
+CHECK_EXPERIMENT_ID:
+deep3-postholdout-determinism-check-01
+SEED:
+20260815
+LEVEL_ATTEMPTED:
+A_STRICT
+NONDETERMINISTIC_OPERATION_ERROR:
+NONE
+BIT_EXACT:
+YES
+OUTCOME:
+A_ADOPTED
+LOCKED_TEST_MODEL_ACCESS:
+NO
+PHASE_9_8:
+DETERMINISTIC_BASELINE_THEN_RETEST_DECISION
+```
+
+This check advances no candidate and is not an experiment in the H-family sense; it is registered so the runs that consumed GPU time are accounted for. Because `torch.use_deterministic_algorithms(True)` raises rather than degrading silently, completing the run is itself the evidence that no nondeterministic operation is reachable in this model's training path.
+
+Phase 9.8 needs a new baseline under the adopted pipeline: the recorded 0.9012 came from the unseeded pipeline and is not a valid comparison basis for a deterministic run.

@@ -71,6 +71,33 @@ class DeterminismProtocolContractTest(unittest.TestCase):
         ):
             self.assertIn(token, document)
 
+    def test_recorded_outcome_matches_the_branch_it_committed_to(self):
+        document = PROTOCOL.read_text(encoding="utf-8")
+
+        # The ladder said A completing both runs with matching digests means
+        # A_ADOPTED. The recorded evidence must satisfy that branch, not a
+        # neighbouring one.
+        for token in (
+            "OUTCOME:\nA_ADOPTED",
+            "ADOPTED_LEVEL:\nA_STRICT",
+            "LEVEL_ATTEMPTED:\nA_STRICT",
+            "NONDETERMINISTIC_OPERATION_ERROR:\nNONE",
+            "BOTH_RUNS_COMPLETED:\nYES",
+            "BIT_EXACT:\nYES",
+        ):
+            self.assertIn(token, document)
+
+        # A descent that never happened must not be recorded as if it had.
+        self.assertNotIn("ADOPTED_LEVEL:\nB_CUDNN", document)
+
+    def test_recorded_limitations_survive_the_positive_result(self):
+        document = PROTOCOL.read_text(encoding="utf-8")
+
+        # A clean result is exactly when limitations get quietly dropped.
+        self.assertIn("Two epochs, not one hundred and twenty", document)
+        self.assertIn("One host, one software stack", document)
+        self.assertIn("Seed-to-seed variation is untouched", document)
+
     def test_seed_conditional_limitation_is_recorded(self):
         document = PROTOCOL.read_text(encoding="utf-8")
 

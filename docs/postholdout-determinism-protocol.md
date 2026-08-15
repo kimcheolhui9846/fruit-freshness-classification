@@ -10,7 +10,11 @@ PIPELINE_CHANGE_NOT_HYPOTHESIS_TEST
 PROTOCOL_STATUS:
 FROZEN
 EXECUTION_STATUS:
-IN_PROGRESS
+COMPLETED
+OUTCOME:
+A_ADOPTED
+ADOPTED_LEVEL:
+A_STRICT
 SEED:
 20260815
 VERIFICATION_RUN_COUNT:
@@ -219,3 +223,48 @@ NO
 The owner approved the phase scope, the determinism ladder, and the documentation correction scope on 2026-08-15, before any implementation existed. Execution of the two verification runs was granted separately on 2026-08-15, after the implementation was merged and with the adoption ladder already frozen.
 
 Authorization covers exactly the two bounded runs of `configs/deep3_postholdout_determinism_check.toml` and their comparison. It does not authorize a third run, a full-length run, a change to the seed or the ladder, the Phase 9.8 deterministic baseline, locked-test evaluation, or publication. Windows Update was verified paused until 2026-08-22 before launch, so the 17:00-23:00 reboot window created by the current 23:00-17:00 active hours does not threaten the runs.
+
+## Recorded Execution — 2026-08-15
+
+Both bounded runs executed on the same host with Windows Update verified paused. Run A ran 19:41 to 19:50, run B 19:51 to 20:00, each 8.6 minutes across three folds of two epochs.
+
+### Result
+
+```text
+LEVEL_ATTEMPTED:
+A_STRICT
+NONDETERMINISTIC_OPERATION_ERROR:
+NONE
+BOTH_RUNS_COMPLETED:
+YES
+BIT_EXACT:
+YES
+OUTCOME:
+A_ADOPTED
+```
+
+| Compared field | Digest (both runs) |
+|---|---|
+| `model_state_dict` | `5d31422c6c334928aa36d29610bc4464798c1f6d3c0caa0fd3fe2a6f92cd5397` |
+| `ema_state_dict` | `f433e8e4b1c214c3c87a27cc94c49e26ba2f815253d1ff307db372cd5ad28b4c` |
+| `completed_fold_histories` | `2d3f0c149ab8219c36e1df217a673c76d2dc88806b6806cd25a19ef5f1e639e8` |
+
+The frozen ladder's first branch was reached directly: level A completed both runs and the digests match, so `A_ADOPTED` is the recorded outcome and `A_STRICT` is the adopted level. No descent to `B_CUDNN` was needed.
+
+The comparison was confirmed a second time without using the project's own digest code. `sha256sum` over the four checkpoint files each run wrote — `best_model_fold1.pt`, `best_model_fold2.pt`, `best_model_fold3.pt`, and `last_model_weights.pt` — returned identical hashes for every pair. A verification that rests only on the tool written to perform it is weaker than one an independent utility reproduces.
+
+### What this establishes
+
+**The pipeline is bit-exact under `A_STRICT` on this host.** Two runs of the same command produced identical weights, identical EMA weights, and identical recorded metrics. The run-to-run variation that made Phase 9.6 uninterpretable is removed for a fixed seed.
+
+**No nondeterministic operation is reachable in this model's training path.** The design anticipated that `torch.use_deterministic_algorithms(True)` might raise on `nn.MultiheadAttention`'s scaled-dot-product-attention backward or on depthwise convolution backward, and registered a descent to `B_CUDNN` for that case. Neither raised. Because strict mode raises rather than degrading silently, completing the run *is* the proof that every dispatched operation has a deterministic implementation.
+
+### Limitations, recorded rather than discovered later
+
+**Two epochs, not one hundred and twenty.** The bounded runs exercise every branch the full recipe uses — a mixup epoch, a fine-tuning epoch, and all three folds — and the operation set does not change with epoch count, which is what makes the strict-mode guarantee carry. But bit-exactness was measured over six epochs, not three hundred and sixty.
+
+**One host, one software stack.** Determinism is established for this machine, this driver, and the pinned PyTorch and CUDA versions. Nothing here claims reproducibility across machines.
+
+**The speed cost is not cleanly measured.** The runs averaged 86 seconds per epoch against roughly 90 for the pre-9.7 baseline, so no large penalty from `cudnn_benchmark = false` is apparent. The two are not directly comparable: this configuration's two-epoch schedule has a different mixup-to-fine-tuning ratio than the full recipe. Phase 9.8 should not assume the full run is unchanged in duration, and should not assume it is slower either.
+
+**Seed-to-seed variation is untouched.** This is restated because it is the limitation most likely to be forgotten now that the measurement noise is gone. Determinism makes a baseline-candidate pair a paired comparison under common random numbers, which is a real variance reduction; it does not make one pair an estimate of the effect across seeds. Phase 9.8 must argue its claim strength against that.
