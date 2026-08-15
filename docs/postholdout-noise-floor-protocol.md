@@ -10,7 +10,9 @@ MEASUREMENT_NOT_HYPOTHESIS_TEST
 PROTOCOL_STATUS:
 FROZEN
 EXECUTION_STATUS:
-IN_PROGRESS
+COMPLETED
+OUTCOME:
+INCONCLUSIVE
 REPLICATE_COUNT:
 2
 TOTAL_SAMPLE_SIZE:
@@ -132,3 +134,59 @@ NO
 The owner approved the replicate count and the two-sigma interpretation rule on 2026-08-14, before either replicate ran, and granted execution the same day.
 
 Authorization covers exactly the two replicate runs named above and their development-only OOF evaluations. It does not authorize a third replicate, any change to the training recipe including seeding, re-scoring loss-001, locked-test evaluation, or publication.
+
+
+## Recorded Execution — 2026-08-15
+
+Both replicates ran to completion with no error. rep002 resumed from fold 3 epoch 4 after a deliberate stop that freed the GPU, and finished at 02:58; rep003 ran 02:58 to 11:49. Each reused the baseline's frozen folds and changed only its identity fields.
+
+### Result
+
+| Sample | Macro F1 | Top-1 |
+|---|---:|---:|
+| baseline | 0.901167 | 0.9566 |
+| rep002 | 0.912041 | 0.9579 |
+| rep003 | 0.901858 | 0.9560 |
+
+```text
+MEAN_MACRO_F1:
+0.905022
+SAMPLE_STDEV:
+0.006089
+TWO_SIGMA:
+0.012177
+RANGE:
+0.010874
+LOSS001_DELTA:
+0.0090
+OUTCOME:
+INCONCLUSIVE
+```
+
+`d = 0.0090` is at or below `2s = 0.012177`, so the frozen rule returns `INCONCLUSIVE`. The range, 0.010874, points the same way; the two statistics do not disagree.
+
+### What this establishes
+
+The loss-001 improvement is the size of ordinary run-to-run variation. The clearest demonstration is rep002: **the baseline recipe, rerun without changing a single character of configuration, produced 0.912041** — higher than loss-001's 0.9102 and above the 0.9112 acceptance threshold. An intervention that did nothing at all would have cleared the bar on that draw.
+
+A single run therefore cannot resolve an effect of roughly one point of Macro F1 under this pipeline.
+
+### Consequences
+
+**Phase 9.6 is `INCONCLUSIVE`.** "H1 exhausted" is not a conclusion this experiment can support, because it was underpowered to detect an effect of the size observed. The next phase reverts to an owner decision rather than the automatic H2 selection the loss-001 protocol specified.
+
+**The loss-001 verdict stands unchanged.** `NOT_ADVANCED` was computed against a threshold frozen before that run and is recorded permanently. This measurement re-scores nothing; it bears only on the inference drawn afterwards.
+
+### Limitations, recorded rather than discovered later
+
+Three samples give `s` two degrees of freedom, so the estimate is imprecise and the true variation may be larger or smaller. The rule was applied as written regardless, because choosing the sample size after seeing the spread would restore exactly the freedom this protocol removed.
+
+The source of the variation is the absence of seeding. Until that is fixed, no single-run experiment on this pipeline can resolve an effect smaller than roughly 0.012 Macro F1.
+
+### Direction chosen: determinism before re-testing
+
+The owner decided on 2026-08-15 to introduce seeding and then re-test, rather than raising the effect-size bar or adopting a multi-seed protocol that would cost roughly 27 hours per candidate.
+
+That work becomes Phase 9.7: explicit `torch`, NumPy, and Python seeds, a `DataLoader` generator, and a documented decision on `cudnn_benchmark` against `torch.use_deterministic_algorithms`, since the benchmark autotuner and determinism trade against each other. It also needs a decision on whether existing documentation overstates reproducibility — what this repository has frozen and verified is the data and the configuration, not the training outcome.
+
+Whether loss-001 is then re-run under the deterministic pipeline is a separate decision. Its recorded verdict does not change either way.

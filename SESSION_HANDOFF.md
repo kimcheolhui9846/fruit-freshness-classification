@@ -1258,3 +1258,58 @@ Three deviations bound how much the result carries and are recorded in the proto
 The reviewers differ systematically in category use rather than in freshness: the owner assigned `NOT_A_POTATO` 9 times and `UNDECIDABLE` 8 times over the subsample against the assistant's 0 and 3. The assistant resolves doubtful produce identity toward "potato" where the owner does not. That bias would have been invisible with a single reviewer and does not move the outcome, since subject and control rates are near-equal under either.
 
 Executing H1 requires a separate authorization, as does any locked-test evaluation. The 4,298-example locked test remains `FROZEN_UNOBSERVED_BY_MODEL` with zero model forward passes.
+
+## Phase 9.6 — H1 Loss Experiment and Run-to-Run Noise Floor
+
+```text
+PHASE:
+9.6 — H1 loss experiment, and 9.6a run-to-run noise floor
+EXPERIMENT_ID:
+deep3-postholdout-research-01-loss-001
+CHANGED_PARAMETER:
+loss.class_balanced_beta 0.999 -> 0.9999
+LOSS001_VERDICT:
+NOT_ADVANCED
+LOSS001_MACRO_F1:
+0.9102 (threshold 0.9112, delta +0.0090)
+LOSS001_TOP1:
+0.9561 (guardrail 0.9466, delta -0.0005)
+FRESHPOTATO_F1:
+0.3682 -> 0.5140
+FRESHPOTATO_RECALL:
+0.2738 -> 0.3977
+NOISE_FLOOR_SAMPLES:
+0.901167, 0.912041, 0.901858
+SAMPLE_STDEV:
+0.006089
+TWO_SIGMA:
+0.012177
+RANGE:
+0.010874
+PHASE_9_6_STATUS:
+INCONCLUSIVE
+PHASE_9_7:
+DETERMINISM_THEN_RETEST
+LOCKED_TEST_MODEL_FORWARD_PASSES:
+0
+ARTIFACT_PUBLICATION:
+LOCAL_ONLY
+```
+
+Phase 9.6 changed one parameter, the class-balanced reweighting strength, and reused the baseline's frozen folds so the comparison was against identical data. The guard that enforces "one factor at a time" runs before dataset preparation and was exercised against a config with a second changed factor, one with an unfrozen value for the allowed factor, and one naming an unregistered parent; each was rejected.
+
+The intervention worked where it was aimed. `freshpotato` F1 rose from 0.3682 to 0.5140 and its recall from 0.2738 to 0.3977. It also cost the nine already-working classes a little each, and those losses absorbed much of the gain; `rottenpotato` gained F1 while losing 0.056 of recall as predictions moved the other way.
+
+`scripts.apply_loss001_decision` computed `NOT_ADVANCED`: Macro F1 0.9102 against the frozen threshold of 0.9112, short by 0.0010, with the Top-1 guardrail passed. That verdict is permanent.
+
+The failure branch was not applied. The loss-001 protocol had recorded before the run that the noise floor was unmeasured and that results within roughly ±0.005 of the threshold should be read with that in mind, and +0.0090 sits inside that band. A measurement was frozen and run: three executions of the identical baseline recipe on identical folds gave 0.901167, 0.912041, and 0.901858, so `s` is 0.006089 and `2s` is 0.012177. The frozen two-sigma rule returns `INCONCLUSIVE`, and the range of 0.010874 agrees.
+
+The decisive observation is the second sample. Rerunning the baseline **without changing a character of configuration** produced 0.912041, above the 0.9112 threshold that loss-001 missed. An intervention that did nothing would have been accepted on that draw.
+
+Phase 9.6 is therefore recorded as `INCONCLUSIVE` rather than as H1 exhausted: it was underpowered to support that conclusion. The loss-001 verdict is unchanged, having been computed against a threshold frozen beforehand; the measurement bears only on the inference drawn afterwards, and re-scores nothing.
+
+Designing the measurement surfaced the cause. **The training pipeline sets no random seed.** There is no `torch.manual_seed`, NumPy seed, or Python seed anywhere in `src/` or `scripts/`; `torch.use_deterministic_algorithms` is never called; `cudnn_benchmark` is `true`; and the training `DataLoader` uses `shuffle=True` with no generator. The data, the configuration, and the fold indices are frozen and verifiable, but the training that consumes them is not reproducible. Until that is fixed, no single-run experiment here can resolve an effect below roughly 0.012 Macro F1.
+
+Three samples give `s` two degrees of freedom, so the estimate is imprecise. The rule was applied as written, because selecting a sample size after seeing the spread would have restored the freedom the protocol removed.
+
+Phase 9.7 is determinism before re-testing, chosen over raising the effect-size bar or adopting a multi-seed protocol costing roughly 27 hours per candidate. It introduces explicit seeding and a documented decision on `cudnn_benchmark` against `torch.use_deterministic_algorithms`, and must decide whether existing documentation overstates reproducibility. Whether loss-001 is re-run under the deterministic pipeline is a separate decision.

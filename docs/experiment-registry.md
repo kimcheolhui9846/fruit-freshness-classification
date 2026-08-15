@@ -114,8 +114,29 @@ CANDIDATE_COUNT:
 1
 LOCKED_TEST_MODEL_ACCESS:
 NO
+PHASE_9_6_OUTCOME:
+NOT_ADVANCED_BUT_INCONCLUSIVE
 PHASE_9_7:
-H2_AUGMENTATION_IF_NOT_ADVANCED
+DETERMINISM_THEN_RETEST
 ```
 
 The baseline already trains with class-balanced focal loss, so this run changes how hard that mechanism pushes rather than introducing it. At the baseline's beta the `freshpotato`-to-`rottenapples` weight ratio is 3.18 against a frequency ratio of 7.82; at 0.9999 it is 6.97, essentially inverse frequency. A null result is therefore close to the strongest available form of "reweighting does not fix this class", which is why the failure branch retires H1 rather than trying another loss variant.
+
+## Phase 9.6a run-to-run noise floor
+
+Three runs of the identical baseline recipe on the identical frozen folds gave Macro F1 0.901167, 0.912041, and 0.901858: mean 0.905022, sample standard deviation 0.006089, range 0.010874. The frozen two-sigma rule compares the loss-001 improvement of 0.0090 against 2s = 0.012177 and returns `INCONCLUSIVE`.
+
+```text
+NOISE_FLOOR_SAMPLE_SIZE:
+3
+SAMPLE_STDEV:
+0.006089
+TWO_SIGMA:
+0.012177
+PHASE_9_6_STATUS:
+INCONCLUSIVE
+PHASE_9_7:
+DETERMINISM_THEN_RETEST
+```
+
+Rerunning the baseline unchanged produced 0.912041, above the 0.9112 acceptance threshold loss-001 missed. A null intervention would have cleared the bar on that draw, so a single run cannot resolve an effect of that size under this pipeline. The cause is that training sets no random seed; Phase 9.7 introduces determinism before any further candidate is judged. The loss-001 verdict of `NOT_ADVANCED` is unchanged — the measurement bears only on the inference drawn from it.

@@ -215,8 +215,10 @@ LOCKED_TEST_MODEL_ACCESS:
 NO
 ARTIFACT_PUBLICATION:
 LOCAL_ONLY
+PHASE_9_6_OUTCOME:
+NOT_ADVANCED_BUT_INCONCLUSIVE
 PHASE_9_7:
-H2_AUGMENTATION_IF_NOT_ADVANCED
+DETERMINISM_THEN_RETEST
 ```
 
 Freezing this protocol does not authorize the run. Training requires a separate explicit decision, as Phase 9.4 did for the baseline.
@@ -228,3 +230,16 @@ The acceptance threshold is fixed at Macro F1 at least 0.9112 with Top-1 at leas
 The failure branch is fixed in advance: a result below the threshold retires H1 as exhausted and makes Phase 9.7 H2 augmentation. Leaving it open would invite trying gamma, then label smoothing, then a combination, searching the H1 family without pre-registration until something cleared the bar by chance. The research plan's own stop condition, "stop when a primary family is exhausted", is what this encodes.
 
 The 4,298-example locked test remains `FROZEN_UNOBSERVED_BY_MODEL`. No weight, checkpoint, dataset copy, Release, or tag is authorized.
+
+
+## Phase 9.6a — Noise Floor Measured, Phase 9.6 Inconclusive
+
+The measurement frozen before it ran returned `INCONCLUSIVE`. Three runs of the identical baseline recipe on identical folds gave Macro F1 0.901167, 0.912041, and 0.901858, so the sample standard deviation is 0.006089 and 2s is 0.012177. The loss-001 improvement of 0.0090 falls at or below that, and the range of 0.010874 agrees.
+
+The decisive observation is rep002. Rerunning the baseline without changing a character of configuration produced 0.912041, above the 0.9112 threshold that loss-001 missed at 0.9102. An intervention that did nothing would have been accepted on that draw. A single run cannot resolve an effect of roughly one point of Macro F1 on this pipeline.
+
+Phase 9.6 is therefore recorded as `INCONCLUSIVE` rather than as H1 exhausted: the experiment was underpowered to support that conclusion. The loss-001 verdict of `NOT_ADVANCED` is unchanged, having been computed against a threshold frozen before the run; this measurement re-scores nothing and bears only on the inference drawn afterwards.
+
+Three samples give `s` two degrees of freedom, so the estimate is imprecise. The rule was applied as written, because selecting a sample size after seeing the spread would restore the freedom the protocol removed.
+
+The owner chose determinism before re-testing over raising the effect-size bar or adopting a multi-seed protocol costing roughly 27 hours per candidate. Phase 9.7 introduces explicit seeding — `torch`, NumPy, and Python seeds, a `DataLoader` generator, and a documented decision on `cudnn_benchmark` against `torch.use_deterministic_algorithms` — and must also decide whether existing documentation overstates reproducibility. What this repository froze and verified is the data and the configuration; the training outcome was never reproducible. Whether loss-001 is re-run afterwards is a separate decision.

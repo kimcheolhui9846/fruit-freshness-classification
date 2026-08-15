@@ -87,6 +87,27 @@ class NoiseFloorProtocolContractTest(unittest.TestCase):
         ]
         self.assertEqual(len(states), 1, f"expected exactly one execution status, got {states}")
 
+    def test_recorded_outcome_matches_the_rule_it_committed_to(self):
+        document = PROTOCOL.read_text(encoding="utf-8")
+
+        # The rule said d <= 2s means INCONCLUSIVE. The recorded numbers must
+        # actually satisfy the branch that was recorded.
+        for token in (
+            "OUTCOME:\nINCONCLUSIVE",
+            "SAMPLE_STDEV:\n0.006089",
+            "TWO_SIGMA:\n0.012177",
+            "LOSS001_DELTA:\n0.0090",
+        ):
+            self.assertIn(token, document)
+        self.assertLessEqual(0.0090, 0.012177)
+
+    def test_measurement_did_not_rescore_loss001(self):
+        document = PROTOCOL.read_text(encoding="utf-8")
+
+        # A measurement taken after a verdict may inform the next step only.
+        self.assertIn("loss-001 verdict stands unchanged", document)
+        self.assertIn("re-scores nothing", document)
+
     def test_interpretation_rule_is_numeric_and_directional(self):
         document = PROTOCOL.read_text(encoding="utf-8")
 

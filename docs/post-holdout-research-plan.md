@@ -149,3 +149,11 @@ The owner approved exactly one child run, `deep3-postholdout-research-01-baselin
 `deep3-postholdout-research-01-loss-001` changes one parameter: `loss.class_balanced_beta` from 0.999 to 0.9999. The baseline already uses class-balanced focal loss, so H1 here is a question of strength, not of introducing the mechanism. `freshpotato` already carries the largest alpha and still collapses; at the same time only about 40 percent of full inverse-frequency reweighting is applied. This run settles which of those facts governs.
 
 Acceptance is fixed before the run at development Macro F1 at least 0.9112 with Top-1 at least 0.9466. Below that, H1 is recorded as exhausted and Phase 9.7 is H2 augmentation — no second loss variant. Details and the unmeasured-noise-floor caveat are in [postholdout-loss001-protocol.md](postholdout-loss001-protocol.md).
+
+### Phase 9.6 outcome — inconclusive, and why (2026-08-15)
+
+loss-001 returned `NOT_ADVANCED` at Macro F1 0.9102 against a threshold of 0.9112. A subsequent frozen measurement of run-to-run variation returned `INCONCLUSIVE`: three runs of the identical baseline recipe gave 0.901167, 0.912041, and 0.901858, so 2s is 0.012177 against a loss-001 improvement of 0.0090.
+
+Rerunning the baseline unchanged produced 0.912041 — above the threshold loss-001 missed. The pipeline sets no random seed, so every run is an independent draw and no single-run experiment here can resolve an effect below roughly 0.012 Macro F1.
+
+H1 is therefore **not** recorded as exhausted. Phase 9.7 introduces determinism before any further candidate is judged; H2 augmentation and the remaining families stay queued behind it.
