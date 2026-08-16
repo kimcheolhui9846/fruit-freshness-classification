@@ -365,3 +365,11 @@ EXPLORATORY_DESCRIPTIVE
 Both candidate explanations the protocol anticipated are present rather than one of them. There is a hard core of 183 images the model gets wrong every time, and a band of 102 that flip between runs. Only 62 of 347 are classified correctly in all three runs.
 
 No rule about what these numbers mean was frozen before they were computed, so they support no claim and advance nothing. They are the material Phase 9.9 will be designed from, and any explanation Phase 9.9 pursues must be pre-registered there on its own terms.
+
+### Phase 9.8 deterministic baseline recorded, 2026-08-16
+
+The run completed in 547.85 minutes with no interruption. Macro F1 came in at 0.901891, which is 0.26 of an MDE below the three-replicate mean, so the pre-registered check returns `INSIDE_ENVELOPE` and 0.901891 becomes the comparison basis for every later candidate. `cudnn_benchmark = false` cost about 3% of wall time, moving the H1 closure range from 71-212 to 73-219 GPU hours without changing the conclusion.
+
+Top-1 accuracy landed at 0.954329, which is 1.28 times its own MDE below the replicate mean, and three per-class F1 values sit outside their own two-sigma bands. The recorded outcome does not change: the envelope was frozen on Macro F1 before the run, and adding a Top-1 gate afterwards would be choosing a criterion after seeing the result. The observation is recorded in the protocol together with the three reasons it is weaker than the ratios suggest — the design cannot separate a seed draw from a kernel effect, the standard deviations rest on three samples, and sixteen quantities were compared without multiplicity control.
+
+The owner considered and declined a follow-up to resolve the Top-1 observation, on the grounds that the present data cannot separate those two causes and doing so would need new runs. That decision is recorded rather than left as an open thread.

@@ -8,7 +8,7 @@
 | `deep3-postholdout-research-01-label-audit` | 9.5 | `COMPLETED_DEFECT_NOT_CONFIRMED` | `deep3-postholdout-research-01-baseline` | Development images only; locked test is not inspected |
 | `deep3-postholdout-research-01-loss-001` | 9.6 | `PROTOCOL_FROZEN` | `deep3-postholdout-research-01-baseline` | Development CV only; locked test and canonical holdout are model-inaccessible |
 | `deep3-postholdout-determinism-check-01` | 9.7 | `COMPLETED_A_ADOPTED` | `deep3-postholdout-determinism-check` | Development route only; locked test is never trained on |
-| `deep3-postholdout-research-01-baseline-det` | 9.8 | `REGISTERED_NOT_YET_RUN` | `deep3-postholdout-deterministic-baseline` | Development CV only; locked test and canonical holdout are model-inaccessible |
+| `deep3-postholdout-research-01-baseline-det` | 9.8 | `COMPLETED_DETERMINISTIC_BASELINE` | `deep3-postholdout-deterministic-baseline` | Development CV only; locked test and canonical holdout are model-inaccessible |
 
 Future child runs use: `deep3-postholdout-research-01-baseline`, `deep3-postholdout-research-01-loss-001`, `deep3-postholdout-research-01-aug-001`, `deep3-postholdout-research-01-sampler-001`, `deep3-postholdout-research-01-opt-001`, and `deep3-postholdout-research-01-arch-001`.
 
@@ -194,3 +194,20 @@ FRESHPOTATO_STABILITY
 ```
 
 The measurement floor is derived from the three Phase 9.6a replicates and binds regardless of determinism: fixing a seed pins one draw from the same distribution rather than narrowing it. `freshpotato` alone accounts for 90.56% of Macro F1's run-to-run variance, so the instrument's noise is the class the research was trying to improve.
+
+### Phase 9.8 recorded result
+
+```text
+DETERMINISTIC_BASELINE_MACRO_F1:
+0.901891
+DETERMINISTIC_BASELINE_TOP1:
+0.954329
+VALIDITY_CHECK_OUTCOME:
+INSIDE_ENVELOPE
+DEVIATION_FROM_REPLICATE_MEAN:
+-0.003131, which is 0.26 of the Macro F1 MDE
+RUN_DURATION_MINUTES:
+547.85
+```
+
+`0.901891` is the comparison basis for every later candidate. Top-1 landed 1.28 times its own MDE below the three-replicate mean; that is recorded in the protocol with its limits and did not change the outcome, because the envelope was frozen on Macro F1 before the run.
