@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-16
+
 ### Added
 - Recorded Phase 9.9 as a negative methodological result at zero GPU cost. A per-image McNemar test on the 347 `freshpotato` images was proposed to escape the measurement floor, then calibrated against run pairs that share an identical configuration: four of six such pairs reject the null at 0.05. The runs differ in their marginals — 252, 214, 246, and 233 errors on the same images — a swing of 38 where the test calls a net change of 18 significant. Splitting one pair of runs into 347 image-level comparisons does not create 347 independent observations; the effective sample size is the run count. `freshpotato` stability is closed as not measurable at this scale, the underlying question stays open, and the three-runs-per-arm alternative at about 55 GPU hours was declined as still underpowered.
 - Recorded a zero-GPU descriptive finding alongside it: the logit-average ensemble of the three unseeded runs classifies 100 of 347 `freshpotato` images correctly, worse than the best single run at 133 and worse than the mean of its members. The runs share 183 images they are all confidently wrong about, at mean probability 0.06 on the true class, so averaging preserves the agreement. The oracle bound — picking whichever run happened to be right, per image — reaches only 164.

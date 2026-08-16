@@ -127,3 +127,25 @@ The retained notebooks and continuation log contain historical machine-specific 
 ## Release decision
 
 The owner explicitly authorized `v0.1.0` as a prerelease engineering milestone dated `2026-08-02`, and the source-only prerelease was published with the verified evidence above. Dataset redistribution, trained-weight distribution, branch protection, canonical training, a model-performance release, and a DOI remain separate decisions.
+
+## Approved release target — v0.2.0
+
+`v0.2.0` is the second authorized public engineering milestone, a source-only prerelease dated `2026-08-16`. It supersedes nothing: `v0.1.0` stays published, protected, and immutable, and its own authorization record above is unchanged.
+
+Where `v0.1.0` released a research codebase with no model result, `v0.2.0` releases what running it produced. Canonical training completed once and was evaluated once against the fixed internal holdout. A six-phase pre-registered post-holdout programme followed, and its principal finding is about the limits of its own measurements rather than about a model improvement.
+
+### Verified since v0.1.0
+
+- Canonical three-fold training completed once; locked internal-holdout evaluation completed once at 0.955510 top-1 and 0.903737 macro F1.
+- Epoch-boundary resume, exercised in practice after an interrupted run.
+- Bit-exact training under `A_STRICT`, verified across two runs and confirmed independently with `sha256sum` over the checkpoint files.
+- A measured run-to-run noise floor of two sigma 0.012177 on development OOF Macro F1.
+- 452 repository tests passing on Windows and Ubuntu CPU CI, up from 119.
+
+### Unchanged boundaries
+
+No trained weight, checkpoint, training state, log, raw logit, raw prediction, dataset file, GitHub Actions artifact, or Release asset is published. The locked 4,298-example test has had zero model forward passes and stays frozen. No post-holdout candidate was advanced. Benchmark reproduction, full notebook execution, generic unlabeled inference, and independent-machine verification remain incomplete.
+
+### Release decision — v0.2.0
+
+The owner authorized `v0.2.0` as a source-only prerelease on `2026-08-16`, after the Phase 9 record was brought into agreement across the registry, changelog, session record, README, and model card. Dataset redistribution, trained-weight distribution, a model-performance release, and a DOI remain separate decisions and are not taken here.
