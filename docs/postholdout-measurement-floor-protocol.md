@@ -10,7 +10,9 @@ BASELINE_REESTABLISHMENT_AND_MEASUREMENT_FRAMEWORK
 PROTOCOL_STATUS:
 FROZEN
 EXECUTION_STATUS:
-IN_PROGRESS
+COMPLETED
+VALIDITY_CHECK_OUTCOME:
+INSIDE_ENVELOPE
 TRAINING_RUN_COUNT:
 1
 SEED:
@@ -264,3 +266,44 @@ NO
 The owner approved the phase scope, the MDE framework, the H1 closure basis, and the research question move on 2026-08-15, before the deterministic baseline ran. Execution of that run was granted separately on 2026-08-16, after the implementation was merged and with the validity envelope already frozen.
 
 Authorization covers exactly one run of `configs/deep3_postholdout_baseline_det.toml` and its development-only OOF evaluation. It does not authorize a second run, a candidate experiment, a change to the seed or the envelope, locked-test evaluation, or publication. Windows Update was verified paused until 2026-08-22 before launch, against an expected finish around 10:12 on 2026-08-16.
+
+## Recorded Execution — 2026-08-16
+
+The deterministic baseline ran once, from 01:23 to 10:31, taking 547.85 minutes across three folds of 182.9, 182.0, and 182.9 minutes. No error, no interruption. The development OOF evaluation followed immediately.
+
+### Result
+
+```text
+DETERMINISTIC_BASELINE_MACRO_F1:
+0.901891
+DETERMINISTIC_BASELINE_TOP1:
+0.954329
+VALIDITY_ENVELOPE:
+0.892845 to 0.917199
+VALIDITY_CHECK_OUTCOME:
+INSIDE_ENVELOPE
+DEVIATION_FROM_REPLICATE_MEAN:
+-0.003131, which is 0.26 of the Macro F1 MDE
+RUN_DURATION_MINUTES:
+547.85
+```
+
+The pre-registered check was frozen on Macro F1, and Macro F1 lands 0.26 of an MDE below the three-replicate mean — an unremarkable position inside the envelope. The frozen rule therefore returns `INSIDE_ENVELOPE`, and **0.901891 is adopted as the deterministic baseline** for every later comparison.
+
+The measured duration was 547.85 minutes against the 530.98 the last uninterrupted unseeded replicate took, so `cudnn_benchmark = false` cost about 3%. That is smaller than the Phase 9.7 record left open as possible and does not change the H1 closure arithmetic materially: at 9.13 hours per run the closure range becomes 73 to 219 GPU hours rather than 71 to 212.
+
+### An observation on a metric the check did not cover
+
+Top-1 accuracy came in at 0.954329 against a three-replicate mean of 0.956850 — **1.28 times its own MDE below the mean, and 2.56 of its own standard deviations.** Three per-class F1 values also sit outside their own two-sigma bands: `rottenbanana` at 4.58 times, `freshapples` at 1.66, and `rottencucumber` at 1.04.
+
+This does not change the recorded outcome. The envelope was frozen on Macro F1 before the run, and adding a Top-1 gate now would be choosing a criterion after seeing the result, which is the freedom this protocol exists to remove. The result stands as `INSIDE_ENVELOPE`.
+
+It is recorded because it is real and because three things make it weaker evidence than the ratios suggest:
+
+**The design cannot separate two causes.** The deterministic run differs from the replicates both by being one particular seed draw and by using deterministic kernels. A deviation is consistent with either, and nothing here distinguishes them.
+
+**The standard deviations rest on three samples.** With two degrees of freedom the estimate is wide, so a ratio computed against it carries far less information than the same ratio computed against a well-estimated spread. Top-1's estimated sigma of 0.000984 is the tightest in the set and correspondingly the least trustworthy.
+
+**Sixteen quantities were compared without multiplicity control.** Fourteen per-class F1 values plus Macro F1 and Top-1. Some falling outside two sigma is expected; four is more than expected but the quantities are not independent, since all come from one run.
+
+Taken together this is a reason to watch Top-1 in Phase 9.9 and beyond, not a finding about `A_STRICT`. If it matters enough to resolve, it needs its own pre-registered design, and that design would face the same measurement floor recorded here.
