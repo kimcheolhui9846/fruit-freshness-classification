@@ -1507,3 +1507,28 @@ Measured from prediction files already on disk, with no model run: removing the 
 The owner decided to record without revising. Promoting the uncontaminated figures would substitute a subset chosen after seeing the problem for the split frozen beforehand; re-splitting on unique images and retraining would invalidate every frozen artifact. Neither is foreclosed. Every document reporting an affected figure now carries the disclosure beside it.
 
 A difference-hash scan intended to quantify near-duplicates beyond byte equality reported 20,918 pairs, of which a sample of twelve contained roughly three genuine matches. It was rejected as dominated by false positives, no near-duplicate count is claimed, and the attempt is recorded so it is not repeated and mistaken for an answer.
+
+### Published v0.2.0 release body brought in line, 2026-08-17
+
+The duplication audit landed after `v0.2.0` was published, so the Release body on GitHub still described the canonical holdout result without the overlap beside it while every document in the repository carried the disclosure. The body was replaced with the merged `docs/releases/v0.2.0.md`.
+
+```text
+ACTION:
+release body text replaced from the merged notes file
+TAG_SHA_BEFORE:
+c77f9cd3b5a89f9c2557428376f7d9496f65ed14
+TAG_SHA_AFTER:
+c77f9cd3b5a89f9c2557428376f7d9496f65ed14
+TAG_MOVED_OR_RECREATED:
+NO
+PRERELEASE:
+unchanged, true
+RELEASE_ASSETS:
+unchanged, 0
+RULESET_CHANGED:
+NO
+```
+
+The tag itself was not touched, so the immutability this project's tag governance protects is intact: the annotated tag still points at `4cf8617` under the same object. What changed is descriptive text attached to the release, in the direction of disclosing more rather than claiming more.
+
+This is recorded because the governance requires administrative actions on published artifacts to be written down, and because a reader comparing the Release to its notes file should be able to see why they now match.
