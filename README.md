@@ -94,6 +94,8 @@ python -m scripts.evaluate `
 
 The frozen `deep3-canonical-reference-01` three-fold EMA ensemble was evaluated once on the fixed 5,372-example internal holdout. It achieved 5,133 / 5,372 top-1 correct predictions (0.955510), macro F1 of 0.903737, and balanced accuracy of 0.899969. The protocol used equal three-fold raw-logit averaging plus equal original/horizontal-flip TTA; no post-holdout tuning, alternate checkpoint evaluation, or rerun was performed.
 
+**This holdout shares images with the training pool.** The source dataset stores byte-identical copies of the same image, and the split is by row, so 1,618 of the 5,372 holdout rows (30.1%) duplicate a training row. Removing them moves Top-1 from 0.9555 to 0.9414. The figures above are unrevised and remain what was measured on that split; the size of the effect is recorded in the [dataset duplication audit](docs/dataset-duplication-audit.md).
+
 This is an internal fixed holdout result, not an external benchmark, production-validation result, or generalization claim. The complete per-class metrics and aggregated confusion matrix are in the [canonical result interpretation](docs/canonical-results.md); model scope and limitations are in the [model card](docs/model-card.md); and the documentation-only artifact boundary is in the [artifact publication decision](docs/artifact-publication-decision.md). Checkpoints, weights, raw logits, predictions, logs, and dataset contents are not published.
 
 ## Post-holdout research (Phase 9)
@@ -208,6 +210,7 @@ Every result recorded before Phase 9.7 was produced by a pipeline that set no ra
 
 - Full canonical three-fold training completed once. Its checkpoints remain local-only; no trained binary is committed or published.
 - The reported model result is one internal fixed holdout, not an external benchmark, production-validation result, or generalization claim.
+- The holdout and the post-holdout splits both contain byte-identical duplicates of training images, so recorded scores are higher than they would be on distinct images. See the [dataset duplication audit](docs/dataset-duplication-audit.md).
 - The canonical holdout was evaluated once. It was never reevaluated, no alternate checkpoint was scored against it, and no tuning was performed after seeing it.
 - Sample-level image review was performed once, in the Phase 9.5 label audit, on 497 **development** images drawn from the separate post-holdout split. No canonical-holdout image was reviewed.
 - Full notebook execution is not verified.

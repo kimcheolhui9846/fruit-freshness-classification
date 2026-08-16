@@ -1,5 +1,7 @@
 # Canonical Holdout Evaluation
 
+> **Duplication notice.** The holdout shares byte-identical images with the training pool: 1,618 of its 5,372 rows (30.1%) duplicate a training row, because the source dataset stores copies and the split is by row. On rows without such a copy, Top-1 is 0.9414 against the 0.9555 reported here. Every figure in this document is unrevised and remains what was measured on that split. The audit is in [dataset-duplication-audit.md](dataset-duplication-audit.md).
+
 ## Scope
 
 The trained `deep3-canonical-reference-01` fold ensemble was evaluated once against the fixed internal holdout. This is the first trained holdout evaluation for this run. The holdout contains 5,372 examples, the evaluation protocol was locked before any metric was read, and no post-holdout tuning occurred.

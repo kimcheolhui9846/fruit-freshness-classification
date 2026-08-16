@@ -1,5 +1,7 @@
 # Canonical Result Interpretation and Publication Decision
 
+> **Duplication notice.** The holdout shares byte-identical images with the training pool: 1,618 of its 5,372 rows (30.1%) duplicate a training row, because the source dataset stores copies and the split is by row. On rows without such a copy, Top-1 is 0.9414 against the 0.9555 reported here. Every figure in this document is unrevised and remains what was measured on that split. The audit is in [dataset-duplication-audit.md](dataset-duplication-audit.md).
+
 ## Scope
 
 This Phase 8.5 record interprets the frozen result for `deep3-canonical-reference-01` and records the approved documentation-only publication boundary. It publishes aggregate metrics, per-class metrics, and aggregated confusion-matrix documentation only. The evaluated set is the fixed 5,372-example internal holdout described in [canonical-holdout-evaluation.md](canonical-holdout-evaluation.md).

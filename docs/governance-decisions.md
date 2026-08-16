@@ -405,3 +405,17 @@ Three values do not follow from that choice and are recorded on their own terms.
 The contract test that guarded this changed shape rather than being deleted. It previously asserted the gate remained *unresolved*, which a real owner decision made false. It now asserts the recorded values and rejects the ones that would authorize distribution, so an edit toward publishing weights still fails the suite. The guard was narrowed, not dropped, and the narrowing was verified by editing the document toward publication and confirming the failure.
 
 Reversing this requires a new explicit owner approval and reopens the dataset rights and provenance question it made moot.
+
+## Dataset duplication audit, 2026-08-16
+
+A check run before proposing new training data found that the source dataset stores byte-identical copies of the same image under both its `Train` and `Test` directories, and that the loader concatenates them and splits by row. Nothing groups copies of one image, so a random row split places one copy on each side of every boundary derived from it.
+
+Of the 26,858 filtered files only 21,413 are distinct: 5,445 extra copies across 3,781 groups, 2,198 of which span the source's two top-level directories. No group spans two class directories, so no image carries contradictory labels; the redundancy is leakage, not mislabelling.
+
+The consequence was measured from prediction files already on disk, with no model run. 1,618 of the 5,372 canonical holdout rows duplicate a training row, and 1,140 of the 4,298 locked-test rows duplicate a development row. On the canonical holdout, removing the duplicated rows moves Top-1 from 0.9555 to 0.9414; on the development set it moves from 0.9543 to 0.9462, and macro F1 from 0.9019 to 0.8969. That macro F1 difference of 0.0050 is the same size as the 0.0052 effect Phase 9.6 set out to measure.
+
+The owner decided to record the finding without revising any recorded metric. Two alternatives were declined. Promoting the uncontaminated-subset figures to headline results would substitute a subset chosen after seeing the problem for the split the protocol froze beforehand, which is the after-the-fact selection this project's governance exists to prevent. Re-splitting on unique images and retraining would be the clean repair but invalidates every frozen artifact and restarts the project from the split freeze. Neither is foreclosed.
+
+Two things are unaffected and are recorded as such. `freshpotato` and `rottenpotato` contain no duplicates, so every Phase 9 finding about that class stands. The measurement floor describes how far a result moves between runs of one recipe on the same data, which duplication does not change.
+
+The audit also settled a question it was originally run to answer. The four misspelled class directories the filter removes — `freshpatato`, `rottenpatato`, `freshtamto`, `rottentamto` — looked like 1,248 unused images that might enlarge the smallest class. All 1,248 are byte-identical to kept images. The filter is deduplicating rather than discarding, and there is no unused data to recover.
