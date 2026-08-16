@@ -9,6 +9,7 @@
 | `deep3-postholdout-research-01-loss-001` | 9.6 | `PROTOCOL_FROZEN` | `deep3-postholdout-research-01-baseline` | Development CV only; locked test and canonical holdout are model-inaccessible |
 | `deep3-postholdout-determinism-check-01` | 9.7 | `COMPLETED_A_ADOPTED` | `deep3-postholdout-determinism-check` | Development route only; locked test is never trained on |
 | `deep3-postholdout-research-01-baseline-det` | 9.8 | `COMPLETED_DETERMINISTIC_BASELINE` | `deep3-postholdout-deterministic-baseline` | Development CV only; locked test and canonical holdout are model-inaccessible |
+| (no experiment) | 9.9 | `CLOSED_NOT_MEASURABLE_AT_THIS_SCALE` | n/a | No training run; recorded predictions only |
 
 Future child runs use: `deep3-postholdout-research-01-baseline`, `deep3-postholdout-research-01-loss-001`, `deep3-postholdout-research-01-aug-001`, `deep3-postholdout-research-01-sampler-001`, `deep3-postholdout-research-01-opt-001`, and `deep3-postholdout-research-01-arch-001`.
 
@@ -211,3 +212,24 @@ RUN_DURATION_MINUTES:
 ```
 
 `0.901891` is the comparison basis for every later candidate. Top-1 landed 1.28 times its own MDE below the three-replicate mean; that is recorded in the protocol with its limits and did not change the outcome, because the envelope was frozen on Macro F1 before the run.
+
+## Phase 9.9 stability measurement limit
+
+No experiment was registered and no run was executed. Designing a `freshpotato` stability test produced a negative methodological result, recorded in [postholdout-stability-measurement-limit.md](postholdout-stability-measurement-limit.md).
+
+```text
+ATTEMPTED_DESIGN:
+per-image McNemar on 347 freshpotato images, one run per arm
+NULL_PAIRS_TESTED:
+6
+NULL_PAIRS_SIGNIFICANT_AT_0.05:
+4
+OUTCOME:
+PER_IMAGE_TESTING_DOES_NOT_ESCAPE_THE_MEASUREMENT_FLOOR
+FRESHPOTATO_STABILITY_AS_A_TESTABLE_PHASE:
+CLOSED_NOT_MEASURABLE_AT_THIS_SCALE
+TRAINING_RUN_COUNT:
+0
+```
+
+Splitting one pair of runs into hundreds of image-level comparisons does not create hundreds of independent observations. What varies between runs is a property of the run and moves all 347 images together, so the effective sample size is the number of runs. A valid design needs three runs per arm, about 55 GPU hours, and would still be underpowered.

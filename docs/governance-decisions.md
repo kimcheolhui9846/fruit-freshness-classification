@@ -373,3 +373,19 @@ The run completed in 547.85 minutes with no interruption. Macro F1 came in at 0.
 Top-1 accuracy landed at 0.954329, which is 1.28 times its own MDE below the replicate mean, and three per-class F1 values sit outside their own two-sigma bands. The recorded outcome does not change: the envelope was frozen on Macro F1 before the run, and adding a Top-1 gate afterwards would be choosing a criterion after seeing the result. The observation is recorded in the protocol together with the three reasons it is weaker than the ratios suggest — the design cannot separate a seed draw from a kernel effect, the standard deviations rest on three samples, and sixteen quantities were compared without multiplicity control.
 
 The owner considered and declined a follow-up to resolve the Top-1 observation, on the grounds that the present data cannot separate those two causes and doing so would need new runs. That decision is recorded rather than left as an open thread.
+
+## Phase 9.9 — the measurement limit, recorded as a negative result, 2026-08-16
+
+Phase 9.8 registered `FRESHPOTATO_STABILITY` without designing it. Designing it produced a test that looked well powered and is not, and the demonstration is the phase's output. No training run was executed and none is proposed.
+
+The proposal was to change the unit of analysis: instead of comparing one class-level F1 against another across runs, compare two runs image by image on the same 347 images and test the asymmetry of their disagreement. McNemar's exact test on discordant pairs has a sample size in the hundreds, which appeared to make one run per arm sufficient.
+
+Calibrating that test against pairs of runs that share an identical configuration refutes it. Four of six such pairs reject the null at 0.05, against a nominal rate of 0.05. The cause is that the runs differ in their marginals: the number of `freshpotato` images each gets wrong is 252, 214, 246, and 233, a swing of 38 across four runs of the same recipe, while the test calls a net change of 18 significant. The test detects seed noise accurately; seed noise is not what it was asked about.
+
+The general statement is that splitting one pair of runs into 347 image-level comparisons does not create 347 independent observations. What varies between runs is a property of the run and moves all the images together, so the effective sample size is the number of runs. This is the third design in Phase 9 defeated by the same fact, after the aggregate-metric attempt in 9.6 and the per-class attempt in 9.8, and it is recorded as a pattern so a fourth attempt is not made by default.
+
+A zero-GPU descriptive analysis accompanies it. Averaging the logits of the three unseeded runs classifies 100 of 347 `freshpotato` images correctly, worse than the best single run at 133 and worse than the mean of its members. The runs are not making independent errors: they share 183 images they are all confidently wrong about, at mean probability 0.06 on the true class. Even picking, per image, whichever run happened to be right reaches only 164 of 347.
+
+The owner declined the valid alternative, three runs per arm at about 55 GPU hours, on the grounds that it would remain underpowered. `freshpotato` stability is closed as not measurable at this project's scale. The underlying question stays open and unanswered, and no claim is made about what causes the failure.
+
+A hypothesis examined during design is recorded untested: the training pipeline's `ColorJitter` adds a within-group brightness spread about three times the between-group signal separating the always-wrong images from the always-right ones, halving the separation by that proxy measure. Mean brightness is not what the network classifies on, so this is a lead for anyone with the budget, not evidence.
