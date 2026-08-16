@@ -136,7 +136,7 @@ Where `v0.1.0` released a research codebase with no model result, `v0.2.0` relea
 
 ### Verified since v0.1.0
 
-- Canonical three-fold training completed once; locked internal-holdout evaluation completed once at 0.955510 top-1 and 0.903737 macro F1.
+- Canonical three-fold training completed once; locked internal-holdout evaluation completed once at 0.955510 top-1 and 0.903737 macro F1. The holdout shares byte-identical images with the training pool — 1,618 of its 5,372 rows — so this figure is higher than it would be on distinct images; on rows without such a copy Top-1 is 0.9414. The figure is unrevised. See [the dataset duplication audit](dataset-duplication-audit.md).
 - Epoch-boundary resume, exercised in practice after an interrupted run.
 - Bit-exact training under `A_STRICT`, verified across two runs and confirmed independently with `sha256sum` over the checkpoint files.
 - A measured run-to-run noise floor of two sigma 0.012177 on development OOF Macro F1.

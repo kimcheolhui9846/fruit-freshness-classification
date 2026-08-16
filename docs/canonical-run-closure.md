@@ -38,7 +38,7 @@ No private filesystem path is part of this public record.
 
 ## Locked internal-holdout summary
 
-The already-completed locked evaluation recorded 5,133 correct top-1 predictions out of 5,372 examples: top-1 `0.955510`, macro F1 `0.903737`, balanced accuracy `0.899969`, top-2 `0.981199`, and top-3 `0.992740`. These frozen aggregates are not newly derived values and are not an external benchmark or production claim.
+The already-completed locked evaluation recorded 5,133 correct top-1 predictions out of 5,372 examples: top-1 `0.955510`, macro F1 `0.903737`, balanced accuracy `0.899969`, top-2 `0.981199`, and top-3 `0.992740`. These frozen aggregates are not newly derived values and are not an external benchmark or production claim. The holdout shares byte-identical images with the training pool — 1,618 of its 5,372 rows — so this figure is higher than it would be on distinct images; on rows without such a copy Top-1 is 0.9414. The figure is unrevised. See [the dataset duplication audit](dataset-duplication-audit.md).
 
 ## Publication and retention boundary
 

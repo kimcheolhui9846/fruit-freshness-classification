@@ -21,7 +21,7 @@ Can the fruit-freshness classifier improve class-balanced performance and reduce
 
 ## Historical motivation
 
-`HISTORICAL_OBSERVATION_ONLY`: canonical Top-1 was 0.955510, Macro F1 0.903737, balanced accuracy 0.899969, Top-2 0.981199, and Top-3 0.992740. Historical weak classes include `freshpotato`, `rottentomato`, and `rottencucumber`; 194 of 239 historical top-1 errors (about 81.17%) were concentrated. These observations motivate hypotheses only, never a new validation target.
+`HISTORICAL_OBSERVATION_ONLY`: canonical Top-1 was 0.955510, Macro F1 0.903737, balanced accuracy 0.899969, Top-2 0.981199, and Top-3 0.992740. Historical weak classes include `freshpotato`, `rottentomato`, and `rottencucumber`; 194 of 239 historical top-1 errors (about 81.17%) were concentrated. These observations motivate hypotheses only, never a new validation target. The holdout shares byte-identical images with the training pool — 1,618 of its 5,372 rows — so this figure is higher than it would be on distinct images; on rows without such a copy Top-1 is 0.9414. The figure is unrevised. See [the dataset duplication audit](dataset-duplication-audit.md).
 
 ## Metrics and success criteria
 

@@ -1466,3 +1466,44 @@ Retained deliberately:
 ### Outstanding
 
 A sibling directory `fruit-freshness-classification-phase-9.4` is a **separate full clone**, not a worktree, and was therefore not removed by this cleanup. It is clean, its branches `docs/phase-9.4-baseline-execution-runbook` and `main` both point at pre-rewrite SHAs, and its tip tree is present in this repository's `main` as `af9bf48`. It holds no unique work. Removing it is a filesystem decision outside this repository and is left to the owner.
+
+## Dataset Duplication Audit
+
+```text
+SCOPE:
+byte-identical duplicate images and how they cross split boundaries
+METHOD:
+SHA-256 over image file bytes
+GPU_HOURS:
+0
+MODEL_RUNS:
+0
+FILTERED_ROWS:
+26858
+UNIQUE_IMAGES:
+21413
+EXTRA_COPIES:
+5445
+CROSS_CLASS_DUPLICATE_GROUPS:
+0
+HOLDOUT_ROWS_DUPLICATING_A_TRAIN_ROW:
+1618
+LOCKED_ROWS_DUPLICATING_A_DEVELOPMENT_ROW:
+1140
+DECISION:
+RECORD_WITHOUT_REVISING
+LOCKED_TEST_MODEL_FORWARD_PASSES:
+0
+```
+
+The audit began as a search for unused training data. The class filter removes eight source directories, four of which are misspellings — `freshpatato`, `rottenpatato`, `freshtamto`, `rottentamto` — holding 1,248 images that looked like they could enlarge the smallest class by half. All 1,248 are byte-identical to images the filter keeps. The filter deduplicates rather than discards, and there is nothing to recover.
+
+The search instead found that the source stores the same file under both its `Train` and `Test` directories and that the loader concatenates them before splitting by row. Nothing groups copies of one image, so a random row split places one copy on each side of every boundary derived from it. Of 26,858 filtered files only 21,413 are distinct. No duplicate group spans two class directories, so this is leakage rather than mislabelling.
+
+Measured from prediction files already on disk, with no model run: removing the duplicated rows moves canonical holdout Top-1 from 0.9555 to 0.9414 and development Top-1 from 0.9543 to 0.9462. The development macro F1 difference is 0.0050, the same size as the 0.0052 effect Phase 9.6 set out to measure.
+
+`freshpotato` and `rottenpotato` contain no duplicates, so every Phase 9 finding about that class stands. The measurement floor was checked rather than assumed: recomputed over uncontaminated rows only, two sigma is 0.012223 against the frozen 0.012177. Duplication moves the level and leaves the spread alone.
+
+The owner decided to record without revising. Promoting the uncontaminated figures would substitute a subset chosen after seeing the problem for the split frozen beforehand; re-splitting on unique images and retraining would invalidate every frozen artifact. Neither is foreclosed. Every document reporting an affected figure now carries the disclosure beside it.
+
+A difference-hash scan intended to quantify near-duplicates beyond byte equality reported 20,918 pairs, of which a sample of twelve contained roughly three genuine matches. It was rejected as dominated by false positives, no near-duplicate count is claimed, and the attempt is recorded so it is not repeated and mistaken for an answer.
