@@ -1313,3 +1313,104 @@ Designing the measurement surfaced the cause. **The training pipeline sets no ra
 Three samples give `s` two degrees of freedom, so the estimate is imprecise. The rule was applied as written, because selecting a sample size after seeing the spread would have restored the freedom the protocol removed.
 
 Phase 9.7 is determinism before re-testing, chosen over raising the effect-size bar or adopting a multi-seed protocol costing roughly 27 hours per candidate. It introduces explicit seeding and a documented decision on `cudnn_benchmark` against `torch.use_deterministic_algorithms`, and must decide whether existing documentation overstates reproducibility. Whether loss-001 is re-run under the deterministic pipeline is a separate decision.
+
+## Phase 9.7 — Training Determinism
+
+```text
+PHASE:
+9.7 — explicit seeding and backend determinism policy
+SEED:
+20260815
+LEVEL_ATTEMPTED:
+A_STRICT
+NONDETERMINISTIC_OPERATION_ERROR:
+NONE
+BIT_EXACT:
+YES
+OUTCOME:
+A_ADOPTED
+VERIFICATION_RUNS:
+2 bounded, 8.6 minutes each
+LOCKED_TEST_MODEL_FORWARD_PASSES:
+0
+ARTIFACT_PUBLICATION:
+LOCAL_ONLY
+```
+
+The pipeline set no random seed anywhere. Phase 9.7 added `src/utils/determinism.py`, optional `[runtime].seed` and `[runtime].determinism_level` keys, and wiring into training and both evaluation entry points. The keys are optional so every configuration frozen earlier keeps its recorded SHA-256 and its original meaning; making them required would have changed hashes recorded in two frozen protocol documents.
+
+A six-branch adoption ladder was frozen before either verification run executed, covering every combination of level, completion, and bit-exactness, including a branch for a resource failure that must not be read as evidence about determinism. Two bounded runs on the frozen development route produced identical digests over model weights, EMA weights, and fold histories. `sha256sum` over the four checkpoint files each run wrote confirmed the match without using the project's own comparison script.
+
+The design flagged `nn.MultiheadAttention`'s scaled-dot-product-attention backward and depthwise convolution backward as the operations most likely to raise under `torch.use_deterministic_algorithms(True)`, and registered a descent to `B_CUDNN` for that case. Neither raised. Because strict mode raises rather than degrading silently, completing the run *is* the evidence that no nondeterministic operation is reachable in this training path, and that guarantee does not depend on epoch count.
+
+Two decisions are recorded because both would otherwise be lost. The `DataLoader` generator proposed by the Phase 9.6a follow-up is **rejected**: at `num_workers = 0` the sampler draws from the global torch generator, which `training_state.pt` already persists, so a separate generator would sit outside that state and break the epoch-boundary resume determinism that currently works. And determinism removes measurement noise but not seed-to-seed variation — fixing a seed pins one draw from the same distribution rather than narrowing it.
+
+The top-level reproducibility documentation was corrected. The run-level documents were already accurate; the failure was placement, in the README opening, the README status table, and the `reproducibility.md` limitations list.
+
+## Phase 9.8 — Measurement Floor and the Deterministic Baseline
+
+```text
+PHASE:
+9.8 — measurement floor, deterministic baseline, H1 closure
+MDE_MACRO_F1:
+0.012177
+MDE_TOP1:
+0.001969
+MDE_FRESHPOTATO_F1:
+0.147833
+FRESHPOTATO_VARIANCE_SHARE:
+90.56 percent of Macro F1 run-to-run variance
+DETERMINISTIC_BASELINE_MACRO_F1:
+0.901891
+VALIDITY_ENVELOPE:
+0.892845 to 0.917199
+VALIDITY_CHECK_OUTCOME:
+INSIDE_ENVELOPE
+H1_STATUS:
+CLOSED_BELOW_RESOLUTION
+RUN_DURATION_MINUTES:
+547.85
+LOCKED_TEST_MODEL_FORWARD_PASSES:
+0
+```
+
+The recorded 0.901167 came from the unseeded pipeline and is not a valid comparison basis for a deterministic run, so the baseline was re-established under `A_STRICT`. A validity envelope of the three-replicate mean plus and minus two sigma was frozen before the run. Macro F1 came in at 0.901891, 0.26 of an MDE below the mean, so the frozen rule returns `INSIDE_ENVELOPE` and that value becomes the comparison basis for every later candidate.
+
+Decomposing the Macro F1 variance produced the finding that reorganized the phase. **`freshpotato` alone accounts for 90.56% of it**, against 5.43% for `rottenpotato` and 4.01% for the remaining twelve classes. The instrument's noise was the class the research was trying to improve, which is why the Phase 9.6 margin of 0.010 — below the 0.012177 floor measured afterwards — could not have separated signal from noise.
+
+H1 is closed as `CLOSED_BELOW_RESOLUTION`, needing 71 to 212 GPU hours to resolve the observed effect under a conservative zero-correlation bound. That is neither "exhausted", which the evidence does not support, nor "keep trying", which the arithmetic prices out of reach. The loss-001 verdict is unchanged and is not re-scored.
+
+Top-1 landed 1.28 times its own MDE below the replicate mean, and three per-class F1 values sit outside their own two-sigma bands. The outcome does not change, because the envelope was frozen on Macro F1 and adding a gate afterwards would be choosing a criterion after seeing the result. The observation is recorded with three limits: the design cannot separate a seed draw from a kernel effect, the sigmas rest on three samples, and sixteen quantities were compared without multiplicity control.
+
+A zero-GPU diagnostic over the three recorded prediction files found that of 347 development `freshpotato` images, 183 are misclassified in every run, 102 flip, and 62 are correct in every run. Both explanations the protocol anticipated are present, not one.
+
+## Phase 9.9 — The Measurement Limit
+
+```text
+PHASE:
+9.9 — freshpotato stability, closed as not measurable
+TRAINING_RUN_COUNT:
+0
+GPU_HOURS:
+0
+ATTEMPTED_DESIGN:
+per-image McNemar on 347 images, one run per arm
+NULL_PAIRS_TESTED:
+6
+NULL_PAIRS_SIGNIFICANT_AT_0.05:
+4
+OUTCOME:
+PER_IMAGE_TESTING_DOES_NOT_ESCAPE_THE_MEASUREMENT_FLOOR
+LOCKED_TEST_MODEL_FORWARD_PASSES:
+0
+```
+
+Phase 9.8 registered `FRESHPOTATO_STABILITY` and designed it nowhere. Designing it produced a test that looked well powered and is not, and the demonstration is the phase's entire output.
+
+The proposal was to move the unit of analysis from the class-level F1 to the individual image, giving McNemar's exact test a sample size in the hundreds. Calibrating it against pairs of runs that share an identical configuration refutes it: **four of six such pairs reject the null at 0.05.** The runs differ in their marginals — 252, 214, 246, and 233 errors on the same 347 images — a swing of 38 where the test calls a net change of 18 significant. The test detects seed noise faithfully; seed noise is not what it was asked about.
+
+Splitting one pair of runs into 347 image-level comparisons does not create 347 independent observations. What varies between runs is a property of the run and moves all the images together, so **the effective sample size is the number of runs, not the number of images.** This is the third design defeated by that same fact, after the aggregate metric in 9.6 and the per-class metric in 9.8, and it is named as a pattern so a fourth finer-grained attempt is not made by default.
+
+A descriptive analysis accompanies it. The logit-average ensemble of the three unseeded runs classifies 100 of 347 correctly, worse than the best single run at 133 and worse than the mean of its members: the runs are not making independent errors but share 183 images they are all confidently wrong about, at mean probability 0.06 on the true class. Even the oracle bound reaches only 164.
+
+The valid alternative — three runs per arm, about 55 GPU hours — was declined as still underpowered. `freshpotato` stability is closed as not measurable at this project's scale. The underlying question stays open and unanswered, and no claim is made about what causes the failure. A `ColorJitter` hypothesis examined during design is recorded explicitly as untested.
