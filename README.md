@@ -96,6 +96,31 @@ The frozen `deep3-canonical-reference-01` three-fold EMA ensemble was evaluated 
 
 This is an internal fixed holdout result, not an external benchmark, production-validation result, or generalization claim. The complete per-class metrics and aggregated confusion matrix are in the [canonical result interpretation](docs/canonical-results.md); model scope and limitations are in the [model card](docs/model-card.md); and the documentation-only artifact boundary is in the [artifact publication decision](docs/artifact-publication-decision.md). Checkpoints, weights, raw logits, predictions, logs, and dataset contents are not published.
 
+## Post-holdout research (Phase 9)
+
+A separate research programme ran after the canonical result was closed. It never touched the canonical holdout. The 21,486-example historical training pool was split once into 17,188 development and 4,298 locked-test examples, and the locked test has had **zero model forward passes** since.
+
+Every phase froze its protocol and its numeric decision rule before execution, which is why several of them were able to refute the hypothesis that motivated them.
+
+| Phase | Question | Outcome |
+|---|---|---|
+| 9.5 | Are the `freshpotato` labels wrong? | `DEFECT_NOT_CONFIRMED` — a blind 497-image audit found the labels sound. The model is wrong, not the data. |
+| 9.6 | Does stronger class-balanced reweighting help? | `NOT_ADVANCED` at Macro F1 0.9102 against a pre-registered 0.9112. |
+| 9.6a | Is that difference bigger than noise? | `INCONCLUSIVE`. Three identical runs gave 0.9012, 0.9120, 0.9019, so 2σ = 0.0122 against an effect of 0.0090. |
+| 9.7 | Can the pipeline be made deterministic? | `A_ADOPTED`. It set no random seed at all; with seeding and strict determinism two runs are now bit-exact. |
+| 9.8 | What can this project actually measure? | Minimum detectable effect frozen at 0.0122 Macro F1. H1 closed as `CLOSED_BELOW_RESOLUTION`. |
+| 9.9 | Can per-image testing get around that? | No. The test fires on four of six run pairs that share an identical configuration. |
+
+Three findings are worth stating on their own.
+
+**The noise floor was larger than the acceptance margin.** Phase 9.6 accepted at baseline plus 0.010 while run-to-run 2σ, measured afterwards, was 0.0122. A criterion narrower than the noise cannot separate signal from noise, and the rerun of the *unchanged* baseline scored higher than the intervention did.
+
+**One class produces 90.56% of the metric's instability, and it is the class the research was trying to fix.** `freshpotato` has a run-to-run standard deviation of 0.0739 against 0.0181 for the next-noisiest class. The instrument's noise was the object of study.
+
+**Determinism removes measurement noise but not seed-to-seed variation.** Fixing a seed pins one draw from the same distribution rather than narrowing it, so bit-exactness did not lower the measurement floor.
+
+Full protocols, decision rules, and outcomes are in [the post-holdout research plan](docs/post-holdout-research-plan.md), [the experiment registry](docs/experiment-registry.md), and [governance decisions](docs/governance-decisions.md). No Phase 9 weights, checkpoints, or predictions are published.
+
 ## Canonical run closure
 
 - Canonical reference run: Closed
@@ -183,7 +208,8 @@ Every result recorded before Phase 9.7 was produced by a pipeline that set no ra
 
 - Full canonical three-fold training completed once. Its checkpoints remain local-only; no trained binary is committed or published.
 - The reported model result is one internal fixed holdout, not an external benchmark, production-validation result, or generalization claim.
-- No post-holdout tuning, holdout reevaluation, alternate-checkpoint evaluation, or sample-level image review was performed.
+- The canonical holdout was evaluated once. It was never reevaluated, no alternate checkpoint was scored against it, and no tuning was performed after seeing it.
+- Sample-level image review was performed once, in the Phase 9.5 label audit, on 497 **development** images drawn from the separate post-holdout split. No canonical-holdout image was reviewed.
 - Full notebook execution is not verified.
 - Generic unlabeled image inference is not implemented.
 - A same-machine clean environment is verified; independent-machine reproduction is not.

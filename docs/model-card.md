@@ -55,7 +55,9 @@ The complete frozen protocol, per-class metrics, and aggregated confusion matrix
 
 - This is one internal fixed holdout evaluation, not an external benchmark, production-validation, or generalization claim.
 - `freshpotato` has materially lower recall and F1 than the strongest classes; aggregate accuracy alone is insufficient for class-specific decisions.
-- No alternate checkpoint evaluation, sample-level review, post-holdout tuning, or independent-machine reproduction was performed.
+- **`freshpotato` is not merely weak but unstable.** Later Phase 9 work retrained this recipe several times on a separate development split carved from the historical training pool. Across runs of an identical configuration, that class's F1 averaged 0.428 with a standard deviation of 0.074, against 0.018 for the next-noisiest class — a two-sigma band of 0.148 wide. Of its 347 development examples, 183 were misclassified in **every** run and only 62 were correct in every run, with the errors going predominantly to `rottenpotato`. Those figures come from the development split and not from the canonical holdout this card reports, so they do not restate the holdout numbers above; they describe the recipe that produced this model. Any use that depends on `freshpotato` should treat a single run's score for that class as unreliable. See [the measurement floor protocol](postholdout-measurement-floor-protocol.md).
+- The labels were audited and are not the cause. A blind Phase 9.5 review of 497 development images returned `DEFECT_NOT_CONFIRMED`: the subject error rate came out lower than the control rate. The class is hard for the model, not mislabelled.
+- No alternate checkpoint evaluation, post-holdout tuning, or independent-machine reproduction was performed. Sample-level image review was performed once, in the Phase 9.5 label audit, on development images only; no canonical-holdout image was reviewed.
 - Dataset and label limitations may affect performance, coverage, and bias; no fairness or safety assessment is claimed.
 - The derived batch-64 configuration is a different trajectory from the original batch-192 configuration.
 

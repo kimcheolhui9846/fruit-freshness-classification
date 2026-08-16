@@ -6,7 +6,7 @@
 | `deep3-postholdout-research-01` | 9.2 | `PROTOCOL_FROZEN` | `deep3-canonical-reference-01` | Historical canonical holdout excluded; new locked test is frozen and unobserved by a model |
 | `deep3-postholdout-research-01-baseline` | 9.3 | `COMPLETED_DEVELOPMENT_BASELINE` | `deep3-postholdout-research-01` | Development CV only; locked test and canonical holdout are model-inaccessible |
 | `deep3-postholdout-research-01-label-audit` | 9.5 | `COMPLETED_DEFECT_NOT_CONFIRMED` | `deep3-postholdout-research-01-baseline` | Development images only; locked test is not inspected |
-| `deep3-postholdout-research-01-loss-001` | 9.6 | `PROTOCOL_FROZEN` | `deep3-postholdout-research-01-baseline` | Development CV only; locked test and canonical holdout are model-inaccessible |
+| `deep3-postholdout-research-01-loss-001` | 9.6 | `COMPLETED_NOT_ADVANCED` | `deep3-postholdout-research-01-baseline` | Development CV only; locked test and canonical holdout are model-inaccessible |
 | `deep3-postholdout-determinism-check-01` | 9.7 | `COMPLETED_A_ADOPTED` | `deep3-postholdout-determinism-check` | Development route only; locked test is never trained on |
 | `deep3-postholdout-research-01-baseline-det` | 9.8 | `COMPLETED_DETERMINISTIC_BASELINE` | `deep3-postholdout-deterministic-baseline` | Development CV only; locked test and canonical holdout are model-inaccessible |
 | (no experiment) | 9.9 | `CLOSED_NOT_MEASURABLE_AT_THIS_SCALE` | n/a | No training run; recorded predictions only |
@@ -108,7 +108,7 @@ H1
 PROTOCOL_STATUS:
 FROZEN
 EXECUTION_STATUS:
-NOT_YET_RUN
+COMPLETED
 CHANGED_PARAMETER:
 loss.class_balanced_beta 0.999 -> 0.9999
 ADVANCE_THRESHOLD:
