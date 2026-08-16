@@ -138,7 +138,16 @@ Extra copies by class:
 
 **`freshpotato` and `rottenpotato` contain no duplicates at all**, nor do the capsicum or orange classes. Every Phase 9 finding about `freshpotato` therefore stands unchanged: the label audit, the per-class variance decomposition, the stability grouping, and the coverage observation are all computed on a class with no redundancy.
 
-The measurement floor is also unaffected. It describes how far a result moves between runs of the same recipe on the same data, which duplication does not change.
+The measurement floor is also unaffected, and this was measured rather than argued. Recomputing the three unseeded replicates over only the 13,876 development rows with no copy in another fold:
+
+| Basis | Mean | Sample stdev | Two sigma |
+|---|---:|---:|---:|
+| Macro F1, all rows — the frozen basis | 0.905022 | 0.006089 | 0.012177 |
+| Macro F1, uncontaminated rows | 0.899394 | 0.006111 | 0.012223 |
+| Top-1, all rows | 0.956850 | 0.000984 | 0.001969 |
+| Top-1, uncontaminated rows | 0.948664 | 0.001020 | 0.002040 |
+
+Duplication moves the **level** down by 0.0056 and leaves the **spread** where it was: the two-sigma figures differ by 0.000046, under half a percent. The frozen `MDE_MACRO_F1` of 0.012177 therefore describes uncontaminated data as well as it describes the recorded data, and nothing in the measurement floor protocol needs revisiting.
 
 What is affected is the level of the headline numbers: the canonical holdout result and the development baselines are higher than they would be on distinct images.
 
@@ -154,6 +163,12 @@ What is affected is the level of the headline numbers: the canonical holdout res
 ```
 
 The script hashes file bytes rather than decoded pixels, so every match it reports is exact. Two files that decode to the same picture through different encodings would not be counted, which makes these figures a lower bound on the true redundancy.
+
+### A perceptual scan was attempted and rejected
+
+To turn that lower bound into a number, a difference-hash scan was run over the byte-unique images. At a Hamming distance of 3 or less it reported 20,918 pairs. Inspecting a random sample of twelve found roughly three genuine near-duplicates; the rest were different photographs of similar produce on similar backgrounds — the hash was matching subject and layout, not identity.
+
+That figure is therefore **not reported**, and no near-duplicate count is claimed here. Answering the question properly would need a method with a verification step rather than a threshold alone. This attempt is recorded so the same naive scan is not run again and mistaken for an answer.
 
 ## What was decided
 

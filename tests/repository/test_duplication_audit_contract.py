@@ -59,6 +59,27 @@ class DuplicationAuditContractTest(unittest.TestCase):
         # are a floor and the document must say so.
         self.assertIn("a lower bound on the true redundancy", document)
 
+    def test_measurement_floor_claim_is_measured_not_argued(self):
+        document = AUDIT.read_text(encoding="utf-8")
+
+        # The claim that duplication does not move the floor was originally
+        # an argument. It is now a computation, and the numbers must stay.
+        self.assertIn("measured rather than argued", document)
+        self.assertIn("| Macro F1, uncontaminated rows | 0.899394 | 0.006111 | 0.012223 |", document)
+        self.assertIn(
+            "moves the **level** down by 0.0056 and leaves the **spread** where it was",
+            document,
+        )
+
+    def test_the_rejected_perceptual_scan_stays_rejected(self):
+        document = AUDIT.read_text(encoding="utf-8")
+
+        # A discarded method that loses its "rejected" framing becomes a
+        # finding. 20,918 is a false-positive count, not a redundancy count.
+        self.assertIn("A perceptual scan was attempted and rejected", document)
+        self.assertIn("That figure is therefore **not reported**", document)
+        self.assertIn("the hash was matching subject and layout, not identity", document)
+
     def test_audit_records_that_the_class_filter_is_correct(self):
         document = AUDIT.read_text(encoding="utf-8")
 
