@@ -3,6 +3,7 @@
 ## Snapshot Information
 
 - Audit date: 2026-08-03.
+- **Later state:** this is a dated snapshot, not a live inventory. The Phase 9.10 cleanup on 2026-08-16 removed five worktrees and deleted 46 local and 45 remote branches after proving each merged, leaving `main`, two `backup/*`, and two `release/*` branches. The branches listed below existed on the audit date and mostly do not now. See `SESSION_HANDOFF.md`.
 - Starting `main` SHA: `d205f2995b6b44345fba1efffa2bb9a6db44fb10`.
 - Repository: `kimcheolhui9846/fruit-freshness-classification`.
 - Default branch: `main`.

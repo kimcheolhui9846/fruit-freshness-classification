@@ -179,7 +179,9 @@ The locked test is not inspected. Its 86 `freshpotato` images carry the same sus
 
 PR #5 was integrated into `main` with GitHub "Rebase and merge" rather than the fast-forward-only integration this project prefers. The rebase rewrote commit identifiers: PR head `48a61eb63d57604351088ea72bbe69d22fe50a39` became merge commit `15eb552e7ae1f698e99c5d3bac3e9516180f7053`.
 
-Verified consequences: the resulting tree hash `4275acce956419989dfcb6a3bb1158538eafe9d1` is byte-identical to the PR head tree, linear history is preserved, the `Protect main` ruleset accepted the integration, final-main CI passed on both required jobs with zero Actions artifacts, and the source branch `experiment/phase-9.3-development-baseline` is retained at its original SHA. No content was lost or altered.
+Verified consequences: the resulting tree hash `4275acce956419989dfcb6a3bb1158538eafe9d1` is byte-identical to the PR head tree, linear history is preserved, the `Protect main` ruleset accepted the integration, final-main CI passed on both required jobs with zero Actions artifacts, and the source branch `experiment/phase-9.3-development-baseline` was retained at its original SHA. No content was lost or altered.
+
+That branch was deleted in the Phase 9.10 cleanup on 2026-08-16, after its tip tree was verified present in `main`. The verification above stands as recorded; only the retention it describes has since ended.
 
 This deviation is recorded rather than reverted, because reverting would require a force push to protected `main` and a ruleset bypass, which carries more risk than the deviation itself. Future phases use fast-forward-only integration.
 ### Phase 9.5 outcome — hypothesis refuted, pre-registered order restored
