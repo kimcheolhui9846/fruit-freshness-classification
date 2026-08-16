@@ -84,49 +84,44 @@ All binary artifacts remain local-only through Phase 8.6. This record does not a
 
 ## Phase 8.6 Owner Gate
 
-The following fields are intentionally unresolved. They require a new explicit owner approval before Phase 8.6 may begin.
+These fields were left intentionally unresolved when this document was written. The owner resolved them on 2026-08-16, after Phase 9 closed and `v0.2.0` was published. The values below are the decision; the unfilled form is preserved in git history.
+
+The governing choice is that trained weights are not published at all. The earlier stance deferred the question behind a rights and provenance review; the owner instead judged the weights an asset that should not be distributed, which closes the question rather than completing that review.
 
 APPROVED_NEXT_ACTION:
-<PUBLISH_DOCUMENTATION_ONLY |
- KEEP_ALL_BINARY_ARTIFACTS_LOCAL_ONLY |
- PREPARE_SAFE_MODEL_PACKAGE_AFTER_CLEARANCE |
- REQUEST_DATASET_RIGHTS_CLARIFICATION |
- DEFER>
+KEEP_ALL_BINARY_ARTIFACTS_LOCAL_ONLY
 
 APPROVED_MODEL_WEIGHT_PUBLICATION:
-<YES_AFTER_CLEARANCE | NO | DEFER>
+NO
 
 APPROVED_CHECKPOINT_SET:
-<FOLD_BEST_ENSEMBLE | NONE | DEFER>
+NONE
 
 APPROVED_ARTIFACT_FORMAT:
-<PYTORCH_STATE_DICT |
- SAFETENSORS_AFTER_VERIFIED_CONVERSION |
- NONE |
- DEFER>
+NONE
 
 APPROVED_HOSTING_DESTINATION:
-<GITHUB_RELEASE |
- HUGGING_FACE_MODEL_REPOSITORY |
- OWNER_CONTROLLED_PRIVATE_STORAGE |
- NONE |
- DEFER>
+NONE
 
 APPROVED_DATASET_LICENSE_CLEARANCE:
-<CONFIRMED | NOT_CONFIRMED | DEFER>
+DEFER
 
 APPROVED_MODEL_CARD_PUBLICATION:
-<YES | NO | DEFER>
+YES
 
 APPROVED_BINARY_RETENTION:
-<KEEP_LOCAL_ONLY |
- CREATE_OWNER_CONTROLLED_BACKUP |
- DEFER>
+KEEP_LOCAL_ONLY
 
 APPROVED_RELEASE_CREATION:
-<YES | NO | DEFER>
+YES
 
 APPROVED_TAG_CREATION:
-<YES | NO | DEFER>
+YES
 
-Do not resolve these fields or begin Phase 8.6 without a new owner approval.
+Notes on the values that do not follow directly from the weight decision:
+
+- `APPROVED_DATASET_LICENSE_CLEARANCE` stays `DEFER`. The owner did not resolve the dataset rights question and did not need to: with nothing distributed, the clearance is moot rather than settled. It would have to be answered before any future reversal, and recording it as confirmed would be a claim nobody has verified.
+- `APPROVED_MODEL_CARD_PUBLICATION` is `YES` because it records an accomplished fact. `model-card.md` is documentation in this public repository and already published.
+- `APPROVED_RELEASE_CREATION` and `APPROVED_TAG_CREATION` are `YES` for the same reason. `v0.1.0` and `v0.2.0` are both published, both source-only, both with zero assets, so neither release contradicts the weight decision.
+
+Reversing `APPROVED_MODEL_WEIGHT_PUBLICATION` requires a new explicit owner approval and would reopen the dataset rights and provenance question this decision made moot.

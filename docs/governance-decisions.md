@@ -391,3 +391,17 @@ A zero-GPU descriptive analysis accompanies it. Averaging the logits of the thre
 The owner declined the valid alternative, three runs per arm at about 55 GPU hours, on the grounds that it would remain underpowered. `freshpotato` stability is closed as not measurable at this project's scale. The underlying question stays open and unanswered, and no claim is made about what causes the failure.
 
 A hypothesis examined during design is recorded untested: the training pipeline's `ColorJitter` adds a within-group brightness spread about three times the between-group signal separating the always-wrong images from the always-right ones, halving the separation by that proxy measure. Mean brightness is not what the network classifies on, so this is a lead for anyone with the budget, not evidence.
+
+## Trained-weight publication closed, 2026-08-16
+
+The Phase 8.5 artifact publication record left a block of owner-gate fields unresolved, as an explicit form to be filled when the owner decided. It was never filled: `APPROVED_MODEL_WEIGHT_PUBLICATION` and eight neighbouring fields still held angle-bracket placeholders, and the prose said trained-weight publication was blocked *until a separate rights and provenance review is completed*. That framing treated the question as deferred rather than answered.
+
+The owner resolved it on 2026-08-16, after Phase 9 closed and `v0.2.0` was published: **trained weights are not published.** The reason recorded is the owner's, that the weights are an asset that should not be distributed. That closes the question rather than completing the deferred review.
+
+The resolved values are `APPROVED_MODEL_WEIGHT_PUBLICATION: NO`, `APPROVED_CHECKPOINT_SET: NONE`, `APPROVED_ARTIFACT_FORMAT: NONE`, `APPROVED_HOSTING_DESTINATION: NONE`, `APPROVED_NEXT_ACTION: KEEP_ALL_BINARY_ARTIFACTS_LOCAL_ONLY`, and `APPROVED_BINARY_RETENTION: KEEP_LOCAL_ONLY`.
+
+Three values do not follow from that choice and are recorded on their own terms. `APPROVED_DATASET_LICENSE_CLEARANCE` stays `DEFER`: the owner did not resolve the dataset rights question and did not need to, because with nothing distributed the clearance is moot rather than settled, and marking it confirmed would assert something nobody verified. `APPROVED_MODEL_CARD_PUBLICATION`, `APPROVED_RELEASE_CREATION`, and `APPROVED_TAG_CREATION` are `YES` because they record accomplished facts — the model card is documentation already in this public repository, and both published releases are source-only with zero assets, so neither contradicts the weight decision.
+
+The contract test that guarded this changed shape rather than being deleted. It previously asserted the gate remained *unresolved*, which a real owner decision made false. It now asserts the recorded values and rejects the ones that would authorize distribution, so an edit toward publishing weights still fails the suite. The guard was narrowed, not dropped, and the narrowing was verified by editing the document toward publication and confirming the failure.
+
+Reversing this requires a new explicit owner approval and reopens the dataset rights and provenance question it made moot.

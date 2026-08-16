@@ -84,7 +84,7 @@ class CanonicalResultsPublicationContractTest(unittest.TestCase):
         self.assertIn("No state-of-the-art claim is made.", self.results)
         self.assertIn("No post-holdout tuning occurred.", self.results)
 
-    def test_publication_governance_blocks_binary_publication_and_leaves_phase_8_6_owner_gates_unresolved(self) -> None:
+    def test_publication_governance_blocks_binary_publication(self) -> None:
         self.assertTrue(self.publication_decision_path.is_file())
         for value in (
             "CURRENT_PUBLICATION_ACTION:\nPUBLISH_DOCUMENTATION_ONLY",
@@ -95,20 +95,46 @@ class CanonicalResultsPublicationContractTest(unittest.TestCase):
             "BINARY_PUBLICATION_GATE:\nBLOCKED",
             "PRIMARY_RECOMMENDATION:\nPUBLISH_DOCUMENTATION_ONLY",
             "SECONDARY_RECOMMENDATION:\nKEEP_ALL_BINARY_ARTIFACTS_LOCAL_ONLY",
-            "APPROVED_NEXT_ACTION:",
-            "<PUBLISH_DOCUMENTATION_ONLY |",
-            "APPROVED_MODEL_WEIGHT_PUBLICATION:",
-            "APPROVED_CHECKPOINT_SET:",
-            "APPROVED_ARTIFACT_FORMAT:",
-            "APPROVED_HOSTING_DESTINATION:",
-            "APPROVED_DATASET_LICENSE_CLEARANCE:",
-            "APPROVED_MODEL_CARD_PUBLICATION:",
-            "APPROVED_BINARY_RETENTION:",
-            "APPROVED_RELEASE_CREATION:",
-            "APPROVED_TAG_CREATION:",
             "Normal CI does not require local artifacts, CUDA, or production dataset access.",
         ):
             self.assertIn(value, self.publication_decision)
+
+    def test_phase_8_6_owner_gates_are_resolved_against_publication(self) -> None:
+        """The owner gate was open until 2026-08-16, and this test guarded that.
+
+        It now guards the decision instead. The gate existed so nobody could
+        publish weights without an explicit owner choice; the owner made that
+        choice and it was NO. Narrowing the guard to the recorded values keeps
+        the same thing protected -- a later edit toward publication still fails
+        the suite -- without asserting an openness a real decision has closed.
+        """
+        for value in (
+            "APPROVED_NEXT_ACTION:\nKEEP_ALL_BINARY_ARTIFACTS_LOCAL_ONLY",
+            "APPROVED_MODEL_WEIGHT_PUBLICATION:\nNO",
+            "APPROVED_CHECKPOINT_SET:\nNONE",
+            "APPROVED_ARTIFACT_FORMAT:\nNONE",
+            "APPROVED_HOSTING_DESTINATION:\nNONE",
+            "APPROVED_BINARY_RETENTION:\nKEEP_LOCAL_ONLY",
+            "APPROVED_DATASET_LICENSE_CLEARANCE:\nDEFER",
+        ):
+            self.assertIn(value, self.publication_decision)
+
+        # The values that would authorize distribution must not appear.
+        for forbidden in (
+            "APPROVED_MODEL_WEIGHT_PUBLICATION:\nYES_AFTER_CLEARANCE",
+            "APPROVED_CHECKPOINT_SET:\nFOLD_BEST_ENSEMBLE",
+            "APPROVED_HOSTING_DESTINATION:\nGITHUB_RELEASE",
+            "APPROVED_HOSTING_DESTINATION:\nHUGGING_FACE_MODEL_REPOSITORY",
+            "APPROVED_DATASET_LICENSE_CLEARANCE:\nCONFIRMED",
+        ):
+            self.assertNotIn(forbidden, self.publication_decision)
+
+        # Clearance stays deferred rather than confirmed: with nothing
+        # distributed it is moot, and recording it confirmed would assert
+        # something nobody verified.
+        self.assertIn(
+            "the clearance is moot rather than settled", self.publication_decision
+        )
 
     def test_model_card_excludes_food_safety_and_autonomous_operational_use(self) -> None:
         for value in (
