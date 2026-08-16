@@ -1414,3 +1414,55 @@ Splitting one pair of runs into 347 image-level comparisons does not create 347 
 A descriptive analysis accompanies it. The logit-average ensemble of the three unseeded runs classifies 100 of 347 correctly, worse than the best single run at 133 and worse than the mean of its members: the runs are not making independent errors but share 183 images they are all confidently wrong about, at mean probability 0.06 on the true class. Even the oracle bound reaches only 164.
 
 The valid alternative — three runs per arm, about 55 GPU hours — was declined as still underpowered. `freshpotato` stability is closed as not measurable at this project's scale. The underlying question stays open and unanswered, and no claim is made about what causes the failure. A `ColorJitter` hypothesis examined during design is recorded explicitly as untested.
+
+## Phase 9.10 — v0.2.0 Release, Worktree and Branch Cleanup
+
+```text
+PHASE:
+9.10 — second published release and repository cleanup
+RELEASE_TAG:
+v0.2.0
+RELEASE_TYPE:
+PRERELEASE
+RELEASE_ASSETS:
+0
+TAGGED_COMMIT:
+4cf8617
+TAG_RULESET_ID:
+20906060
+WORKTREES_REMOVED:
+5
+LOCAL_BRANCHES_DELETED:
+46
+REMOTE_BRANCHES_DELETED:
+45
+LOCKED_TEST_MODEL_FORWARD_PASSES:
+0
+```
+
+### Release
+
+The eight-step workflow in `tag-governance.md` was followed in order: prepared on `release/phase-9.10-v0.2.0`, branch CI passed on Windows and Ubuntu, fast-forwarded into protected `main`, `main` CI passed on `4cf8617`, the annotated tag was created and read back, the Release was published and verified as a prerelease with zero assets, and the exact `Protect v0.2.0` ruleset was added only afterwards.
+
+`v0.1.0` was not touched. Its authorization record, changelog section, release checklist, and tag ruleset are unchanged, and the readiness document appends a v0.2.0 section rather than overwriting the earlier one, so every existing v0.1.0 contract assertion still passes.
+
+### Worktree removal
+
+Five linked worktrees remained in sibling directories from earlier phases: `phase-8.5`, `phase-8.6`, `phase-9.1`, `phase-9.2`, and `phase-9.3`. Each was verified to have zero uncommitted entries, and each checked-out branch tip was verified to have its tree present in `main` under a rewritten SHA before removal. All five were removed with `git worktree remove`; one worktree remains, the repository itself on `main`.
+
+Their existence mattered for the branch audit: the retention policy requires a `SAFE_DELETE_CANDIDATE` not be checked out, so those five branches could not have been deleted while the worktrees existed.
+
+### Branch deletion
+
+Forty-six local and forty-five remote branches were deleted. Every one was verified merged into `main`.
+
+Nine local branches appeared to carry unique commits. Investigation, rather than deletion first, established that all were pre-rewrite pointers: the 2026-08-15 history rewrite gave every commit a new SHA and only the remotes were updated, so the local refs still named the old SHAs. Each was confirmed by tree hash — local and remote tips share an identical tree, and the content is reachable from `main` under the rewritten SHA. The pre-rewrite history itself remains in `backup/pre-rewrite-20260815`.
+
+Retained deliberately:
+
+- `backup/before-fruit-freshness-switch-20260729` and `backup/pre-rewrite-20260815`, which hold unique commits and are the preservation record the correspondence table in `governance-decisions.md` refers to. Neither has a remote, by design.
+- `release/phase-6.5-v0.1.0` and `release/phase-9.10-v0.2.0`, classified `RETAIN_RELEASE_AUDIT` by the retention policy.
+
+### Outstanding
+
+A sibling directory `fruit-freshness-classification-phase-9.4` is a **separate full clone**, not a worktree, and was therefore not removed by this cleanup. It is clean, its branches `docs/phase-9.4-baseline-execution-runbook` and `main` both point at pre-rewrite SHAs, and its tip tree is present in this repository's `main` as `af9bf48`. It holds no unique work. Removing it is a filesystem decision outside this repository and is left to the owner.

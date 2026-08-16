@@ -63,3 +63,32 @@ The exact live ruleset identifier, API readback, tag/ref integrity evidence, and
 - **Release evidence:** The associated GitHub Release remains the published source-only prerelease engineering milestone, is not a draft, and has zero uploaded assets.
 - **Boundary verification:** `Protect main` remains the separate active branch ruleset with its Phase 7.1 rule set unchanged. No classic branch protection, broad tag rule, future-tag rule, tag movement, tag deletion, force update, destructive enforcement test, or Release mutation was performed.
 - **Next protected update:** The evidence handoff commit must pass both required checks on the Phase branch before it is fast-forwarded into protected `main` through a normal push. The known externally managed temporary-ref limitation remains untouched; GitHub SHA comparison is the fallback if a fetch fails.
+
+## Protected tag — v0.2.0, added 2026-08-16
+
+`v0.2.0` is the second published release tag and is protected by its own exact ruleset, created only after the Release was published. `Protect v0.1.0` is unchanged, and no broad future-tag pattern was introduced: the two tags carry separate exact rulesets, exactly as this policy requires.
+
+```text
+RULESET_NAME:
+Protect v0.2.0
+RULESET_ID:
+20906060
+NODE_ID:
+RRS_lACqUmVwb3NpdG9yec48FxsWzgE_AEw
+TARGET:
+tag
+ENFORCEMENT:
+active
+INCLUDE:
+refs/tags/v0.2.0
+EXCLUDE:
+none
+RULES:
+deletion, non_fast_forward
+BYPASS_ACTORS:
+none
+```
+
+The tag is annotated, points at `4cf8617`, and carries the message `Fruit Freshness Classification v0.2.0 post-holdout research milestone`. The release workflow was followed in order: the version was prepared on `release/phase-9.10-v0.2.0`, branch CI passed on Windows and Ubuntu, the commit was fast-forwarded into protected `main`, `main` CI passed, the annotated tag was created and read back, the Release was published and verified as a prerelease with zero assets, and only then was the exact tag rule added.
+
+`v0.2.0` inherits the same recovery policy as `v0.1.0`. It must not be moved, recreated, deleted, or force-updated; a corrective release takes a new version number.
